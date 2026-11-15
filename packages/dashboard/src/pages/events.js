@@ -9,6 +9,7 @@ import { severityOf } from '../levels.js';
 import { withState } from '../state.js';
 import { h, mount, fmt } from '../dom.js';
 import { levelBadge } from '../ui.js';
+import { requestRowClass } from '../rows.js';
 import { initLive } from '../live.js';
 
 const PAGE_SIZE = 25;
@@ -136,13 +137,9 @@ function eventRows(e) {
     },
     h('span', { class: 'chevron', 'aria-hidden': 'true' }),
   );
-  const classes = ['event-row'];
-  if (e.alert) classes.push('is-alert');
-  if (!e.correct) classes.push('is-mistake');
-  if (isOpen) classes.push('is-open');
   const row = h(
     'tr',
-    { class: classes.join(' ') },
+    { class: requestRowClass(e, 'event-row', isOpen && 'is-open') },
     h('td', {}, toggle),
     h('td', { class: 'num' }, String(e.id)),
     h('td', { class: 'mono nowrap' }, `${request.method} ${request.path}`),
