@@ -1,12 +1,13 @@
-# T3 — Evaluation and uncertainty
+# T3 - Evaluation and uncertainty
 
 > **Draft** of the T3 chapter of the final report (E-05). Author: Nicholas Arcari.
 >
-> - **Source of the numbers:** one run of `npm run experiments` at commit `c4ef25c`, seeds 1–20,
->   clean working tree, 2026-11-13.
-> - **The statistical score is still the baseline:** the length signal only. When the chi-square
->   and outlier signals land (C-03, C-05, C-06), re-run the experiment on the final commit and
->   update the tables.
+> - **Source of the numbers:** one run of `npm run experiments` at commit `0ca4847`, seeds 1-20,
+>   clean working tree, 2026-11-15. That commit has the signatures of B-01; the first draft used
+>   the baseline ruleset (commit `c4ef25c`), and §5 explains what changed.
+> - **The statistical score is still the baseline:** the length signal only. Chi-square (C-03) is
+>   implemented, but it enters the score only with C-06, together with the outliers (C-05). When
+>   they land, re-run the experiment on the final commit and update the tables.
 >
 > The Italian version is [`t3-evaluation-and-uncertainty.it.md`](t3-evaluation-and-uncertainty.it.md).
 
@@ -41,7 +42,7 @@ Each **seed** draws a complete dataset from the traffic generator (T4, ADR-006),
   - obfuscated: disguised to dodge the signatures;
   - novel: families the rules have no signature for.
 
-  Five of the nine families are novel, so novel attacks are more than half of the attacks: 258–296
+  Five of the nine families are novel, so novel attacks are more than half of the attacks: 258-296
   of the 500 in each seed.
 
 - **Hard cases** are legitimate requests that look odd: an apostrophe, long free text, non-Latin
@@ -76,14 +77,14 @@ them may reach the threshold. The threshold `t` is the smallest number strictly 
 - **An unattainable target:** in combined mode a rule match scores `+∞` and is flagged at any
   threshold. If more than `k` legitimate calibration requests match a rule, no threshold meets the
   target. The threshold then sits above every finite calibration score, and only the rules fire on
-  the calibration split.
+  the calibration split. This happened with the baseline ruleset (§5).
 
 Kruegel and Vigna (2003) likewise set their thresholds on attack-free traffic.
 
 ### 3.3 ROC curve and AUC
 
 The ROC curve sweeps the threshold down through every distinct score and plots TPR against FPR.
-The area under it is the Mann–Whitney statistic:
+The area under it is the Mann-Whitney statistic:
 
 ```
 AUC = P(score of a random attack > score of a random legitimate request), ties counting ½
@@ -154,90 +155,95 @@ All values are the mean over 20 seeds, with the 95% t-interval of the mean in br
 
 ### 4.1 Without a threshold: AUC
 
-**Table 1 — AUC on the test split.**
+**Table 1 - AUC on the test split.**
 
 | Detector | AUC                 | SD across seeds | Range       | Mean width of one seed's bootstrap interval |
 | -------- | ------------------- | --------------- | ----------- | ------------------------------------------- |
-| rules    | 0.700 [0.695–0.705] | 0.010           | 0.685–0.722 | 0.044                                       |
-| stats    | 0.814 [0.801–0.827] | 0.028           | 0.763–0.856 | 0.051                                       |
-| combined | 0.866 [0.858–0.875] | 0.018           | 0.827–0.893 | 0.043                                       |
+| rules    | 0.704 [0.700-0.709] | 0.010           | 0.687-0.727 | 0.043                                       |
+| stats    | 0.814 [0.801-0.827] | 0.028           | 0.763-0.856 | 0.051                                       |
+| combined | 0.886 [0.878-0.895] | 0.018           | 0.847-0.909 | 0.043                                       |
 
 On ranking alone, the combination separates attacks from legitimate requests best, and the
 statistics clearly beat the rules.
 
 ### 4.2 At a 1% false-positive target
 
-**Table 2 — Operating point at a 1% target.**
+**Table 2 - Operating point at a 1% target.**
 
-| Detector | Threshold           | Calibration FPR   | Test FPR, typical | Test FPR, all legitimate | TPR               | Precision         | Target met |
-| -------- | ------------------- | ----------------- | ----------------- | ------------------------ | ----------------- | ----------------- | ---------- |
-| rules    | — (a rule match)    | 3.10% [3.03–3.17] | 3.09% [2.96–3.22] | 2.93% [2.81–3.06]        | 42.9% [41.9–43.8] | 61.9% [60.7–63.2] | 0/20 seeds |
-| stats    | 1.380 [1.325–1.435] | 0.95% [0.93–0.97] | 0.92% [0.82–1.02] | 2.53% [2.22–2.85]        | 57.2% [55.1–59.3] | 71.8% [69.2–74.4] | 20/20      |
-| combined | 2.304 [2.229–2.380] | 3.10% [3.03–3.17] | 3.09% [2.96–3.23] | 2.94% [2.81–3.06]        | 66.2% [64.6–67.7] | 71.5% [70.4–72.5] | 0/20       |
+| Detector | Threshold           | Calibration FPR   | Test FPR, typical | Test FPR, all legitimate | TPR               | Precision         | Target met  |
+| -------- | ------------------- | ----------------- | ----------------- | ------------------------ | ----------------- | ----------------- | ----------- |
+| rules    | - (a rule match)    | 0% (every seed)   | 0% (every seed)   | 0% (every seed)          | 40.9% [39.9-41.8] | 100% (every seed) | 20/20 seeds |
+| stats    | 1.380 [1.325-1.435] | 0.95% [0.93-0.97] | 0.92% [0.82-1.02] | 2.53% [2.22-2.85]        | 57.2% [55.1-59.3] | 71.8% [69.2-74.4] | 20/20       |
+| combined | 1.380 [1.325-1.435] | 0.95% [0.93-0.97] | 0.92% [0.82-1.02] | 2.53% [2.22-2.85]        | 76.0% [74.5-77.4] | 77.2% [74.9-79.4] | 20/20       |
 
-**Table 3 — Share flagged by variant at a 1% target.** For attacks this is the detection rate;
+The rules flag no legitimate request, so the combination keeps the statistics' threshold: the two
+raise the same false alarms, and the combination adds the rule matches.
+
+**Table 3 - Share flagged by variant at a 1% target.** For attacks this is the detection rate;
 for legitimate requests, the false-positive rate.
 
 | Variant              | Requests per seed | rules             | stats             | combined          |
 | -------------------- | ----------------- | ----------------- | ----------------- | ----------------- |
-| attack · canonical   | 163–197           | 95.7% [94.9–96.4] | 52.5% [50.3–54.6] | 96.5% [95.9–97.1] |
-| attack · obfuscated  | 33–56             | 86.7% [83.8–89.6] | 63.7% [60.2–67.1] | 94.4% [92.6–96.1] |
-| attack · novel       | 258–296           | 1.8% [1.5–2.1]    | 59.2% [56.7–61.7] | 42.1% [39.5–44.7] |
-| legitimate · typical | 4,275             | 3.09% [2.96–3.22] | 0.92% [0.82–1.02] | 3.09% [2.96–3.23] |
-| legitimate · hard    | 225               | 0% (every seed)   | 33.1% [26.9–39.4] | 0% (every seed)   |
+| attack · canonical   | 163-197           | 100% (every seed) | 52.5% [50.3-54.6] | 100% (every seed) |
+| attack · obfuscated  | 33-56             | 58.2% [54.8-61.6] | 63.7% [60.2-67.1] | 84.0% [81.5-86.5] |
+| attack · novel       | 258-296           | 0% (every seed)   | 59.2% [56.7-61.7] | 59.2% [56.7-61.7] |
+| legitimate · typical | 4,275             | 0% (every seed)   | 0.92% [0.82-1.02] | 0.92% [0.82-1.02] |
+| legitimate · hard    | 225               | 0% (every seed)   | 33.1% [26.9-39.4] | 33.1% [26.9-39.4] |
 
 By family:
 
-- **The rules** catch every command-injection and traversal attack (100% in every seed), and most
-  SQL injection (85.6%) and XSS (89.7%). Of each novel family they catch only about 2%.
+- **The rules** catch every command-injection attack (100% in every seed), and most SQL injection
+  (90.9%), XSS (89.4%) and traversal (86.4%). They catch no novel attack at all. They were written
+  for the canonical payloads only, without looking at the obfuscated and novel ones (ADR-006,
+  B-01): every canonical attack is caught, but only 58% of the obfuscated ones.
 - **The statistics** catch between 36% (command injection) and 84% (oversized values) of every
   family.
-- **Legitimate requests:** all the rules' false alarms are on the login form. 20.6% [20.0–21.3] of
-  login requests match a rule, because the generated passwords contain `#` and `--`.
+- **Legitimate requests:** the rules raise no false alarm, 0 of 90,000 legitimate test requests
+  over the 20 seeds. The statistics' false alarms come mostly from search (6.6% of the search
+  requests) and comments (3.4%); login requests never raise one.
 
 ### 4.3 At a 0.1% false-positive target
 
-Only the statistics meet this target:
+All three detectors meet this target.
 
-- threshold 1.917 [1.853–1.982];
-- calibration FPR 0.08% [0.07–0.10], test FPR 0.08% [0.05–0.10];
-- TPR down to 48.2% [45.7–50.8], precision up to 98.6% [98.3–99.0];
-- 47.2% [44.1–50.3] of novel attacks caught, and no hard case flagged.
-
-The rules and the combination cannot go below their 3% floor, so their rows are the same as at 1%.
+- **Statistics:** threshold 1.917 [1.853-1.982]; calibration FPR 0.08% [0.07-0.10], test FPR
+  0.08% [0.05-0.10]; TPR down to 48.2% [45.7-50.8], precision up to 98.6% [98.3-99.0]; 47.2%
+  [44.1-50.3] of novel attacks caught, and no hard case flagged.
+- **Combined:** the same threshold and the same false alarms; TPR 69.1% [67.3-71.0], precision
+  99.0% [98.8-99.3].
+- **Rules:** no threshold, so the same row as at 1%: no false alarm, TPR 40.9%.
 
 ### 4.4 Paired comparisons
 
-**Table 4 — McNemar at a 1% target**, disagreements added up over the 20 seeds.
+**Table 4 - McNemar at a 1% target**, disagreements added up over the 20 seeds.
 
-| A vs B            | Requests      | Flagged only by A | Flagged only by B | Exact p | Seeds with p < 0.05                    |
-| ----------------- | ------------- | ----------------- | ----------------- | ------- | -------------------------------------- |
-| stats vs combined | attacks       | 1,008             | 1,902             | < 0.001 | combined ahead in 19                   |
-| stats vs combined | novel attacks | 975               | 27                | < 0.001 | stats ahead in 20                      |
-| stats vs combined | legitimate    | 2,276             | 2,641             | < 0.001 | combined more alarms in 11, stats in 2 |
-| rules vs stats    | attacks       | 1,902             | 3,335             | < 0.001 | stats ahead in 18                      |
-| rules vs stats    | novel attacks | 27                | 3,207             | < 0.001 | stats ahead in 20                      |
-| rules vs combined | legitimate    | 0                 | 4                 | 0.125   | none                                   |
+| A vs B            | Requests      | Flagged only by A | Flagged only by B | Exact p | Seeds with p < 0.05     |
+| ----------------- | ------------- | ----------------- | ----------------- | ------- | ----------------------- |
+| stats vs combined | attacks       | 0                 | 1,876             | < 0.001 | combined ahead in 20    |
+| stats vs combined | novel attacks | 0                 | 0                 | 1.000   | none                    |
+| stats vs combined | legitimate    | 0                 | 0                 | 1.000   | none                    |
+| rules vs stats    | attacks       | 1,876             | 3,511             | < 0.001 | stats ahead in 20       |
+| rules vs stats    | novel attacks | 0                 | 3,281             | < 0.001 | stats ahead in 20       |
+| rules vs stats    | legitimate    | 0                 | 2,280             | < 0.001 | stats more alarms in 20 |
 
-The two detectors raise false alarms on different requests. Statistics alone raises 2,280 false
-alarms and the combination 2,645, but only 4 of them are the same requests.
+The statistics and the combination raise exactly the same 2,280 false alarms and catch the same
+novel attacks: they never disagree there. The combination adds 1,876 attacks that the statistics
+miss, all canonical or obfuscated, the ones the rules are written for. The rules and the
+statistics miss different attacks (1,876 against 3,511), which is why combining them pays.
 
-At 0.1% the picture is the same:
-
-- statistics alone catches 340 novel attacks that the combination misses, against 60 the other way
-  (p < 0.001);
-- it raises 65 false alarms that the combination does not, against 2,641 the other way.
+At 0.1% the picture is the same: the combination adds 2,087 attacks to the statistics, with the
+same 69 false alarms.
 
 ### 4.5 How much do the numbers move?
 
 - **Rules:** the SD of the AUC across seeds (0.010) matches the standard error from one seed's
-  bootstrap (≈ 0.044 / 3.92 = 0.011). The rules learn nothing from data, so the only noise is the
+  bootstrap (≈ 0.043 / 3.92 = 0.011). The rules learn nothing from data, so the only noise is the
   test set.
 - **Statistics:** the SD across seeds (0.028) is about twice the bootstrap's standard error
   (≈ 0.013). In variance terms the test set explains only about a fifth of it
   (0.013² / 0.028² ≈ 0.22). The rest comes from the training data, which a single run's interval
   cannot see.
-- **The test FPR over all legitimate requests** also moves a lot: SD 0.68%, range 1.73–3.78%. How
+- **The test FPR over all legitimate requests** also moves a lot: SD 0.68%, range 1.73-3.78%. How
   many of the four hard-case fixtures fall above the threshold changes from seed to seed.
 
 This is why the experiment uses 20 seeds rather than one.
@@ -245,53 +251,59 @@ This is why the experiment uses 20 seeds rather than one.
 ## 5. Discussion
 
 1. **Calibration works where it has seen data.** On typical legitimate traffic, the statistics hit
-   the targets out of sample: 0.92% [0.82–1.02] against 1%, and 0.08% against 0.1%.
+   the targets out of sample: 0.92% [0.82-1.02] against 1%, and 0.08% against 0.1%.
 2. **It does not cover what it has not seen.** One hard case in three (33%) raises a false alarm at
    the 1% target. Neither the calibration split nor the training split holds such requests: a
    model of "normal" is only as wide as the normal traffic it was given.
-3. **Statistics catch what signatures cannot.** At 1% they catch 59% of novel attacks, against 2%
+3. **Statistics catch what signatures cannot.** At 1% they catch 59% of novel attacks, against 0%
    for the rules: this is the core answer to the research question. But they also miss about half
-   of the canonical attacks the rules catch (52% against 96%). So they complement the rules rather
+   of the canonical attacks the rules catch (52% against 100%). So they complement the rules rather
    than replace them.
-4. **Combining is not free.** The rules alone flag 3.1% of legitimate traffic, so the combination
-   can never meet a 1% or 0.1% target.
-   - So that the statistics add no false alarm of their own, the combination's threshold rises from
-     1.38 to 2.30.
-   - It therefore catches fewer novel attacks than the statistics alone: 42% against 59% (McNemar
-     p < 0.001, in all 20 seeds).
-   - Its higher AUC (0.866) hides this. AUC summarises every threshold, including a region the
-     combination cannot reach: below an FPR of about 3% it has no operating point at all.
-
-   Fixing the signatures that fire on passwords (`#`, `--`) is task B-01 of T1.
+4. **Combining is free, as long as the rules raise no false alarm.** The signatures of B-01 flag no
+   legitimate request, so the combination keeps the statistics' threshold and their false alarms,
+   and adds the rule matches: at the 1% target its TPR rises from 57% to 76% with the same 2.53%
+   of false positives (McNemar: 1,876 attacks against 0, in all 20 seeds).
+   - The baseline ruleset of the first draft (commit `c4ef25c`) showed the opposite. It matched
+     20.6% of the login requests, whose generated passwords contain `#` and `--`, so the rules
+     alone flagged 3.1% of legitimate traffic. The combination could then never meet a 1% target:
+     its threshold rose from 1.38 to 2.30, and it caught fewer novel attacks than the statistics
+     alone (42% against 59%, McNemar p < 0.001).
+   - The lesson: with a fixed false-positive budget, every false alarm of a rule is paid for by the
+     statistics. A signature has to be checked on legitimate traffic before it joins the
+     combination.
 
 5. **The base rate changes everything** (T4's chapter). At the 10% prevalence of the test split,
-   about 72% of the statistics' alarms are attacks. At a prevalence `π` of 0.1%, Bayes gives:
+   about 72% of the statistics' alarms are attacks, and 77% of the combination's. At a prevalence
+   `π` of 0.1%, Bayes gives:
 
    ```
    PPV = TPR·π / (TPR·π + FPR·(1 − π))
    ```
 
-   - at the 1% target: 2.2%, so 98 alarms in 100 are false;
-   - at the 0.1% target: 37.6%.
+   - at the 1% target: 2.2% for the statistics and 2.9% for the combination, so about 97 alarms in
+     100 are false;
+   - at the 0.1% target: 38.6% and 47.4%.
 
 ## 6. Limitations
 
 - **Synthetic data.** The numbers describe the T4 generator, not real traffic. The conclusions that
-  carry over are comparative: rules against statistics, the cost of combining, calibration against
-  unseen requests.
-- **A baseline model.** The score is still the length signal alone. The chi-square and outlier
-  signals (C-03, C-05, C-06) will change every number in Tables 1–4.
+  carry over are comparative: rules against statistics, what the combination adds and what a
+  rule's false alarms cost it, calibration against unseen requests.
+- **A baseline model.** The score is still the length signal alone. Chi-square (C-03) is
+  implemented but enters the score only with C-06, together with the outliers (C-05): they will
+  change every number in Tables 1-4.
 - **Four hard cases, repeated.** Their false-positive rate mostly says which of the four fall above
   the threshold. It is not a rate over a population of unusual requests.
 - **The t-interval** assumes roughly normal per-seed values. With 20 seeds this is reasonable, but
   not near 0% or 100%, where the interval is clipped.
 - **Many tests.** Only the McNemar results with p < 0.0028 survive a Bonferroni correction. In
-  Table 4, every row but the last one does.
+  Table 4 every row with p < 0.001 does; the two rows with p = 1.000 are not differences at all,
+  since there the two detectors decide in the same way on every request.
 
 ## 7. Reproducing the numbers
 
 ```bash
-git checkout c4ef25c
+git checkout 0ca4847
 npm ci
 npm run experiments      # about 1.5 minutes; writes results/<date>-<commit>/report.md
 ```
@@ -323,5 +335,5 @@ Prepared with Claude Code (AI assistant), as the team guide asks to declare.
 - Q. McNemar, _Note on the sampling error of the difference between correlated proportions or
   percentages_, Psychometrika 12, 1947.
 - J. A. Hanley and B. J. McNeil, _The meaning and use of the area under a receiver operating
-  characteristic (ROC) curve_, Radiology 143, 1982 (AUC as the Mann–Whitney statistic).
+  characteristic (ROC) curve_, Radiology 143, 1982 (AUC as the Mann-Whitney statistic).
 - B. Efron and R. J. Tibshirani, _An Introduction to the Bootstrap_, Chapman & Hall, 1993.
