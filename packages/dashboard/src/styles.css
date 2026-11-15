@@ -737,10 +737,6 @@ table.data {
   cursor: pointer;
 }
 
-.event-row.is-mistake > td:first-child {
-  box-shadow: inset 3px 0 0 var(--danger);
-}
-
 .event-row.is-open > td {
   background: var(--primary-weak);
 }
@@ -1237,10 +1233,6 @@ pre.json {
   }
 }
 
-.feed-row.is-mistake > td:first-child {
-  box-shadow: inset 3px 0 0 var(--danger);
-}
-
 .feed-row.is-new > td {
   animation: feed-arrive 1.4s ease-out;
 }
@@ -1280,15 +1272,57 @@ pre.json {
   outline-offset: -2px;
 }
 
-/* An alert stands out: its whole row is tinted red, in the Overview's requests and in Events,
-   where an open row is a shade stronger (blue is the open colour of a row with no alert). */
-.feed-row.is-alert > td,
-.event-row.is-alert > td {
+/* ---------- a row that shows one request, in any table of requests (Overview, Security events,
+   any later one): its classes come from src/rows.js, so every table looks the same ---------- */
+
+/* A detector mistake, a false alarm or a missed attack: a red bar on the left. */
+.request-row.is-mistake > td:first-child {
+  box-shadow: inset 3px 0 0 var(--danger);
+}
+
+/* An alert stands out: its whole row is tinted red, a shade stronger while its details are open
+   (blue is the open colour of a row with no alert). */
+.request-row.is-alert > td {
   background: var(--danger-weak);
 }
 
-.event-row.is-alert.is-open > td {
+.request-row.is-alert.is-open > td {
   background: color-mix(in srgb, var(--danger) 12%, var(--danger-weak));
+}
+
+/* The key to those marks, under every table of requests (partials/request-legend.html). */
+.table-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  margin: 0;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.legend-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-swatch {
+  flex: none;
+  width: 16px;
+  height: 12px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  background: var(--panel-bg);
+}
+
+.legend-swatch.is-alert {
+  background: var(--danger-weak);
+}
+
+.legend-swatch.is-mistake {
+  box-shadow: inset 3px 0 0 var(--danger);
 }
 
 .panel-tools {

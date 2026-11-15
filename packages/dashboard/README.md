@@ -28,7 +28,8 @@ link to open the finished run.
 ```
 dashboard/
 ├── *.html            one file per page
-├── partials/         header, settings bar, run bar, sidebar, footer - inserted by vite.config.js
+├── partials/         header, settings bar, run bar, sidebar, footer, the key to the request rows -
+│                     inserted by vite.config.js
 ├── src/
 │   ├── styles.css    the whole look: tokens, layout, components, dark mode
 │   ├── shell.js      shared behaviour: settings from the URL, links, sidebar, column help
@@ -40,6 +41,8 @@ dashboard/
 │   │                 detect -> metrics (pure, tested)
 │   ├── quality.js    Wilson intervals, results by variant, ROC and AUC per mode (pure, tested)
 │   ├── levels.js     alert level 0-15 and severity (pure, tested)
+│   ├── rows.js       the look of a row that shows one request, in every table (pure, tested)
+│   ├── team.js       the members' GitHub nicknames, listed on About (pure, tested)
 │   ├── dom.js        DOM helpers: data goes in as text, never as HTML
 │   ├── ui.js         KPI tile, level badge
 │   ├── charts.js     Chart.js setup and helpers (bar, doughnut, ROC)
@@ -48,7 +51,7 @@ dashboard/
 │   ├── assets/       icon
 │   └── pages/        one script per page
 ├── test/             node:test for state, shell, levels, pipeline, quality, replay, glossary,
-│                     lines
+│                     lines, rows, team
 └── vite.config.js    page list, partials plugin, CSP
 ```
 
@@ -112,7 +115,10 @@ Every page has its own address: `/events.html`, `/models.html`, ...
    To let people open it large, give `chartModal(...)` (`src/chart-modal.js`) the button and a
    function that draws the same chart on the modal's canvas, as the ROC does.
 3. A new table: add its column names to `COLUMN_HELP` in `src/glossary.js`, each with one short
-   sentence. Every header then explains itself on hover; a test fails while one is missing.
+   sentence. Every header then explains itself on hover; a test fails while one is missing. If
+   its rows are requests, give each `<tr>` the class `requestRowClass(e, ...)` (`src/rows.js`):
+   alerts are then tinted red and the detector's mistakes get a red bar, as in every other table;
+   put `<!-- include: partials/request-legend.html -->` under it to explain the two marks.
 4. Keep the statistics in the pure packages (`core`, `evaluation`) with their tests: the page only
    draws.
 5. No inline styles or scripts (the CSP blocks them); data goes into the page as text only (`h()`

@@ -8,6 +8,7 @@ import { runExperiment, countBy } from '../pipeline.js';
 import { SEVERITIES, SIGNATURE_LEVEL, severityOf } from '../levels.js';
 import { h, mount, fmt } from '../dom.js';
 import { kpi, levelBadge } from '../ui.js';
+import { requestRowClass } from '../rows.js';
 import {
   setupCharts,
   barChart,
@@ -246,13 +247,9 @@ function feedRow(e, animate) {
   const params = Object.entries(request.params)
     .map(([name, value]) => `${name}=${value}`)
     .join('  ');
-  const classes = ['feed-row'];
-  if (e.alert) classes.push('is-alert');
-  if (!e.correct) classes.push('is-mistake');
-  if (animate) classes.push('is-new');
   return h(
     'tr',
-    { class: classes.join(' '), dataset: { id: String(e.id) } },
+    { class: requestRowClass(e, 'feed-row', animate && 'is-new'), dataset: { id: String(e.id) } },
     h('td', { class: 'num' }, String(e.id)),
     h('td', { class: 'mono nowrap' }, `${request.method} ${request.path}`),
     h('td', { class: 'mono truncate', title: params }, params),
