@@ -1,10 +1,10 @@
 # @anomaly-guard/server
 
-A tiny Express monitor that demonstrates the realistic **ingest → analyse → verdict** loop on
-your machine. **Node only** — it is not deployed and not part of the GitHub Pages demo (the
+A tiny Express monitor that demonstrates the realistic **ingest -> analyse -> verdict** loop on
+your machine. **Node only** - it is not deployed and not part of the GitHub Pages demo (the
 dashboard runs the same `core` in the browser, ADR-003).
 
-It binds to `127.0.0.1` and never forwards, executes, or acts on a payload — it only measures the
+It binds to `127.0.0.1` and never forwards, executes, or acts on a payload - it only measures the
 request and returns a verdict (ADR-001).
 
 ## Run
@@ -16,7 +16,8 @@ npm run dev:server        # from the repo root
 ```
 
 Environment: `PORT` (default 3100), `TARGET_FPR` (default `0.01`), `CALIBRATION_SIZE` (default
-2000), `SEED` (default 1).
+2000), `SEED` (default 1). An invalid value stops the server with a message saying what is
+expected; fewer than 10/`TARGET_FPR` calibration requests give a warning (methods.md §6).
 
 ## What happens at startup (B-02)
 
@@ -32,9 +33,9 @@ legitimate requests than the target allows.
 
 ## Endpoints
 
-- `GET /health` → `{ status, trainedOn, calibration: { seed, size, targetFpr, thresholds,
+- `GET /health` -> `{ status, trainedOn, calibration: { seed, size, targetFpr, thresholds,
 calibrationFpr, attainable } }`.
-- `POST /ingest` → the detector verdict. The body is
+- `POST /ingest` -> the detector verdict. The body is
   `{ method?, path?, params?, mode?, threshold? }`, with values already URL-decoded (ADR-006).
   - **Threshold:** the calibrated one for the mode, unless the request passes its own on the
     −log10 p scale. The response says which one was used: `thresholdSource` is `calibrated`,
@@ -43,13 +44,17 @@ calibrationFpr, attainable } }`.
   - **Validation:** the body must be an object; `method` one of GET, POST, PUT, PATCH, DELETE,
     HEAD, OPTIONS; `path` a string starting with `/`; `params` an object of string values; `mode`
     one of `combined`, `stats`, `rules`; `threshold` a finite number ≥ 0. Otherwise the answer is
-    **400** with an `error`. Malformed JSON gives 400, a body over 64 kB gives 413.
+    **400** with an `error`. Malformed JSON gives 400, a body over 64 kB gives 413, and a body
+    that is not JSON (no `Content-Type: application/json`, or empty) gives **415**: it is never
+    analysed as an empty request.
+- Any other method on `/ingest` gives **405** (`Allow: POST`) and any other route **404**. Every
+  answer is JSON, errors included.
 
 ```bash
 curl -s http://127.0.0.1:3100/ingest \
   -H 'content-type: application/json' \
   -d '{"method":"GET","path":"/login","params":{"user":"'"'"' OR '"'"'1'"'"'='"'"'1"}}'
-# → { "request": {...}, "mode": "combined", "threshold": ..., "thresholdSource": "calibrated",
+# -> { "request": {...}, "mode": "combined", "threshold": ..., "thresholdSource": "calibrated",
 #     "verdict": "attack", "score": "Infinity", "reasons": [...] }
 ```
 
