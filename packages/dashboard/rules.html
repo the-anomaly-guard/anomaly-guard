@@ -17,6 +17,7 @@
       <!-- include: partials/sidebar.html -->
       <main id="main" class="content">
         <!-- include: partials/querybar.html -->
+        <!-- include: partials/runbar.html -->
         <div class="page-head">
           <p class="crumbs">Threat detection</p>
           <h1>Rules</h1>
@@ -26,8 +27,7 @@
         <div class="callout">
           Signatures are regular expressions matched against every parameter value. They cover only
           the <strong>canonical</strong> attack families (ADR-006): obfuscated and novel attacks
-          are, by design, what the statistical side has to catch. Extending the ruleset is task
-          B-01.
+          are, by design, what the statistical side has to catch. The ruleset is task B-01 (T1).
         </div>
         <div id="mode-note"></div>
 
@@ -36,7 +36,9 @@
         <section class="panel" aria-labelledby="ruleset-title">
           <div class="panel-head">
             <h2 class="panel-title" id="ruleset-title">Ruleset</h2>
-            <span class="panel-meta">requests matched on the current test split</span>
+            <span class="panel-meta" id="ruleset-meta"
+              >requests matched on the current test split</span
+            >
           </div>
           <div class="table-wrap">
             <table class="data">

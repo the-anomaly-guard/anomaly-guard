@@ -17,6 +17,7 @@
       <!-- include: partials/sidebar.html -->
       <main id="main" class="content">
         <!-- include: partials/querybar.html -->
+        <!-- include: partials/runbar.html -->
         <div class="page-head">
           <p class="crumbs">Anomaly detection</p>
           <h1>Statistical models</h1>
@@ -25,7 +26,7 @@
 
         <div class="callout">
           The model learns what normal input looks like for each endpoint and parameter, from the
-          legitimate training split only — attacks never enter training (ADR-004). Each signal turns
+          legitimate training split only - attacks never enter training (ADR-004). Each signal turns
           how unusual a value is into a probability p and a score s = −log₁₀ p (ADR-007); the
           request's score is the highest of them.
         </div>
@@ -57,7 +58,7 @@
             <span class="task">E-02 · T1</span>
             <strong>Character classes: legitimate vs attack values</strong>
             <span
-              >The share of each of the seven character classes in legitimate and in attack values —
+              >The share of each of the seven character classes in legitimate and in attack values -
               the picture behind the chi-square score (C-03).</span
             >
           </div>
@@ -74,7 +75,9 @@
         <section class="panel" aria-labelledby="pairs-title">
           <div class="panel-head">
             <h2 class="panel-title" id="pairs-title">Learned model per endpoint and parameter</h2>
-            <span class="panel-meta">length statistics and character-class shares</span>
+            <span class="panel-meta" id="pairs-meta"
+              >length statistics and character-class shares</span
+            >
           </div>
           <div class="table-wrap">
             <table class="data">

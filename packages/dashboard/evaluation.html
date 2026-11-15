@@ -17,6 +17,7 @@
       <!-- include: partials/sidebar.html -->
       <main id="main" class="content">
         <!-- include: partials/querybar.html -->
+        <!-- include: partials/runbar.html -->
         <div class="page-head">
           <p class="crumbs">Evaluation</p>
           <h1>Detection quality</h1>
@@ -69,8 +70,22 @@
         <div class="grid grid-2">
           <section class="panel" aria-labelledby="roc-title">
             <div class="panel-head">
-              <h2 class="panel-title" id="roc-title">ROC curve</h2>
-              <span class="panel-meta">every threshold, the same test requests</span>
+              <h2 class="panel-title" id="roc-title">
+                <button
+                  class="title-button"
+                  type="button"
+                  data-roc-expand
+                  title="Open the ROC curve large"
+                >
+                  ROC curve
+                  <svg class="expand-icon" viewBox="0 0 16 16" aria-hidden="true">
+                    <path d="M10 2h4v4M14 2 9 7M6 14H2v-4M2 14l5-5" />
+                  </svg>
+                </button>
+              </h2>
+              <span class="panel-meta"
+                >every threshold, the same test requests · click to enlarge</span
+              >
             </div>
             <div class="panel-body">
               <div class="chart-box is-tall" id="roc-box">

@@ -17,6 +17,7 @@
       <!-- include: partials/sidebar.html -->
       <main id="main" class="content">
         <!-- include: partials/querybar.html -->
+        <!-- include: partials/runbar.html -->
         <div class="page-head">
           <p class="crumbs">Overview</p>
           <h1>Overview</h1>
@@ -33,11 +34,51 @@
           <div class="panel-body"><div class="severity" id="severity"></div></div>
         </section>
 
+        <section class="panel" aria-labelledby="feed-title">
+          <div class="panel-head">
+            <h2 class="panel-title" id="feed-title">Requests</h2>
+            <div class="panel-tools">
+              <span class="panel-meta" id="feed-meta"></span>
+              <button
+                class="btn btn-small sort-toggle"
+                type="button"
+                data-feed-sort
+                title="Change the order of the requests"
+              >
+                <svg class="sort-icon" viewBox="0 0 16 16" aria-hidden="true">
+                  <path d="M8 3v10M4 9l4 4 4-4" />
+                </svg>
+                <span data-feed-sort-label>Newest first</span>
+              </button>
+            </div>
+          </div>
+          <div
+            class="table-wrap feed-scroll"
+            id="feed-scroll"
+            tabindex="0"
+            role="region"
+            aria-label="All the requests that have arrived: scroll to see them"
+          >
+            <table class="data feed">
+              <thead>
+                <tr>
+                  <th scope="col" class="num" id="feed-order" aria-sort="descending">#</th>
+                  <th scope="col">Request</th>
+                  <th scope="col">Parameters</th>
+                  <th scope="col">Level</th>
+                  <th scope="col">Verdict</th>
+                </tr>
+              </thead>
+              <tbody id="feed-body"></tbody>
+            </table>
+          </div>
+        </section>
+
         <div class="grid grid-3">
           <section class="panel" aria-labelledby="levels-title">
             <div class="panel-head">
               <h2 class="panel-title" id="levels-title">Alerts by level</h2>
-              <span class="panel-meta">0–14 statistics · 15 signature</span>
+              <span class="panel-meta">0-14 statistics · 15 signature</span>
             </div>
             <div class="panel-body">
               <div class="chart-box">
