@@ -67,4 +67,4 @@ non-Latin letters, so a legitimate Greek comment and a shell payload looked alik
 
 - [x] `CHAR_CLASSES` / `SPECIAL_CHARS` updated; `AGENTS.md` §7, standards §3 and methods.md §0/§4
       aligned.
-- [ ] C-03 implements the score; C-08 the dataset-level test of homogeneity.
+- [x] C-03 implements the score; C-08 the dataset-level test of homogeneity.

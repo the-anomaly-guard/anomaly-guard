@@ -138,6 +138,31 @@ normal text well — it is one feature among many, and a good illustration of wh
 **Known-answer test:** a string using `k` symbols each equally often has `H = log2(k)` (e.g.
 `"0101..."` → 1 bit).
 
+### 1b. Entropy distributions for the report (C-08, implemented)
+
+`entropySummary` takes one entropy per **non-empty parameter value** — including the legitimate
+filler values of an attack request, so the comparison is the whole test set — and reports `n`,
+mean, sample standard deviation, min, the 5th/25th/50th/75th/95th percentiles (linear interpolation
+between order statistics) and max. `entropySeparation` compares the legitimate and attack test
+values with two threshold-free quantities:
+
+- **AUC** = P(H_attack > H_legit), with ties counted ½ — the Mann–Whitney statistic (§6). It is
+  directional: 0.5 means no separation, 1 means every attack value is more random-looking. Entropy
+  has no natural direction — an encoded payload is high-entropy, `1 OR 1=1` is low-entropy — so
+  the function also reports `bestAuc = max(AUC, 1 − AUC)` and the direction that gives it. Choosing
+  that direction on the same data is descriptive and slightly optimistic; it is not a detector
+  trained in advance.
+- **KS distance** `D = max_x |F_legit(x) − F_attack(x)|` from the two empirical CDFs: 0 for
+  identical distributions, 1 for disjoint supports. It detects a difference in either direction.
+
+Both describe distributions, not independent requests: characters within a value and values within
+a request are correlated, so no p-value is attached. Entropy is also bits per symbol and therefore
+length-dependent — a one-character value has `H = 0` — so read it together with the length
+distribution, never as a stand-alone detector. The homogeneity table of §4b is **character-weighted**
+(each character counts once); these summaries are **value-weighted** (each value counts once), so
+the two answer related but not identical questions. This is the quantitative version of §1's
+warning that entropy alone does not separate attacks from normal text.
+
 ## 2. Feature extraction — `features/extract.js` (implemented)
 
 Each request becomes a flat numeric record: total length, per-parameter length, parameter count,
@@ -209,12 +234,33 @@ not underflow to `p = 0`. **Known answers:** `χ² = 12.592, df = 6 → p ≈ 0.
 `χ² = 16.812 → p ≈ 0.01`. Other `df` (for example after merging cells in §4b) need the general
 regularised incomplete gamma function `Q(df/2, x/2)` (series and continued fraction).
 
-### 4b. The formal test: legitimate vs attack traffic (C-08)
+### 4b. The formal test: legitimate vs attack traffic (C-08, implemented)
 
 For the report, compare the class distribution of **all** legitimate test values with that of
-**all** attack test values in a 7 × 2 contingency table (test of homogeneity, `df = (7 − 1)(2 − 1)
-= 6`). Counts are in the thousands, so `E_i ≥ 5` holds and this is a valid test. If a cell still
-falls below 5, merge that class with a neighbour **for this test only** and state it.
+**all** attack test values in a 7 × 2 contingency table (test of homogeneity). Let `O_ij` be the
+pooled count of class `i` in group `j`, `r_i` the row total, `c_j` the column total and `N` the
+grand total. Then
+
+```
+E_ij = r_i · c_j / N        χ² = Σ_ij (O_ij − E_ij)² / E_ij        df = (rows − 1)(2 − 1)
+```
+
+Counts are in the thousands, so `E_ij ≥ 5` holds and the asymptotic test is valid. A class whose
+smallest expected count is still below 5 is merged into an adjacent class in `CHAR_CLASSES` order
+— the neighbour with the larger expected count, the previous one on a tie — **for this test only**;
+the merge and the reduced `df` are reported. An all-zero class merges away without changing any
+count. `chiSquareHomogeneity` returns the final table, the merges, χ², df, p, `s = −log10(p)` and
+**Cramér's V = √(χ² / (N · min(rows − 1, 1)))**, which with two groups is `√(χ²/N)`. If p
+underflows to 0, report `p < 10^-300` (or the score), never "p = 0". An attack request keeps its
+other parameter values legitimate (ADR-006), so pooling all values dilutes the contrast: this is
+the specified whole-test-set comparison, not a per-request detector.
+
+Two cautions for the report. First, with thousands of characters even a negligible difference is
+"significant", so report V and the class shares next to p: significance is not effect size. Second,
+the table pools characters: characters within a value and values within a request are not
+independent draws, and a long value contributes more characters than a short one. So the p-value
+describes this character-weighted corpus, not a probability about requests or values. The
+per-request test remains the nominal score of §4, not this p-value.
 
 ## 5. Outlier detection — `stats/outliers.js` (to create, C-05)
 

@@ -2,6 +2,8 @@
 
 export {
   shannonEntropy,
+  entropySummary,
+  entropySeparation,
   charClassCounts,
   charHistogram,
   classifyChar,
@@ -15,7 +17,7 @@ export { RuleEngine, DEFAULT_RULES } from './rules/engine.js';
 
 export { trainStatModel, paramKey, pToScore } from './stats/model.js';
 export { lengthZScore, lengthScore } from './stats/length.js';
-export { chiSquareScore } from './stats/chisquare.js';
+export { chiSquareScore, chiSquareLogSurvival, chiSquareHomogeneity } from './stats/chisquare.js';
 export { scoreRequest } from './stats/anomaly.js';
 
 export { detect } from './detector/detect.js';
