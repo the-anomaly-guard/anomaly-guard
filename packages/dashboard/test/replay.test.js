@@ -272,6 +272,19 @@ test('statusText and calibrationText: each step says what it does and what it fo
     statusText(run, { ...frame, stage: 'done', at: 200 }, 21),
     'Done: 200 test requests analysed, 21 alerts.',
   );
+  // one alert is singular, zero is plural
+  assert.equal(
+    statusText(run, { ...frame, stage: 'playing', trained: 1, calibrated: true, at: 3 }, 1),
+    'Step 3 of 3 · Monitoring: 3 of 200 test requests, 1 alert.',
+  );
+  assert.equal(
+    statusText(run, { ...frame, stage: 'done', at: 200 }, 1),
+    'Done: 200 test requests analysed, 1 alert.',
+  );
+  assert.equal(
+    statusText(run, { ...frame, stage: 'done', at: 200 }, 0),
+    'Done: 200 test requests analysed, 0 alerts.',
+  );
 
   const point = { threshold: 1.5706, target: 0.01, calibrationFpr: 0.005, attainable: true };
   assert.equal(
