@@ -13,11 +13,12 @@ consequences. ADRs are not deleted; a superseded one is marked `Superseded by AD
 | [ADR-004](ADR-004-evaluation-methodology.md)                    | Evaluation methodology: train-on-normal, held-out test, threshold sweep | Accepted (refined by ADR-009) | 2026-10-19 |
 | [ADR-005](ADR-005-no-ci-cd.md)                                  | No CI/CD; local checks only                                             | Accepted                      | 2026-10-19 |
 | [ADR-006](ADR-006-dataset-and-request-contract.md)              | Dataset and request contract: injection, variants, decoded values       | Accepted                      | 2026-11-08 |
-| [ADR-007](ADR-007-per-parameter-models-and-score-scale.md)      | Per-(path, parameter) models and the common −log10(p) score scale       | Accepted                      | 2026-11-08 |
+| [ADR-007](ADR-007-per-parameter-models-and-score-scale.md)      | Per-(path, parameter) models and the common −log10(p) score scale       | Accepted (length: ADR-012)    | 2026-11-08 |
 | [ADR-008](ADR-008-character-classes-and-chi-square-score.md)    | Seven character classes; chi-square as a smoothed score                 | Accepted                      | 2026-11-08 |
 | [ADR-009](ADR-009-threshold-calibration-seeds-and-intervals.md) | Threshold calibration at a target FPR, repeated seeds, CIs              | Accepted                      | 2026-11-08 |
 | [ADR-010](ADR-010-multi-page-siem-style-dashboard.md)           | Dashboard as a multi-page, SIEM-style console                           | Accepted                      | 2026-11-09 |
 | [ADR-011](ADR-011-live-replay.md)                               | Live replay in the console                                              | Accepted                      | 2026-11-15 |
+| [ADR-012](ADR-012-length-signal-log-scale-and-unseen-pairs.md)  | Length signal on the log scale; policy for unseen pairs                 | Accepted                      | 2026-11-15 |
 
 ## When to write an ADR
 

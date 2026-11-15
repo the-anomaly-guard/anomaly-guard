@@ -5,7 +5,7 @@
 // runtime-agnostic.
 //
 // One file per signal, so the people working on different signals rarely edit the same file:
-//   length.js     length bound — Chebyshev BASELINE in place     (C-04)
+//   length.js     length bound - Chebyshev, log scale, prediction interval (C-04)
 //   chisquare.js  character distribution — chi-square score       (C-03, C-08)
 //   outliers.js   IQR / MAD, Mahalanobis — to be created         (C-05)
 //   anomaly.js    scoreRequest: combines the signals             (C-06)
@@ -18,6 +18,8 @@ import { CHAR_CLASSES } from './entropy.js';
  * @typedef {Object} ParamStats
  * @property {number} n  number of training values
  * @property {{ mean: number, std: number }} length  value length: mean and sample std (n − 1)
+ * @property {{ mean: number, std: number }} logLength  the same on ln(1 + length) (C-04): lengths
+ *   are right-skewed, the log scale is closer to symmetric
  * @property {Record<string, number>} classCounts  character-class counts summed over the values
  */
 
@@ -97,6 +99,7 @@ export function trainStatModel(normalRequests) {
     params[key] = {
       n: acc.lengths.length,
       length: meanStd(acc.lengths),
+      logLength: meanStd(acc.lengths.map((len) => Math.log1p(len))),
       classCounts: acc.classCounts,
     };
   }

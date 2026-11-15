@@ -171,7 +171,7 @@ payload), Shannon entropy, HTTP method (encoded), and an encoding flag (`%xx` st
 decoding). Downstream code consumes this record only. The raw character histogram
 (`charHistogram`) is used for the entropy, not as a feature.
 
-## 3. Length model - `stats/length.js` (Chebyshev baseline implemented, C-04)
+## 3. Length model - `stats/length.js` (implemented, C-04)
 
 From legitimate traffic, estimate the mean `μ` and standard deviation `σ` of each pair's value
 length. For a new value `x`, `z = |x − μ| / σ`. **Chebyshev's inequality** holds for any
@@ -183,7 +183,7 @@ P(|X − μ| ≥ z·σ) ≤ 1 / z²      ->   p = min(1, 1/z²),   s = −log10(
 
 so a value 10 standard deviations away has `p ≤ 0.01` and score 2. It needs no normality, which
 matters because lengths are right-skewed and bounded below by 0; it is the bound Kruegel & Vigna
-use for lengths. Example: a search `q` that is normally 10-30 characters arriving at 800 is far
+use for lengths. Example: a search `q` that is normally 10–30 characters arriving at 800 is far
 outside.
 
 **This is not a confidence interval.** A confidence interval bounds a _parameter_ (here the mean
@@ -194,8 +194,25 @@ Chebyshev bound above or, if lengths were normal, the **prediction interval**
 μ̂ ± t(n−1, 1−α/2) · s · √(1 + 1/n)
 ```
 
-C-04 may compare the two (on raw and log-transformed lengths) and must decide how to treat pairs
-never seen in training (Kruegel & Vigna treat an unexpected attribute as anomalous in itself).
+**What C-04 decided** (ADR-012, evidence in the ADR). `lengthScore(model, request, { method })`
+has four methods: Chebyshev and the prediction interval, each on the raw length and on
+`ln(1 + length)`. The prediction interval uses the normal quantile instead of Student's t
+(`z' = z / √(1 + 1/n)`, `p = P(|N(0,1)| ≥ z')`, computed in log space). The default is
+**Chebyshev on `ln(1 + length)`**: same distribution-free bound, but on a scale where the
+right-skewed lengths are closer to symmetric. On 20 seeds it raises the AUC by 0.025 (20/20
+seeds) and halves the false alarms on legitimate-but-weird requests at a 1 % target FPR. The raw
+Chebyshev bound and the raw prediction interval give the same TPR and FPR at a calibrated
+threshold (both are monotone in `z`); their AUC differs only because Chebyshev scores 0 for
+`z ≤ 1`, a tie effect.
+
+Two more rules make every deviation finite. The standard deviation is floored (`σ_eff = max(σ, 1)`
+character on the raw scale, `max(σ, 0.1)` on the log scale), so a pair whose training lengths
+are constant does not give `z = ∞`. A pair **never seen in training** gets a fixed, moderate
+score `s = log10(n + 1)` (`p = 1/(n + 1)`, `n` = training requests): an unexpected attribute is
+anomalous in itself (Kruegel & Vigna), but not so much that every rare legitimate parameter
+becomes a certain alarm. The synthetic generator never produces an unseen pair, so this rule is
+covered by unit tests, not by the experiment. A robust scale (median / MAD) is left to C-05.
+
 Confidence intervals proper are used on the evaluation metrics (§6).
 
 ## 4. Chi-square score on the character distribution - `stats/chisquare.js` (implemented, C-03)
