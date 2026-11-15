@@ -18,7 +18,7 @@ const ROOT = fileURLToPath(new URL('../../../', import.meta.url));
 export const USAGE = `Usage: npm run experiments -- [options]
 
   --seeds <n>          number of seeds, at least 2 (default 20; ADR-009 asks for 20 or more)
-  --first-seed <s>     first seed; the seeds are s, s+1, … (default 1)
+  --first-seed <s>     first seed; the seeds are s, s+1, ... (default 1)
   --train <n>          legitimate training requests per seed (default 2000)
   --calibration <n>    legitimate calibration requests per seed (default 10000)
   --test <n>           test requests per seed (default 5000)

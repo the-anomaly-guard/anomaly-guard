@@ -33,7 +33,7 @@ Constraints:
    the build. No templating dependency.
 3. **Experiment settings in the URL**:
    `?seed=42&mode=combined&fpr=0.01&threshold=1&prevalence=0.1&size=1000` (`src/state.js`; E-06
-   added `fpr`, the target false-positive rate the threshold is calibrated for). Every page rebuilds the same seeded experiment from them (same seed → same
+   added `fpr`, the target false-positive rate the threshold is calibrated for). Every page rebuilds the same seeded experiment from them (same seed -> same
    data); links carry them; nothing uses browser storage. The settings form applies on the Apply
    button's click and navigates from script: in a sandboxed iframe without `allow-forms` the
    browser cancels a form submission before the `submit` event even fires, but clicks and a page's
@@ -43,9 +43,9 @@ Constraints:
    severity strip, alert table with expandable details, colour-coded alert levels, light and dark
    themes. It borrows the layout conventions of SIEM consoles such as Wazuh, but uses no Wazuh
    name, logo, asset or code (Wazuh is GPL; this project is MIT).
-5. **Alert levels 0–15 with a statistical meaning** (`src/levels.js`). A statistical alert of level
+5. **Alert levels 0-15 with a statistical meaning** (`src/levels.js`). A statistical alert of level
    k has s = −log10(p) ≥ k, i.e. p ≤ 10^−k (ADR-007), capped at 14; level 15 means a signature
-   matched. Severities: low 0–1, medium 2–3, high 4–14, critical 15. The levels are for display
+   matched. Severities: low 0-1, medium 2-3, high 4-14, critical 15. The levels are for display
    only: the verdict always comes from the threshold.
 6. **Content Security Policy** in a `<meta>` injected at build time: `script-src 'self'`,
    `style-src 'self'`, `object-src 'none'`, `base-uri 'self'`, `form-action 'self'`. No inline

@@ -22,7 +22,7 @@ export function kpi(label, value, tone = 'neutral', detail) {
 
 /**
  * The coloured alert-level badge.
- * @param {number} level  0–15
+ * @param {number} level  0-15
  */
 export function levelBadge(level) {
   const severity = severityOf(level);

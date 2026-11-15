@@ -22,7 +22,7 @@ test('shannonEntropy: two equally frequent symbols is 1 bit', () => {
 });
 
 test('shannonEntropy: k equally frequent symbols is log2(k)', () => {
-  // 4 distinct symbols, each once → log2(4) = 2 bits
+  // 4 distinct symbols, each once -> log2(4) = 2 bits
   assert.ok(Math.abs(shannonEntropy('abcd') - 2) < 1e-12);
 });
 

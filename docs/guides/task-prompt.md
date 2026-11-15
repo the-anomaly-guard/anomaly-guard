@@ -21,14 +21,14 @@ Three rules, whatever the tool:
 
 ## 1. Fill in
 
-| Placeholder    | Where to find it                                         | Example                                      |
-| -------------- | -------------------------------------------------------- | -------------------------------------------- |
-| `<TASK>`       | the task id in `docs/planning/backlog.md`                | `C-03`                                       |
-| `<TASK ROW>`   | the text of that task's row, copied as it is             | `Chi-square score in stats/chisquare.js (…)` |
-| `<THEME>`      | your theme in backlog §8                                 | `T1`                                         |
-| `<SHORT-NAME>` | two to four words for the branch, lowercase with hyphens | `chi-square`                                 |
+| Placeholder    | Where to find it                                         | Example                                        |
+| -------------- | -------------------------------------------------------- | ---------------------------------------------- |
+| `<TASK>`       | the task id in `docs/planning/backlog.md`                | `C-03`                                         |
+| `<TASK ROW>`   | the text of that task's row, copied as it is             | `Chi-square score in stats/chisquare.js (...)` |
+| `<THEME>`      | your theme in backlog §8                                 | `T1`                                           |
+| `<SHORT-NAME>` | two to four words for the branch, lowercase with hyphens | `chi-square`                                   |
 
-## 2. The prompt — for an assistant that reads the repository and runs commands
+## 2. The prompt - for an assistant that reads the repository and runs commands
 
 Claude Code, Copilot agent mode, Codex:
 
@@ -57,7 +57,7 @@ Explain every statistical choice in plain words: I must be able to defend all of
 exam.
 ```
 
-## 3. The prompt — for a chat assistant (claude.ai, without Claude Code)
+## 3. The prompt - for a chat assistant (claude.ai, without Claude Code)
 
 A chat cannot read the repository or run commands, so you give it the files and you run the
 commands.
@@ -125,7 +125,7 @@ Paths are under `packages/`.
 | D-04             | T3     | a new workspace `experiments/`                                                                                                                             | ADR-009; `docs/development/project-structure.md` §2                                                                              |
 | B-02             | T3     | `server/src/server.js`                                                                                                                                     | ADR-009                                                                                                                          |
 | E-02 (ROC), E-06 | T3     | `dashboard/evaluation.html`, `dashboard/src/pages/evaluation.js`, `dashboard/src/charts.js`                                                                | dashboard README, "Adding your theme's chart"; ADR-010                                                                           |
-| A-02 – A-05      | T4     | `traffic/src/generators.js`, `traffic/src/dataset.js`, `traffic/src/rng.js`, `traffic/test/*.test.js`                                                      | the A-02 and A-04 checklists in the backlog; ADR-006                                                                             |
+| A-02 - A-05      | T4     | `traffic/src/generators.js`, `traffic/src/dataset.js`, `traffic/src/rng.js`, `traffic/test/*.test.js`                                                      | the A-02 and A-04 checklists in the backlog; ADR-006                                                                             |
 | E-03             | T4     | `dashboard/base-rate.html`, a new `dashboard/src/pages/base-rate.js`, `dashboard/src/charts.js`                                                            | methods §7; dashboard README                                                                                                     |
 | E-02 (T1, T2)    | T1, T2 | `dashboard/models.html`, `dashboard/src/pages/models.js`, `dashboard/src/charts.js`                                                                        | dashboard README; ADR-010                                                                                                        |
 

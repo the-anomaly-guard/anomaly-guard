@@ -1,8 +1,8 @@
 # @anomaly-guard/core
 
-The shared detection engine. **Pure JavaScript — no DOM, no Node-only APIs** — so it runs
+The shared detection engine. **Pure JavaScript - no DOM, no Node-only APIs** - so it runs
 unchanged in the browser (for the GitHub Pages demo) and in Node (server + tests). See
-[`../../docs/development/project-structure.md`](../../docs/development/project-structure.md) §3–§4.
+[`../../docs/development/project-structure.md`](../../docs/development/project-structure.md) §3-§4.
 ESLint rejects browser globals, Node globals/modules, `fetch` and `Math.random` in `src/`.
 
 ## Exports
@@ -27,7 +27,7 @@ import {
   // statistical models
   trainStatModel,
   scoreRequest,
-  paramKey, // '/search?q' — models are per (path, parameter) (ADR-007)
+  paramKey, // '/search?q' - models are per (path, parameter) (ADR-007)
   pToScore, // s = −log10(p), the common score scale (ADR-007)
   lengthZScore,
   lengthScore, // Chebyshev bound on lengths
@@ -63,11 +63,11 @@ const model = trainStatModel(legitimateRequests); // train on NORMAL only (ADR-0
 
 // threshold on the −log10(p) scale: 2 ≈ p ≤ 0.01. Calibrate it on legit-only data (ADR-009).
 const result = detect(request, { ruleEngine: engine, model, threshold: 2, mode: 'combined' });
-// → { verdict: 'attack' | 'legit', score, statScore, ruleMatched, reasons, detail }
+// -> { verdict: 'attack' | 'legit', score, statScore, ruleMatched, reasons, detail }
 ```
 
-`score` is continuous in every mode, so the ROC can sweep it: `stats` → the statistical score;
-`combined` → `Infinity` on a rule hit, otherwise the statistical score; `rules` → 1 or 0. There is
+`score` is continuous in every mode, so the ROC can sweep it: `stats` -> the statistical score;
+`combined` -> `Infinity` on a rule hit, otherwise the statistical score; `rules` -> 1 or 0. There is
 no default threshold on purpose.
 
 ## Status

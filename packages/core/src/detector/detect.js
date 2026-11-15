@@ -14,8 +14,8 @@ const MODES = ['rules', 'stats', 'combined'];
 /**
  * Decide whether a request is an attack, and say why.
  *
- * Score by mode (ADR-007): `stats` → the statistical score (−log10 p scale); `combined` →
- * +Infinity when a rule matched, otherwise the statistical score; `rules` → 1 if a rule matched,
+ * Score by mode (ADR-007): `stats` -> the statistical score (−log10 p scale); `combined` ->
+ * +Infinity when a rule matched, otherwise the statistical score; `rules` -> 1 if a rule matched,
  * else 0 (a binary score: its ROC is a single operating point). For `stats` and `combined` the
  * verdict is 'attack' exactly when score ≥ threshold.
  *

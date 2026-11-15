@@ -1,11 +1,11 @@
-// Tiny DOM helpers. Every piece of data — attack payloads included — is inserted as TEXT, never
+// Tiny DOM helpers. Every piece of data - attack payloads included - is inserted as TEXT, never
 // as HTML: there is no innerHTML with data anywhere in the dashboard. A payload is measured and
 // shown, never rendered or executed (ADR-001).
 
 /** @typedef {Node | string | number | null | undefined | false | Child[]} Child */
 
 /**
- * Create an element. `attrs` are plain attributes (`true` → empty attribute; null, undefined and
+ * Create an element. `attrs` are plain attributes (`true` -> empty attribute; null, undefined and
  * false are skipped), plus `class` and `dataset`. No `style`: the CSP forbids inline styles, so
  * use a class.
  * @param {string} tag
@@ -17,7 +17,7 @@ export function h(tag, attrs = {}, ...children) {
   const node = document.createElement(tag);
   for (const [key, value] of Object.entries(attrs)) {
     if (value === null || value === undefined || value === false) continue;
-    if (key === 'style') throw new Error('h(): no inline styles (CSP) — use a class');
+    if (key === 'style') throw new Error('h(): no inline styles (CSP) - use a class');
     if (key === 'class') node.className = value;
     else if (key === 'dataset') Object.assign(node.dataset, value);
     else node.setAttribute(key, value === true ? '' : String(value));
@@ -57,7 +57,7 @@ export function mount(selector, ...children) {
 export const fmt = {
   /** @param {number} n */
   int: (n) => n.toLocaleString('en-US'),
-  /** @param {number} x  a share in 0–1 */
+  /** @param {number} x  a share in 0-1 */
   pct: (x) => `${(x * 100).toFixed(1)}%`,
   /** @param {number} s  a −log10(p) score; +Infinity is a rule hit in combined mode */
   score: (s) => (Number.isFinite(s) ? s.toFixed(2) : '∞'),

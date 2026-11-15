@@ -1,7 +1,7 @@
 # ADR-009: Threshold calibration, repeated seeds and confidence intervals
 
 **Date:** 2026-11-08
-**Status:** Accepted — refines ADR-004
+**Status:** Accepted - refines ADR-004
 **Author:** The Anomaly Guard team
 
 ## Context
@@ -21,12 +21,12 @@ zero".
 2. **Threshold at a target FPR.** Score the calibration requests; the threshold is the smallest
    value that at most a fraction `targetFpr` of calibration scores reach (D-06,
    `thresholdAtFpr`). Report at `targetFpr` = 1%, and 0.1% for the base-rate discussion. No attack
-   label is used to choose the threshold — Kruegel & Vigna likewise set thresholds on attack-free
+   label is used to choose the threshold - Kruegel & Vigna likewise set thresholds on attack-free
    traffic.
 3. **ROC and AUC** stay threshold-free summaries on the test set (ADR-004).
 4. **Repeated seeds.** Every reported configuration runs on at least 20 seeds; report the mean and
    the spread.
-5. **Confidence intervals on the metrics** — this is where the brief's "confidence intervals"
+5. **Confidence intervals on the metrics** - this is where the brief's "confidence intervals"
    belong (D-05): Wilson score interval for TPR, FPR, FNR and precision; seeded bootstrap
    percentile interval for AUC.
 6. **Provenance.** Every result records the seed(s), git commit, split sizes, prevalence and

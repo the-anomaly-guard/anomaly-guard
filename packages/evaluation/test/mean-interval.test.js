@@ -14,7 +14,7 @@ function lcg(seed) {
   };
 }
 
-/** Standard normal draws (Box–Muller). */
+/** Standard normal draws (Box-Muller). */
 function normals(random, n) {
   return Array.from(
     { length: n },

@@ -4,7 +4,7 @@ import { trainStatModel, scoreRequest } from '../src/index.js';
 
 const get = (path, params) => ({ method: 'GET', path, params });
 
-// Lengths 3, 5, 4 → mean 4, sample std 1.
+// Lengths 3, 5, 4 -> mean 4, sample std 1.
 const model = trainStatModel([
   get('/search', { q: 'abc' }),
   get('/search', { q: 'abcde' }),

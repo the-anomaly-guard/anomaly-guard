@@ -1,5 +1,5 @@
 // Generators for simulated requests. Legitimate traffic is built from innocuous word pools;
-// malicious traffic uses a few canonical, public example strings as MEASUREMENT SUBJECTS only —
+// malicious traffic uses a few canonical, public example strings as MEASUREMENT SUBJECTS only -
 // they are never executed, parsed, or sent anywhere (ADR-001).
 // Pure, runtime-agnostic (takes an Rng so it stays reproducible).
 //

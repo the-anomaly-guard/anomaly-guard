@@ -39,7 +39,7 @@ function run(cmd, args, { optional = false, browser = false } = {}) {
 
 /** A change: always printed, made only outside a dry run. */
 function change(description, action) {
-  console.log(`  → ${description}${DRY_RUN ? ' (dry run: not done)' : ''}`);
+  console.log(`  -> ${description}${DRY_RUN ? ' (dry run: not done)' : ''}`);
   if (!DRY_RUN) action();
 }
 
@@ -77,7 +77,7 @@ async function main() {
   }
   if (run('gh', ['--version'], { optional: true }) === null) {
     fail(
-      'the GitHub CLI (gh) is not installed: https://cli.github.com/ — Windows: winget install ' +
+      'the GitHub CLI (gh) is not installed: https://cli.github.com/ - Windows: winget install ' +
         '--id GitHub.cli · macOS: brew install gh · Debian, Ubuntu, Kali: sudo apt install gh. ' +
         'Then run "npm run team-setup" again.',
     );
@@ -130,8 +130,8 @@ async function main() {
   const name = globalName || me.name || me.login;
   if (globalEmail === noreply && globalName) ok(`already ${globalName} <${noreply}>`);
   else {
-    console.log(`  user.email: ${globalEmail || '(not set)'} → ${noreply}`);
-    if (!globalName) console.log(`  user.name : (not set) → ${name}`);
+    console.log(`  user.email: ${globalEmail || '(not set)'} -> ${noreply}`);
+    if (!globalName) console.log(`  user.name : (not set) -> ${name}`);
     if (await confirm('Use them for every repository on this computer (recommended)?')) {
       change('set the identity for every repository (git config --global)', () => {
         run('git', ['config', '--global', 'user.email', noreply]);

@@ -33,8 +33,8 @@ test('metrics: FPR and FNR are computed, not just accuracy', () => {
 test('evaluateAt: thresholds scores (attack when score ≥ t)', () => {
   const scored = [
     { label: 'attack', score: 5 },
-    { label: 'attack', score: 1 }, // missed at t=3 → fn
-    { label: 'legit', score: 4 }, // false alarm at t=3 → fp
+    { label: 'attack', score: 1 }, // missed at t=3 -> fn
+    { label: 'legit', score: 4 }, // false alarm at t=3 -> fp
     { label: 'legit', score: 0 },
   ];
   const r = evaluateAt(scored, 3);
@@ -42,7 +42,7 @@ test('evaluateAt: thresholds scores (attack when score ≥ t)', () => {
 });
 
 test('positivePredictiveValue: base-rate fallacy worked example', () => {
-  // TPR 0.99, FPR 0.01, prevalence 0.001 → PPV ≈ 0.09 (methods.md §7)
+  // TPR 0.99, FPR 0.01, prevalence 0.001 -> PPV ≈ 0.09 (methods.md §7)
   const ppv = positivePredictiveValue(0.99, 0.01, 0.001);
   assert.ok(Math.abs(ppv - 0.0902) < 0.001, `PPV was ${ppv}`);
 });

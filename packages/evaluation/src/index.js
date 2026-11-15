@@ -1,5 +1,5 @@
 // Evaluation harness. Operates on plain data ({ label, score } / predictions), so it can score
-// any detector without depending on core. See docs/statistics/methods.md §6–§7. Pure.
+// any detector without depending on core. See docs/statistics/methods.md §6-§7. Pure.
 //
 // Positive class = 'attack'. Predict "attack" when score ≥ threshold.
 
@@ -134,7 +134,7 @@ function nextUp(x) {
 
 /**
  * Positive predictive value P(attack | alarm) by Bayes, for a given operating point and base
- * rate — the base-rate fallacy (methods.md §7). Rare attacks ⇒ mostly false alarms even when
+ * rate - the base-rate fallacy (methods.md §7). Rare attacks ⇒ mostly false alarms even when
  * TPR is high and FPR is low.
  * @param {number} tpr          true positive rate (sensitivity), 0..1
  * @param {number} fpr          false positive rate, 0..1
@@ -157,7 +157,7 @@ export function positivePredictiveValue(tpr, fpr, prevalence) {
  * legitimate requests is one diagonal step, so ties get half credit. +Infinity (a rule hit in
  * `combined` mode, ADR-007) is simply the highest score.
  *
- * AUC is the trapezoid area under the points. It equals the Mann–Whitney statistic: the
+ * AUC is the trapezoid area under the points. It equals the Mann-Whitney statistic: the
  * probability that a random attack scores higher than a random legitimate request, ties counting
  * ½. With a binary score (`rules` mode, 0 or 1) the curve has one inner point, and
  * AUC = (1 + TPR − FPR) / 2.

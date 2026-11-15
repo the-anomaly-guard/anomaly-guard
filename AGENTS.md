@@ -1,7 +1,7 @@
-# AGENTS.md — The Anomaly Guard
+# AGENTS.md - The Anomaly Guard
 
-> Operating manual for anyone working on this repository — people and AI assistants (Codex,
-> Copilot, Claude Code, …). Read it before touching the code. `CLAUDE.md` only loads this file
+> Operating manual for anyone working on this repository - people and AI assistants (Codex,
+> Copilot, Claude Code, ...). Read it before touching the code. `CLAUDE.md` only loads this file
 > for Claude Code, so every tool follows the same rules.
 > Details live in [`docs/development/`](docs/development/README.md); this file is the
 > short, binding summary. Keep it under ~200 lines.
@@ -10,49 +10,49 @@
 
 ## 1. What this project is
 
-**Project 5 — The Anomaly Guard** (master's course, extra-credit project). An educational
+**Project 5 - The Anomaly Guard** (master's course, extra-credit project). An educational
 Intrusion Detection System that monitors **simulated** web requests (HTTP payloads, query
 parameters, input lengths, character distributions) and decides, for each one, whether it is
 normal or suspicious. It does so two ways and compares them:
 
-1. **Rule engine** — regex / keyword signatures. Precise on known attacks, blind to new or
+1. **Rule engine** - regex / keyword signatures. Precise on known attacks, blind to new or
    obfuscated ones.
-2. **Statistical anomaly detection** — learn what _normal_ traffic looks like, then flag what
+2. **Statistical anomaly detection** - learn what _normal_ traffic looks like, then flag what
    departs from it. No prior knowledge of the attack is required.
 
 The research question (binding scope): **how much can statistics catch without pre-defined
 signatures, and how often does it get it wrong?** So the deliverable is an _experiment_ with an
-honest evaluation of false positives and false negatives — not a production IDS.
+honest evaluation of false positives and false negatives - not a production IDS.
 
 The full assignment is pinned in [`docs/project-brief.md`](docs/project-brief.md). A feature
 that is not in the brief is **out of scope** (§2): propose it, do not build it on your own.
 
 ---
 
-## 2. Scope — in and out
+## 2. Scope - in and out
 
 **In scope:** a traffic generator (legitimate + malicious samples, including _novel_ attacks the
 rules do not know); feature extraction; a rule engine; a statistical model trained on normal
 traffic; a detector that combines the two; an evaluation harness (confusion matrix, FPR/FNR,
 precision/recall/F1, ROC/AUC, base-rate analysis); a browser dashboard; a written report.
 
-**Out of scope — do not build:** any real network capture; sending requests to any real host;
+**Out of scope - do not build:** any real network capture; sending requests to any real host;
 executing, running, or "detonating" any payload; attacking, scanning, or fuzzing a live target;
 persisting real personal data. All traffic is **synthetic and local**. If a task seems to need
-any of the above, stop and ask — the answer is almost always "simulate it instead".
+any of the above, stop and ask - the answer is almost always "simulate it instead".
 
 ---
 
-## 3. Tech stack (LOCKED — new tech needs an ADR)
+## 3. Tech stack (LOCKED - new tech needs an ADR)
 
 | Layer         | Choice                                         | Notes                                                                |
 | ------------- | ---------------------------------------------- | -------------------------------------------------------------------- |
 | Language      | JavaScript (ES modules), `"type": "module"`    | No TypeScript compile step; JSDoc for types                          |
 | Runtime       | Node.js ≥ 22 LTS                               | `engines` in `package.json`                                          |
 | Monorepo      | npm **workspaces** (`packages/*`)              | No Lerna/Turborepo/pnpm                                              |
-| Shared engine | `@anomaly-guard/core`                          | Pure JS — **no DOM, no Node-only APIs** (runs in browser _and_ Node) |
+| Shared engine | `@anomaly-guard/core`                          | Pure JS - **no DOM, no Node-only APIs** (runs in browser _and_ Node) |
 | Server        | Express 4 (`@anomaly-guard/server`)            | Node-only; the "realistic" live monitor                              |
-| Dashboard     | Vite + vanilla JS (`@anomaly-guard/dashboard`) | Multi-page console (ADR-010) → **GitHub Pages**; charts: Chart.js    |
+| Dashboard     | Vite + vanilla JS (`@anomaly-guard/dashboard`) | Multi-page console (ADR-010) -> **GitHub Pages**; charts: Chart.js   |
 | Tests         | `node:test` + `node --test`                    | Zero-config, no Jest/Vitest                                          |
 | Lint / format | ESLint 9 (flat) + Prettier                     | Local only; **no CI** by design (ADR-005)                            |
 | Hosting       | GitHub Pages (static)                          | The dashboard must run **fully client-side** (§5)                    |
@@ -63,13 +63,13 @@ Full list with rationale: [`docs/development/tech-stack.md`](docs/development/te
 
 ## 4. Repository layout & who owns what
 
-Workspaces in `packages/`: `core` (features, rules, statistical models, detector — imported by
+Workspaces in `packages/`: `core` (features, rules, statistical models, detector - imported by
 everything, so it must never couple to a runtime), `traffic` (seeded generator, labelled dataset),
 `evaluation` (metrics, ROC/AUC, base rate), `server` (Express live monitor), `experiments`
-(Node-only multi-seed runner → `results/`), `dashboard` (browser UI, GitHub Pages build). Tree + dependency rules:
+(Node-only multi-seed runner -> `results/`), `dashboard` (browser UI, GitHub Pages build). Tree + dependency rules:
 [`docs/development/project-structure.md`](docs/development/project-structure.md).
 
-**Work is owned by statistical theme, not by package** — the exam is on statistics. Each member
+**Work is owned by statistical theme, not by package** - the exam is on statistics. Each member
 owns one theme end to end (functions, tests, dashboard chart, report chapter) wherever the code
 lives, so every contribution is documentable for the individual grade. Details and first wave:
 [`docs/planning/backlog.md`](docs/planning/backlog.md) §8.
@@ -77,17 +77,17 @@ lives, so every contribution is documentable for the individual grade. Details a
 | Theme                                 | Tasks                   |
 | ------------------------------------- | ----------------------- |
 | **T1** Character distributions and χ² | C-03, C-08, B-01        |
-| **T2** Lengths and outliers           | C-04 – C-07             |
-| **T3** Evaluation and uncertainty     | D-03 – D-06, B-02, E-06 |
-| **T4** Probability and simulation     | A-02 – A-05, E-03       |
+| **T2** Lengths and outliers           | C-04 - C-07             |
+| **T3** Evaluation and uncertainty     | D-03 - D-06, B-02, E-06 |
+| **T4** Probability and simulation     | A-02 - A-05, E-03       |
 
 ---
 
-## 5. Hard rules (invariants — do not violate)
+## 5. Hard rules (invariants - do not violate)
 
 - **Train on normal only.** The statistical model is fitted on _legitimate_ traffic alone. The
   labelled test set is held out. **Never fit on the test set and never let labels leak into
-  training** — that is the single most common way to fake a good result.
+  training** - that is the single most common way to fake a good result.
 - **Methods return a score, not a verdict.** Every statistical signal (chi-square, length bound,
   outlier) returns `s = −log10(p)` (higher = more anomalous, ADR-007), and the _threshold_ is
   applied outside it. ROC needs to sweep that threshold, so a method that bakes in a hard
@@ -99,12 +99,12 @@ lives, so every contribution is documentable for the individual grade. Details a
   _measures_ them (length, character counts, entropy, regex match). Nothing ever `eval`s,
   executes, requests, or writes them to a shell, a DOM, or a query. No real request leaves the
   machine.
-- **Reproducible experiments.** The traffic generator takes an explicit **seed**; same seed →
+- **Reproducible experiments.** The traffic generator takes an explicit **seed**; same seed ->
   same dataset. Record the seed and git commit with every reported result. No unseeded
   `Math.random()` in the generator or the experiments (ESLint enforces it in the pure packages).
 - **Honest evaluation.** Set the operating threshold on the legit-only calibration split at a
   target FPR, never by looking at the test set (ADR-009). Always report the confusion matrix and
-  both error rates (FPR _and_ FNR), not just accuracy — the classes are imbalanced. Keep the "hard
+  both error rates (FPR _and_ FNR), not just accuracy - the classes are imbalanced. Keep the "hard
   cases": legitimate-but-weird (`O'Brien`, long free-text, non-Latin text) for false positives;
   short/mimicry attacks (`1 OR 1=1`) for false negatives.
 - **No real data.** Datasets are synthetic. No real names, emails, credentials, IPs, or captured
@@ -118,15 +118,15 @@ lives, so every contribution is documentable for the individual grade. Details a
   (total length, per-parameter length, param count, character-class counts and ratios,
   Shannon entropy, method, encoding flags). Detectors and the report consume _that record_,
   never the raw request, so a new feature is added in one place.
-- **Statistical model lifecycle:** `train(normalRequests) → model`, then
-  `score(model, request) → number`. Training and scoring are separate calls (see the
+- **Statistical model lifecycle:** `train(normalRequests) -> model`, then
+  `score(model, request) -> number`. Training and scoring are separate calls (see the
   train-on-normal rule). The model is a plain serialisable object, kept per (path, parameter).
 - **Detector** (`core/src/detector`) combines rule hits and statistical scores into a verdict
   **at a given threshold**, and returns _why_ (which rule, which feature, which score) so the
   dashboard can explain it.
 - **Dataset is labelled** (`traffic`): every sample is `{ request, label, kind, variant }`; an
   attack is a legit request with one parameter value replaced by a payload (ADR-006). Labels and
-  variants drive evaluation only — never training.
+  variants drive evaluation only - never training.
 - **Numbers:** character distributions use the seven fixed `CHAR_CLASSES` (ADR-008, see
   [`docs/statistics/methods.md`](docs/statistics/methods.md) §0); don't improvise per call.
 
@@ -135,14 +135,14 @@ lives, so every contribution is documentable for the individual grade. Details a
 ## 7. Common mistakes to avoid
 
 - **Never** fit the statistical model on data that includes attacks or on the test split.
-- **Never** report a single accuracy number for an imbalanced set — show the confusion matrix,
+- **Never** report a single accuracy number for an imbalanced set - show the confusion matrix,
   FPR, FNR, and the ROC. Mention the **base-rate fallacy**: at a 0.1% attack rate even a 1% FPR
-  drowns true attacks in false alarms (Bayes — worked in `methods.md`).
+  drowns true attacks in false alarms (Bayes - worked in `methods.md`).
 - **Never** present the per-request chi-square p-value as a probability: with tiny expected
   counts it is only a score (ADR-008). The valid test is the dataset-level one (`methods.md` §4b).
 - **Never** hardcode a decision threshold inside a scoring function (breaks the ROC sweep).
 - **Never** import a browser or Node API from `core` (breaks the GitHub Pages demo or the tests).
-- **Never** execute, request, or shell out a generated payload — it is a measurement subject.
+- **Never** execute, request, or shell out a generated payload - it is a measurement subject.
 - **Never** use unseeded randomness in the generator or experiments (breaks reproducibility).
 - **Never** leave a `TODO` without a backlog id: `// TODO(C-03): add the chi-square part`.
 - **Never** introduce a dependency that is not in `tech-stack.md` without an ADR.
@@ -208,4 +208,4 @@ Dashboard (Pages):    packages/dashboard/src
 ```
 
 Reference paper to cite in the report: Kruegel & Vigna, _Anomaly Detection of Web-based Attacks_
-(CCS 2003) — the character-distribution / chi-square idea at the heart of this project.
+(CCS 2003) - the character-distribution / chi-square idea at the heart of this project.

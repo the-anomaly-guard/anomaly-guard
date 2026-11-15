@@ -52,7 +52,7 @@ over the seeds, which the null hypothesis allows.
 
 | Setting       | Value    | Why                                                    |
 | ------------- | -------- | ------------------------------------------------------ |
-| Seeds         | 1–20     | ADR-009: at least 20                                   |
+| Seeds         | 1-20     | ADR-009: at least 20                                   |
 | Train         | 2,000    | legitimate requests for the model                      |
 | Calibration   | 10,000   | `n ≥ 10/α` even at α = 0.1% (methods.md §6)            |
 | Test          | 5,000    | 500 attacks, 4,500 legitimate, of which 225 hard cases |

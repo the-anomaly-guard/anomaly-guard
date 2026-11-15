@@ -34,7 +34,7 @@ export function lengthZScore(model, request) {
  * BASELINE length signal (C-04) on the common scale. Chebyshev's inequality bounds the tail of
  * ANY distribution, P(|X − μ| ≥ zσ) ≤ 1/z², so p = min(1, 1/z²) and s = −log10(p) (ADR-007).
  * Distribution-free (lengths are skewed), and the bound Kruegel & Vigna use for lengths. It bounds
- * a NEW observation — it is not a confidence interval (methods.md §3).
+ * a NEW observation - it is not a confidence interval (methods.md §3).
  * @param {import('./model.js').StatModel} model
  * @param {import('../features/extract.js').AgRequest} request
  * @returns {{ score: number, z: number, param: string | null }}

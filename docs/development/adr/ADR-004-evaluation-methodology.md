@@ -1,7 +1,7 @@
 # ADR-004: Evaluation methodology
 
 **Date:** 2026-10-19
-**Status:** Accepted — refined by [ADR-009](ADR-009-threshold-calibration-seeds-and-intervals.md)
+**Status:** Accepted - refined by [ADR-009](ADR-009-threshold-calibration-seeds-and-intervals.md)
 (calibration split, threshold at a target FPR, repeated seeds, confidence intervals)
 **Author:** The Anomaly Guard team
 
@@ -25,7 +25,7 @@ fitting on the test set, or reporting accuracy on an imbalanced set.
   precision/recall/F1, ROC/AUC. Compare three configurations: rules-only, stats-only, combined;
   and on known vs. novel attacks.
 - **Base-rate analysis.** Report the positive predictive value at a realistic attack prevalence
-  (Bayes), to show the base-rate fallacy — the headline of the discussion.
+  (Bayes), to show the base-rate fallacy - the headline of the discussion.
 - **Hard cases.** Keep fixtures of legitimate-but-weird inputs (`O'Brien`, long free-text,
   non-Latin text) and stealthy attacks (`1 OR 1=1`, mimicry) and analyse where each method fails.
 
@@ -53,5 +53,5 @@ fitting on the test set, or reporting accuracy on an imbalanced set.
 ### Actions
 
 - [x] `confusionMatrix`, `metrics`, `positivePredictiveValue` implemented in `evaluation`.
-- [ ] `rocCurve` + `auc` (threshold sweep) — backlog D-03.
-- [x] Experiment scripts that fix a seed and write `results/` — backlog D-04, see ADR-009.
+- [ ] `rocCurve` + `auc` (threshold sweep) - backlog D-03.
+- [x] Experiment scripts that fix a seed and write `results/` - backlog D-04, see ADR-009.

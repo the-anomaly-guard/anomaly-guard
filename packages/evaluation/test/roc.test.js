@@ -15,7 +15,7 @@ function lcg(seed) {
   };
 }
 
-/** AUC as the Mann–Whitney statistic: P(attack score > legit score), ties counting ½. */
+/** AUC as the Mann-Whitney statistic: P(attack score > legit score), ties counting ½. */
 function mannWhitney(scored) {
   const a = scored.filter((s) => s.label === 'attack').map((s) => s.score);
   const l = scored.filter((s) => s.label === 'legit').map((s) => s.score);
@@ -96,7 +96,7 @@ test('rocCurve: each point matches evaluateAt at its threshold', () => {
   }
 });
 
-test('rocCurve: AUC equals the Mann–Whitney statistic, ties and +Infinity included', () => {
+test('rocCurve: AUC equals the Mann-Whitney statistic, ties and +Infinity included', () => {
   const random = lcg(5);
   for (let round = 0; round < 100; round++) {
     const n = 2 + Math.floor(random() * 120);

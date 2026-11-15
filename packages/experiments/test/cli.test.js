@@ -92,7 +92,7 @@ test('runCli: writes results.json and report.md with the provenance', () => {
     const report = readFileSync(path.join(dir, 'report.md'), 'utf8');
     assert.match(report, /^# Experiment results \(D-04\)/);
     assert.match(report, /## 2\. Target FPR 2\.0%/);
-    assert.match(report, /\| Seeds \| 2: 1–2 \|/);
+    assert.match(report, /\| Seeds \| 2: 1-2 \|/);
     assert.ok(logs[0].includes('results.json'));
     assert.ok(warnings.some((line) => line.includes('at least 20')));
     assert.ok(warnings.some((line) => line.startsWith('seed 2: done (2/2)')));

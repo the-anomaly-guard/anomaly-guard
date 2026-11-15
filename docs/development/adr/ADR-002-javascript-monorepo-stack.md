@@ -1,7 +1,7 @@
 # ADR-002: JavaScript + npm workspaces monorepo
 
 **Date:** 2026-10-19
-**Status:** Accepted — ownership amended: the work is split by statistical theme, not by
+**Status:** Accepted - ownership amended: the work is split by statistical theme, not by
 workspace ([backlog](../../planning/backlog.md) §8), so "one workspace per member" below no longer
 holds
 **Author:** The Anomaly Guard team
@@ -21,7 +21,7 @@ server, and the tests without duplication.
   `dashboard`. Each workspace maps to one group member (`project-structure.md` §2).
 - Types via **JSDoc**, no TypeScript compile step.
 - Tests with the built-in **`node:test`** runner.
-- Lint/format with **ESLint + Prettier**, run locally (not in CI — see ADR-005).
+- Lint/format with **ESLint + Prettier**, run locally (not in CI - see ADR-005).
 
 ## Alternatives considered
 
@@ -38,7 +38,7 @@ server, and the tests without duplication.
 ### Positive
 
 - One language, one shared `core`, reused by browser demo, server, and tests.
-- Clear per-person ownership via workspaces → documentable individual contributions.
+- Clear per-person ownership via workspaces -> documentable individual contributions.
 - Minimal tooling and install footprint.
 
 ### Negative / risks

@@ -1,6 +1,6 @@
 // Minimal flat config (ESLint 9), intentionally dependency-free so `npm install`
 // stays light. Tighten it (add @eslint/js, globals, browser/node envs) when the
-// team wants stricter gates. Not wired into CI by design — see
+// team wants stricter gates. Not wired into CI by design - see
 // docs/development/adr/ADR-005-no-ci-cd.md.
 
 // These packages run unchanged in the browser (GitHub Pages) AND in Node (server, tests), so they
