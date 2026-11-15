@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Shared detection engine: feature extraction, rule engine, statistical models, detector. Pure JS — runs in the browser and in Node.",
+  "description": "Shared detection engine: feature extraction, rule engine, statistical models, detector. Pure JS - runs in the browser and in Node.",
   "main": "src/index.js",
   "exports": {
     ".": "./src/index.js"

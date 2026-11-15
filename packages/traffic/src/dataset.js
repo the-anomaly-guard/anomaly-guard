@@ -1,8 +1,8 @@
 // Build a labelled, reproducible dataset in three splits (ADR-004, ADR-009):
-//   train        legitimate only — fits the statistical model;
-//   calibration  legitimate only, never used for fitting — fixes the decision threshold at a
+//   train        legitimate only - fits the statistical model;
+//   calibration  legitimate only, never used for fitting - fixes the decision threshold at a
 //                target false-positive rate;
-//   test         legitimate + attacks — scored once, with that threshold.
+//   test         legitimate + attacks - scored once, with that threshold.
 // Labels and variants drive evaluation, never training. `prevalence` is the attack base rate of
 // the TEST set, so it feeds the base-rate analysis directly (methods.md §7). Pure, runtime-agnostic.
 
@@ -14,7 +14,7 @@ import { HARD_CASES } from './hard-cases.js';
  * @typedef {Object} Sample
  * @property {import('@anomaly-guard/core').AgRequest} request
  * @property {'legit' | 'attack'} label  drives evaluation only, never training
- * @property {string} kind  legit: the request kind (search, login, …); attack: the family (sqli, …)
+ * @property {string} kind  legit: the request kind (search, login, ...); attack: the family (sqli, ...)
  * @property {'typical' | 'hard' | 'canonical' | 'obfuscated' | 'novel'} variant  see ADR-006
  */
 
@@ -77,7 +77,7 @@ export function buildDataset({
 }
 
 /**
- * Deterministic Fisher–Yates shuffle driven by the seeded RNG.
+ * Deterministic Fisher-Yates shuffle driven by the seeded RNG.
  * @template T @param {T[]} arr @param {import('./rng.js').Rng} rng @returns {T[]}
  */
 function shuffle(arr, rng) {

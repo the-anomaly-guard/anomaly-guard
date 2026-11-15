@@ -2,7 +2,7 @@
 
 The evaluation harness. Works on plain `{ label, score }` data, so it can score any detector
 without depending on `core`. Pure JS. The maths is in
-[`../../docs/statistics/methods.md`](../../docs/statistics/methods.md) §6–§7.
+[`../../docs/statistics/methods.md`](../../docs/statistics/methods.md) §6-§7.
 
 ## Exports
 
@@ -13,11 +13,11 @@ import {
   evaluateAt,
   positivePredictiveValue, // base-rate / Bayes
   thresholdAtFpr, // threshold from legitimate calibration scores at a target FPR (D-06)
-  rocCurve, // ROC points and AUC = Mann–Whitney (D-03)
+  rocCurve, // ROC points and AUC = Mann-Whitney (D-03)
   wilsonInterval, // 95% interval for a rate x/n (D-05)
   bootstrapAucInterval, // seeded, stratified bootstrap interval for the AUC (D-05)
   meanInterval, // 95% Student-t interval for the mean of per-seed values (D-04)
-  studentTQuantile, // quantile of Student's t, e.g. (0.975, 19) → 2.093
+  studentTQuantile, // quantile of Student's t, e.g. (0.975, 19) -> 2.093
   mcnemarTest, // paired comparison of two detectors on the same requests (D-07)
   mcnemarFromCounts, // the same from the two disagreement counts, e.g. added up over seeds
   Z_95, // 1.96
@@ -38,7 +38,7 @@ const { threshold, calibrationFpr, attainable } = thresholdAtFpr(calibrationScor
 evaluateAt(testScored, threshold); // then score the test set once
 ```
 
-**Always report** the confusion matrix and both FPR and FNR — never accuracy alone, because the
+**Always report** the confusion matrix and both FPR and FNR - never accuracy alone, because the
 classes are imbalanced (standards §3).
 
 Scores follow the common scale of ADR-007 (higher = more anomalous); in `combined` mode a rule hit

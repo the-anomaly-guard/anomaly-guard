@@ -13,13 +13,13 @@
          ┌───────────────────────────┐        ┌────────────────────┐
          │  dashboard (Vite, vanilla)│        │  server (Express)  │
          │  + traffic + evaluation   │        │  + core            │
-         │  + core  → runs fully     │        │  POST /ingest      │
+         │  + core  -> runs fully     │        │  POST /ingest      │
          │  client-side              │        │  (localhost)       │
          └─────────────┬─────────────┘        └─────────┬──────────┘
                        └───────────────┬────────────────┘
                                        │
                                @anomaly-guard/core
-                        (pure JS — browser and Node)
+                        (pure JS - browser and Node)
 ```
 
 ## 2. Runtime & tooling
@@ -32,13 +32,13 @@
 | Test runner | `node:test` + `node --test` | built-in | In use           | Zero-config, no Jest / Vitest                      |
 | Lint        | ESLint                      | ^9.13    | In use           | Flat config, dependency-free rules for now         |
 | Format      | Prettier                    | ^3.3     | In use           | `printWidth: 100`, single quotes                   |
-| CI          | —                           | —        | **Out of scope** | No GitHub Actions / Dependabot / CodeQL — ADR-005  |
+| CI          | -                           | -        | **Out of scope** | No GitHub Actions / Dependabot / CodeQL - ADR-005  |
 
-## 3. `core` — shared engine
+## 3. `core` - shared engine
 
 | Component            | Choice                                          | Status            | Notes                                              |
 | -------------------- | ----------------------------------------------- | ----------------- | -------------------------------------------------- |
-| Feature extraction   | hand-written, pure JS                           | In use (scaffold) | request → numeric record                           |
+| Feature extraction   | hand-written, pure JS                           | In use (scaffold) | request -> numeric record                          |
 | Entropy & histograms | hand-written                                    | In use            | Shannon entropy, seven character classes (ADR-008) |
 | Rule engine          | regex / keyword, hand-written                   | Decided           | public attack signatures as data                   |
 | Chi-square           | hand-written                                    | Decided           | smoothed score + dataset-level test (ADR-008)      |
@@ -46,24 +46,24 @@
 | Outlier detection    | z-score / IQR / MAD; Mahalanobis (multivariate) | Decided           | robust estimators where needed                     |
 
 `evaluation` also implements, by hand, the confidence intervals on the metrics (Wilson for rates,
-seeded bootstrap for AUC — ADR-009).
+seeded bootstrap for AUC - ADR-009).
 
 No external statistics library in `core`: the methods are the learning objective, so we
 implement them. (If a reference implementation is wanted for cross-checking in _tests only_, that
 is an ADR.)
 
-## 4. `server` — live monitor (Node only)
+## 4. `server` - live monitor (Node only)
 
 | Component   | Choice  | Version | Status  | Notes                                               |
 | ----------- | ------- | ------- | ------- | --------------------------------------------------- |
 | HTTP server | Express | ^4.21   | Decided | `POST /ingest`, `GET /health`; binds to `localhost` |
 
-## 5. `dashboard` — browser app (→ GitHub Pages)
+## 5. `dashboard` - browser app (-> GitHub Pages)
 
 | Component          | Choice                  | Version | Status  | Notes                                                                  |
 | ------------------ | ----------------------- | ------- | ------- | ---------------------------------------------------------------------- |
 | Build / dev server | Vite                    | ^6.0    | Decided | `base: './'` so it works at any Pages path                             |
-| UI                 | vanilla JS + HTML + CSS | —       | Decided | no framework; one HTML file per page, partials at build time (ADR-010) |
+| UI                 | vanilla JS + HTML + CSS | -       | Decided | no framework; one HTML file per page, partials at build time (ADR-010) |
 | Charts             | Chart.js                | ^4.6    | In use  | registered per component in `src/charts.js`; theme charts reuse it     |
 
 ## 6. Hosting
@@ -75,8 +75,8 @@ is an ADR.)
 
 ## 7. Explicitly not used
 
-- **TypeScript compile step** — JSDoc types are enough for this size; revisit with an ADR.
-- **Jest / Vitest** — `node:test` covers the library logic.
-- **A statistics package (simple-statistics, jStat, …) in `core`** — the methods are the point
+- **TypeScript compile step** - JSDoc types are enough for this size; revisit with an ADR.
+- **Jest / Vitest** - `node:test` covers the library logic.
+- **A statistics package (simple-statistics, jStat, ...) in `core`** - the methods are the point
   of the exercise. Allowed in tests for cross-checking only, via an ADR.
-- **Any real traffic capture / proxy / scanner** — out of scope (brief, standards §5).
+- **Any real traffic capture / proxy / scanner** - out of scope (brief, standards §5).

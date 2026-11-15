@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "The Anomaly Guard — an educational IDS that combines rule-based checks with statistical anomaly detection, and measures its own false positives and false negatives.",
+  "description": "The Anomaly Guard - an educational IDS that combines rule-based checks with statistical anomaly detection, and measures its own false positives and false negatives.",
   "license": "MIT",
   "engines": {
     "node": ">=22"

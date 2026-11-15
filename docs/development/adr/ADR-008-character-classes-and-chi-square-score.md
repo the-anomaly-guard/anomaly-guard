@@ -10,7 +10,7 @@
 expected count was `E_i ≥ 5`, and not reporting the test otherwise. On the baseline data the
 expected share of `special` characters is about 0.35%: a value would need about 1400 characters to
 reach `E ≥ 5`, and `upper` had `E = 0` (a division by zero). Merging the rare classes removes
-exactly the signal the test exists for — an injection payload is anomalous _because_ of its rare
+exactly the signal the test exists for - an injection payload is anomalous _because_ of its rare
 characters. Applied literally, the rule meant the test would almost never be reported.
 
 Separately, the `other` class mixed injection-relevant punctuation (`` ` `` `*` `#`) with harmless
@@ -27,7 +27,7 @@ non-Latin letters, so a legitimate Greek comment and a shell payload looked alik
    Laplace-smoothed `p̂_i = (c_i + 1) / (C + k)` from the pair's training counts (the pooled counts
    if the pair is unseen), so `E_i > 0` always. `χ² = Σ (O_i − E_i)² / E_i`, `df = k − 1 = 6`, no
    class merging, no Yates correction (it only applies to `df = 1`). The p-value from the χ²(6)
-   survival function is **nominal** — the asymptotic approximation does not hold for small `E_i` —
+   survival function is **nominal** - the asymptotic approximation does not hold for small `E_i` -
    and is used only through `s = −log10(p)` (ADR-007), which is monotone in χ². The threshold is
    calibrated empirically on legitimate data (ADR-009), so the miscalibration does not bias the
    reported error rates.

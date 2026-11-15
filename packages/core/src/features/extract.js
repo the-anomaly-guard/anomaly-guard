@@ -6,7 +6,7 @@ import { charClassCounts, shannonEntropy, CHAR_CLASSES } from '../stats/entropy.
 
 /**
  * A simulated request. `params` collects every user-controlled string value (from the query
- * string and the body) keyed by name — these are what an attacker controls and what we measure.
+ * string and the body) keyed by name - these are what an attacker controls and what we measure.
  * Values are what the application sees AFTER the server's single URL-decoding pass, as Express
  * gives `req.query` / `req.body` (ADR-006): a value that still contains `%xx` was double-encoded
  * by the sender, which is what the `hasEncoding` feature flags.

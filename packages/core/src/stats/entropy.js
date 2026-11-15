@@ -1,5 +1,5 @@
 // Shannon entropy and character-distribution primitives.
-// Pure, runtime-agnostic (no DOM, no Node API). See docs/statistics/methods.md §0–§1 and ADR-008.
+// Pure, runtime-agnostic (no DOM, no Node API). See docs/statistics/methods.md §0-§1 and ADR-008.
 // The report-facing summaries of the entropy distributions (methods.md §1b, C-08) live here too.
 
 /**
@@ -20,7 +20,7 @@ export const CHAR_CLASSES = Object.freeze([
 
 /**
  * Metacharacters of SQL, HTML/JS, shell and path syntax: frequent in injection payloads, rare in
- * normal input. Control characters (U+0000–U+001F, U+007F) are classed as `special` too.
+ * normal input. Control characters (U+0000-U+001F, U+007F) are classed as `special` too.
  * Documented in methods.md §0.
  * @type {ReadonlySet<string>}
  */

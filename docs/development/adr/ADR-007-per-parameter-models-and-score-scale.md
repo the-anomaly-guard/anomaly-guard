@@ -16,7 +16,7 @@
   Kruegel & Vigna model each (program, attribute) pair separately.
 - `μ ± 3σ` on lengths was called a "confidence interval". It is not one: a confidence interval
   bounds a _parameter_ (the mean) and shrinks as 1/√n, while flagging one _new value_ needs a bound
-  on a new observation — a prediction interval or a tail inequality.
+  on a new observation - a prediction interval or a tail inequality.
 
 ## Decision
 
@@ -37,7 +37,7 @@
    reported as the reason. The detector score depends on the mode:
    - `stats`: the statistical score;
    - `combined`: `+Infinity` when a rule matched, otherwise the statistical score;
-   - `rules`: `1` if a rule matched, else `0` — a binary score, so its ROC is a single operating
+   - `rules`: `1` if a rule matched, else `0` - a binary score, so its ROC is a single operating
      point.
 
    In `stats` and `combined` mode, `verdict === 'attack'` exactly when `score ≥ threshold`. The

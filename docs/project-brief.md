@@ -1,4 +1,4 @@
-# Project brief — Project 5: The Anomaly Guard
+# Project brief - Project 5: The Anomaly Guard
 
 > This is the assignment as given by the instructor. It **defines the scope**: anything not
 > described here is out of scope and must be agreed before it is built (see
@@ -27,31 +27,31 @@
 > out in groups, every student can document their own contribution at the end, and individual
 > assessment will be taken into account.
 
-Groups of 3–5 students. Every member documents their own contribution — see the ownership map in
+Groups of 3-5 students. Every member documents their own contribution - see the ownership map in
 [`AGENTS.md`](../AGENTS.md) §4 and the task board in [`planning/backlog.md`](planning/backlog.md).
 
-## Notes (our interpretation — editable)
+## Notes (our interpretation - editable)
 
 These are decisions and readings of the brief that we have agreed on. Each one that affects
 architecture or method should also become an ADR.
 
-- **"Simulated web requests"** → we generate traffic ourselves, with a seeded generator. We do
+- **"Simulated web requests"** -> we generate traffic ourselves, with a seeded generator. We do
   **not** capture a real network or send requests to a real host. (ADR-001)
-- **"combine simple rule-based checks with statistical anomaly detection"** → two independent
+- **"combine simple rule-based checks with statistical anomaly detection"** -> two independent
   engines plus a combined detector, so we can report rules-only, stats-only, and combined.
-- **"without relying exclusively on predefined attack signatures"** → the statistical model is
+- **"without relying exclusively on predefined attack signatures"** -> the statistical model is
   trained on normal traffic only and must catch attacks the rules do not know; we deliberately
   include novel / obfuscated attacks in the test set to show this. (ADR-004)
-- **"paying attention to false positives and false negatives"** → the evaluation is a first-class
+- **"paying attention to false positives and false negatives"** -> the evaluation is a first-class
   deliverable: confusion matrix, FPR/FNR, precision/recall/F1, ROC/AUC, and a base-rate
   discussion. (ADR-004)
 - **Statistical methods we will implement:** Shannon entropy and character-class features;
-  chi-square on the character distribution (Kruegel & Vigna 2003) — as a per-request score and
+  chi-square on the character distribution (Kruegel & Vigna 2003) - as a per-request score and
   as a formal test between normal and attack traffic (ADR-008); a Chebyshev / prediction-interval
   bound on input lengths (ADR-007); outlier detection (z-score / IQR / MAD, and Mahalanobis for
   the multivariate case). Details in [`statistics/methods.md`](statistics/methods.md).
-- **"confidence intervals"** → used where they are statistically correct: on the evaluation
+- **"confidence intervals"** -> used where they are statistically correct: on the evaluation
   metrics (Wilson interval on FPR/FNR/TPR, bootstrap on AUC). A "μ ± 3σ" band on one new value is
   a prediction bound, not a confidence interval, and is named as such (ADR-007, ADR-009).
-- **"comparisons between normal and unusual traffic patterns"** → the dataset-level chi-square
+- **"comparisons between normal and unusual traffic patterns"** -> the dataset-level chi-square
   test of homogeneity, and score distributions of normal vs. attack traffic (ROC).

@@ -2,7 +2,7 @@
 
 Seeded, **reproducible** generator of simulated web requests and a labelled dataset builder.
 All traffic is synthetic; malicious samples are public example strings used only as detector
-input and are never executed or sent (ADR-001). Pure JS — runs in the browser and in Node.
+input and are never executed or sent (ADR-001). Pure JS - runs in the browser and in Node.
 
 ## Exports
 
@@ -25,8 +25,8 @@ const { seed, train, calibration, test } = buildDataset({
   testSize: 500,
   prevalence: 0.1,
 });
-// train:       legitimate only — fits the statistical model (ADR-004)
-// calibration: legitimate only — fixes the threshold at a target FPR (ADR-009)
+// train:       legitimate only - fits the statistical model (ADR-004)
+// calibration: legitimate only - fixes the threshold at a target FPR (ADR-009)
 // test:        legit + attacks, with `prevalence` as the test-set base rate (for evaluation)
 // each sample: { request, label: 'legit' | 'attack', kind, variant }
 ```
@@ -41,7 +41,7 @@ safe integers; `prevalence` and `hardShare` must be finite numbers from 0 to 1. 
 `round(testSize × prevalence)` attacks and `round(legitimate test count × hardShare)` hard cases.
 Generated splits contain separate samples, though their values can coincide by chance.
 
-Record the `seed` and the git commit with every reported result — together they reproduce the
+Record the `seed` and the git commit with every reported result - together they reproduce the
 whole dataset.
 
 ## Status

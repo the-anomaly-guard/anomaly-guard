@@ -8,7 +8,7 @@
 
 Other repositories in this account use a full automated gate (GitHub Actions CI, Dependabot,
 CodeQL, branch rulesets, heavy pre-commit). For this coursework prototype that apparatus was
-**explicitly excluded**. The repository is private and small, the team is 3–5 people, and the
+**explicitly excluded**. The repository is private and small, the team is 3-5 people, and the
 deliverable is an experiment plus a report, not a continuously deployed service.
 
 ## Decision
@@ -27,7 +27,7 @@ deliverable is an experiment plus a report, not a continuously deployed service.
 | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | Full CI gate (as the account's other repos) | Explicitly out of scope for this project; disproportionate for coursework                                                        |
 | A single minimal "npm test" workflow        | Low cost and tempting, but the instruction was to exclude CI/CD; it can be added later with a follow-up ADR if the team wants it |
-| Auto-deploy to Pages via Actions            | Same — omitted deliberately; manual publish is enough for a demo                                                                 |
+| Auto-deploy to Pages via Actions            | Same - omitted deliberately; manual publish is enough for a demo                                                                 |
 
 ## Consequences
 

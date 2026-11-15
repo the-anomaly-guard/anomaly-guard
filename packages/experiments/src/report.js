@@ -40,7 +40,7 @@ export function formatReport({ provenance, config, summary }) {
     '- Every seed is a separate run, with its own training data, model, thresholds and test ' +
       'set (ADR-009). The model is fitted on legitimate requests only, and each threshold is set ' +
       'on legitimate calibration requests only. Attack labels are used only to score the test set.',
-    '- **mean [a–b]**: the mean over the seeds and, in brackets, the 95% Student-t interval of ' +
+    '- **mean [a-b]**: the mean over the seeds and, in brackets, the 95% Student-t interval of ' +
       'that mean (methods.md §6). "every seed": the value was the same in every seed, so the ' +
       'interval has no width; group rows then add the count over all seeds.',
     '- `results.json` holds every seed on its own, with its Wilson intervals (rates) and ' +
@@ -69,7 +69,7 @@ export function formatReport({ provenance, config, summary }) {
       '| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |',
       ...MODES.map((mode) => {
         const p = at(mode);
-        const threshold = p.calibrated ? across(p.threshold, dec3) : '— (a rule match)';
+        const threshold = p.calibrated ? across(p.threshold, dec3) : '- (a rule match)';
         const typical = p.byVariant.legit.typical?.rate;
         return (
           `| ${mode} | ${threshold} | ${across(p.calibrationFpr, pct)} | ${across(typical, pct)} | ` +
@@ -78,7 +78,7 @@ export function formatReport({ provenance, config, summary }) {
         );
       }),
       '',
-      'Spread across seeds (SD; min–max):',
+      'Spread across seeds (SD; min-max):',
       '',
       '| Mode | Test FPR | TPR (recall) |',
       '| --- | --- | --- |',
@@ -184,7 +184,7 @@ function groupTable(modes, pointIndex, field, order) {
     for (const name of order(label, Object.keys(reference))) {
       const cells = MODES.map((mode) => groupCell(groups(mode)[label][name]));
       const { min, max } = reference[name].requestsPerSeed;
-      const sizes = min === max ? int(min) : `${int(min)}–${int(max)}`;
+      const sizes = min === max ? int(min) : `${int(min)}-${int(max)}`;
       rows.push(`| ${LABEL[label]} · ${name} | ${sizes} | ${cells.join(' | ')} |`);
     }
   }
@@ -203,16 +203,16 @@ function groupCell(group) {
   return across(group.rate, pct);
 }
 
-/** "mean [lower–upper]" or "value (every seed)"; "—" when undefined. */
+/** "mean [lower-upper]" or "value (every seed)"; "-" when undefined. */
 function across(interval, format) {
-  if (!interval) return '—';
+  if (!interval) return '-';
   if (interval.min === interval.max) return `${format(interval.estimate)} (every seed)`;
   const bare = { unit: false };
-  return `${format(interval.estimate)} [${format(interval.lower, bare)}–${format(interval.upper, bare)}]`;
+  return `${format(interval.estimate)} [${format(interval.lower, bare)}-${format(interval.upper, bare)}]`;
 }
 
 function spread(interval, format) {
-  return `${format(interval.min, { unit: false })}–${format(interval.max)}`;
+  return `${format(interval.min, { unit: false })}-${format(interval.max)}`;
 }
 
 function codeLine({ commit, dirty }) {
@@ -222,10 +222,10 @@ function codeLine({ commit, dirty }) {
     : `commit \`${commit}\` (no uncommitted changes)`;
 }
 
-/** "1–20" for consecutive seeds, otherwise the list. */
+/** "1-20" for consecutive seeds, otherwise the list. */
 function seedList(seeds) {
   const consecutive = seeds.every((s, i) => i === 0 || s === seeds[i - 1] + 1);
-  return consecutive ? `${seeds[0]}–${seeds[seeds.length - 1]}` : seeds.join(', ');
+  return consecutive ? `${seeds[0]}-${seeds[seeds.length - 1]}` : seeds.join(', ');
 }
 
 /** Percentage; `unit: false` drops the % sign (inside brackets, after the estimate). */

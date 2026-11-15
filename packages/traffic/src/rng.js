@@ -1,7 +1,7 @@
 // Seeded pseudo-random generator so every dataset and every reported result is reproducible
-// (standards §3/§4). Deterministic: same seed → same sequence. Pure, runtime-agnostic.
+// (standards §3/§4). Deterministic: same seed -> same sequence. Pure, runtime-agnostic.
 //
-// mulberry32 — a small, fast, well-known 32-bit PRNG. Good enough for generating test traffic;
+// mulberry32 - a small, fast, well-known 32-bit PRNG. Good enough for generating test traffic;
 // it is NOT cryptographically secure and must not be used for anything security-sensitive.
 
 /**

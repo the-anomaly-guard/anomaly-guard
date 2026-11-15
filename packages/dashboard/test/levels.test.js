@@ -19,7 +19,7 @@ test('levelOf: level k means s = −log10(p) ≥ k, capped below the signature l
   assert.equal(at(Infinity), MAX_STAT_LEVEL);
 });
 
-test('severityOf: low 0–1, medium 2–3, high 4–14, critical 15', () => {
+test('severityOf: low 0-1, medium 2-3, high 4-14, critical 15', () => {
   assert.deepEqual([0, 1, 2, 3, 4, 14, 15].map(severityOf), [
     'low',
     'low',

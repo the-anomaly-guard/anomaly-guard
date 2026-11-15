@@ -14,7 +14,7 @@ const partialsDir = resolve(root, 'partials');
 // The pages, in sidebar order. A new page needs its HTML file here and a link in partials/sidebar.html.
 const PAGES = ['index', 'events', 'rules', 'models', 'evaluation', 'base-rate', 'about'];
 
-// `<!-- include: partials/header.html -->` → that file's contents, in dev and in the build, so the
+// `<!-- include: partials/header.html -->` -> that file's contents, in dev and in the build, so the
 // shared header, settings bar, sidebar and footer are written once and every page stays plain HTML.
 const INCLUDE = /<!--\s*include:\s*([\w./-]+)\s*-->/g;
 
@@ -44,7 +44,7 @@ function partials() {
 // `script-src 'self'` with no exceptions: even if a payload ever reached the page as HTML, it
 // could not run (ADR-001). No inline styles either: styles come from the stylesheet, and the few
 // computed from JS go through the CSSOM, which CSP allows. `frame-ancestors` cannot be set from a
-// <meta>, so any site can embed the demo — which is what the portfolios need.
+// <meta>, so any site can embed the demo - which is what the portfolios need.
 const CSP = [
   "default-src 'self'",
   "script-src 'self'",

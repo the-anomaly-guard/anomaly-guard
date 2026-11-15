@@ -6,7 +6,7 @@
 
 ## Context
 
-The dashboard is to be published on GitHub Pages, which serves **static files only** — no Node
+The dashboard is to be published on GitHub Pages, which serves **static files only** - no Node
 process runs there. But the brief's "client-server" flavour and the realistic ingest loop want a
 server too. We need both without forking the detection logic.
 
@@ -15,10 +15,10 @@ server too. We need both without forking the detection logic.
 The detection pipeline runs **fully client-side**. `packages/core`, `packages/traffic` and
 `packages/evaluation` are pure JS with **no Node-only and no DOM-only APIs**, so the dashboard
 can, in the browser: generate traffic, extract features, run the rules and the statistical model,
-and compute the evaluation — entirely on GitHub Pages, with no backend.
+and compute the evaluation - entirely on GitHub Pages, with no backend.
 
 `packages/server` (Express) is an **optional local enhancement**: the same `core`, wrapped in an
-HTTP `POST /ingest` endpoint, to demonstrate the realistic client→server→verdict loop on
+HTTP `POST /ingest` endpoint, to demonstrate the realistic client->server->verdict loop on
 `localhost`. The dashboard may call it when present, but must work without it.
 
 Vite builds the dashboard with `base: './'` so the static bundle works at any Pages path.
@@ -48,7 +48,7 @@ Vite builds the dashboard with `base: './'` so the static bundle works at any Pa
 ### Actions
 
 - [x] Keep `core`/`traffic`/`evaluation` free of runtime APIs (standards §2.2).
-- [x] Document the manual Pages publish (`npm run build` → push `dist/` to `gh-pages`): see
+- [x] Document the manual Pages publish (`npm run build` -> push `dist/` to `gh-pages`): see
       `packages/dashboard/README.md`. `dist/` is git-ignored, so it is pushed from a throwaway
       repository inside `dist/`, not with `git subtree`.
 - Note: GitHub Pages needs a **public** repository on GitHub Free (a private one needs GitHub Pro,

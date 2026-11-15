@@ -2,40 +2,40 @@
 
 > **MUST** rules are binding. **SHOULD** rules can be deviated from only with a reason stated in
 > the PR; a permanent deviation needs an ADR. This is a student project, so the bar is "clear,
-> correct, reproducible, honestly evaluated" — not enterprise ceremony.
+> correct, reproducible, honestly evaluated" - not enterprise ceremony.
 
 ## 1. General principles
 
-- **MUST** — Stay inside the brief. Features not in [`../project-brief.md`](../project-brief.md)
+- **MUST** - Stay inside the brief. Features not in [`../project-brief.md`](../project-brief.md)
   are flagged, not built on your own initiative.
-- **MUST** — Correctness and honesty over cleverness: the whole point is an unbiased measurement
+- **MUST** - Correctness and honesty over cleverness: the whole point is an unbiased measurement
   of false positives and false negatives. A result that looks good because of a methodology bug
   is worse than a modest honest one.
-- **MUST** — Simplicity: the simplest thing that answers the research question. No abstractions
+- **MUST** - Simplicity: the simplest thing that answers the research question. No abstractions
   "for the future".
-- **SHOULD** — Every change is traceable: branch → PR → merge, with a backlog id.
+- **SHOULD** - Every change is traceable: branch -> PR -> merge, with a backlog id.
 
 ## 2. Code
 
 ### 2.1 Common
 
-- **MUST** — Identifiers, comments and logs in **English**. Comments explain the _why_.
-- **MUST** — No secret, credential, real IP, or real personal datum in code, tests or committed
+- **MUST** - Identifiers, comments and logs in **English**. Comments explain the _why_.
+- **MUST** - No secret, credential, real IP, or real personal datum in code, tests or committed
   data. Synthetic data only.
-- **MUST** — No commented-out code and no `TODO` without a backlog id: `// TODO(C-03): ...`.
-- **SHOULD** — Small, single-purpose functions. Prefer one more function over a dense one.
+- **MUST** - No commented-out code and no `TODO` without a backlog id: `// TODO(C-03): ...`.
+- **SHOULD** - Small, single-purpose functions. Prefer one more function over a dense one.
 
 ### 2.2 JavaScript
 
-- **MUST** — ES modules (`import` / `export`), `"type": "module"`. No CommonJS `require`.
-- **MUST** — `const` by default, `let` when reassigned, never `var`. Strict equality (`===`).
-- **MUST** — Type the public surface with **JSDoc** (`@param` / `@returns`). No TypeScript build.
-- **MUST** — `packages/core` imports **no** runtime API: no `window`, `document`, `fetch`,
+- **MUST** - ES modules (`import` / `export`), `"type": "module"`. No CommonJS `require`.
+- **MUST** - `const` by default, `let` when reassigned, never `var`. Strict equality (`===`).
+- **MUST** - Type the public surface with **JSDoc** (`@param` / `@returns`). No TypeScript build.
+- **MUST** - `packages/core` imports **no** runtime API: no `window`, `document`, `fetch`,
   `fs`, `path`, `process`, `express`. It must run unchanged in the browser and in Node.
-- **MUST** — Pure functions where possible: given the same input, the same output. The only
+- **MUST** - Pure functions where possible: given the same input, the same output. The only
   deliberate source of randomness is the seeded RNG in `packages/traffic`.
-- **MUST** — Format with Prettier (`npm run format`) and pass ESLint (`npm run lint`).
-- **SHOULD** — One main export concept per file; files under ~200 lines.
+- **MUST** - Format with Prettier (`npm run format`) and pass ESLint (`npm run lint`).
+- **SHOULD** - One main export concept per file; files under ~200 lines.
 
 **Naming:**
 
@@ -50,76 +50,76 @@
 
 ## 3. Statistics (the core of the grade)
 
-- **MUST** — The statistical model is trained on **legitimate traffic only**. The labelled test
+- **MUST** - The statistical model is trained on **legitimate traffic only**. The labelled test
   set is held out and never seen during training. No label leaks into any feature.
-- **MUST** — Scoring functions return a **score** on the common scale `s = −log10(p)` (higher =
+- **MUST** - Scoring functions return a **score** on the common scale `s = −log10(p)` (higher =
   more anomalous, ADR-007); the decision **threshold** is applied by the caller, so the ROC can
   sweep it. No baked-in yes/no, no default threshold.
-- **MUST** — Statistical models are kept per (path, parameter) pair (ADR-007).
-- **MUST** — Use the fixed character classes (`CHAR_CLASSES`, ADR-008) documented in
+- **MUST** - Statistical models are kept per (path, parameter) pair (ADR-007).
+- **MUST** - Use the fixed character classes (`CHAR_CLASSES`, ADR-008) documented in
   [`../statistics/methods.md`](../statistics/methods.md) §0; do not improvise per call.
-- **MUST** — Chi-square (ADR-008): the per-request statistic is a **score** with Laplace-smoothed
+- **MUST** - Chi-square (ADR-008): the per-request statistic is a **score** with Laplace-smoothed
   expected counts, `df = 6`, no class merging; its p-value is nominal and is never presented as a
   probability. The formal test, with `E_i ≥ 5`, is the dataset-level test of homogeneity.
-- **MUST** — The operating threshold is calibrated on the legitimate-only **calibration** split at
+- **MUST** - The operating threshold is calibrated on the legitimate-only **calibration** split at
   a target FPR, never chosen by looking at test results (ADR-009).
-- **MUST** — Every reported result names the generator **seed(s)**, the git commit, the split
+- **MUST** - Every reported result names the generator **seed(s)**, the git commit, the split
   sizes and prevalence, and the target FPR (or that the metric is threshold-swept, e.g. AUC).
-- **MUST** — Report the confusion matrix and both FPR and FNR with their confidence intervals,
+- **MUST** - Report the confusion matrix and both FPR and FNR with their confidence intervals,
   never accuracy alone, broken down by `variant`, and discuss the **base-rate fallacy** for a
   realistic attack prevalence.
-- **SHOULD** — Prefer robust estimators (median/MAD) where the normal data is skewed; say why.
+- **SHOULD** - Prefer robust estimators (median/MAD) where the normal data is skewed; say why.
 
 ## 4. Data
 
-- **MUST** — Datasets are generated by `packages/traffic` from an explicit seed and are
+- **MUST** - Datasets are generated by `packages/traffic` from an explicit seed and are
   **reproducible**; large generated datasets are git-ignored (`data/`, `results/`), not committed.
   A small fixed fixture set (the "hard cases") may be committed for tests.
-- **MUST** — Each sample is `{ request, label, kind, variant }`, `label ∈ { 'legit', 'attack' }`,
+- **MUST** - Each sample is `{ request, label, kind, variant }`, `label ∈ { 'legit', 'attack' }`,
   `variant` as defined in ADR-006 (assigned by how the sample was made, never by whether a
   detector catches it).
-- **MUST** — An attack is a generated legitimate request with one parameter value replaced by a
+- **MUST** - An attack is a generated legitimate request with one parameter value replaced by a
   payload; parameter values are URL-decoded once (ADR-006).
-- **MUST** — Malicious samples are standard, public, well-known example strings used purely as
+- **MUST** - Malicious samples are standard, public, well-known example strings used purely as
   **measurement subjects** for the detector. They are never executed, sent, or interpreted.
-- **MUST** — No real-world capture, no scraping a live site, no personal data.
+- **MUST** - No real-world capture, no scraping a live site, no personal data.
 
 ## 5. Safety & scope boundaries
 
-- **MUST** — No code path sends a network request to a real host, executes a payload, or passes a
+- **MUST** - No code path sends a network request to a real host, executes a payload, or passes a
   generated string to a shell, `eval`, `new Function`, a real SQL query, or the DOM as HTML.
-- **MUST** — The dashboard inserts data as text only (`src/dom.js`, never `innerHTML`) and keeps
+- **MUST** - The dashboard inserts data as text only (`src/dom.js`, never `innerHTML`) and keeps
   its Content Security Policy strict: no inline scripts or styles (ADR-010).
-- **MUST** — The Express server binds to `localhost` only and exists to demonstrate the
+- **MUST** - The Express server binds to `localhost` only and exists to demonstrate the
   ingest/analyse loop locally; it is not exposed.
-- **MUST** — If a task appears to need any of the above, stop and ask (brief, `AGENTS.md` §2).
+- **MUST** - If a task appears to need any of the above, stop and ask (brief, `AGENTS.md` §2).
 
 ## 6. Tests
 
-- **MUST** — Every change to logic ships with `node:test` tests. Statistics and metrics get unit
+- **MUST** - Every change to logic ships with `node:test` tests. Statistics and metrics get unit
   tests with known-answer cases (e.g. entropy of a uniform string, metrics of a hand-built
   confusion matrix).
-- **MUST** — A scoring function has a test showing it is **monotonic in the obvious direction**
+- **MUST** - A scoring function has a test showing it is **monotonic in the obvious direction**
   (a more anomalous input scores higher) and that it does not read labels.
-- **SHOULD** — Tests describe behaviour (`entropyOfUniformStringIsLog2OfAlphabet`).
+- **SHOULD** - Tests describe behaviour (`entropyOfUniformStringIsLog2OfAlphabet`).
 
 ## 7. Git
 
-- **MUST** — Branch `<type>/<id>-<short-desc>`; one task = one branch = one PR; update the
+- **MUST** - Branch `<type>/<id>-<short-desc>`; one task = one branch = one PR; update the
   backlog in the same PR.
-- **MUST** — Commit with your GitHub noreply address only: the repository is public.
+- **MUST** - Commit with your GitHub noreply address only: the repository is public.
   `npm run team-setup` sets it up, makes your e-mail private on GitHub and turns on a
   pre-commit check (`.githooks/pre-commit`) that refuses any other address.
-- **MUST** — Conventional Commits in English. Types: `feat`, `fix`, `docs`, `refactor`, `test`,
+- **MUST** - Conventional Commits in English. Types: `feat`, `fix`, `docs`, `refactor`, `test`,
   `chore`, `build`, `perf`, `revert`.
-- **MUST** — No CI gate exists (ADR-005): run `npm test`, `npm run lint`, `npm run format:check`
+- **MUST** - No CI gate exists (ADR-005): run `npm test`, `npm run lint`, `npm run format:check`
   locally and report the real outcome in the PR.
-- **SHOULD** — Small, focused PRs; fill in the PR template.
+- **SHOULD** - Small, focused PRs; fill in the PR template.
 
 ## 8. Documentation
 
-- **MUST** — Docs in English, Markdown, under `docs/`.
-- **MUST** — Architectural / methodological choices go in an ADR ([`adr/`](adr/README.md)).
-- **MUST** — Each workspace has a `README.md`: purpose, how to run, main exports.
-- **SHOULD** — Non-obvious statistics are explained in `docs/statistics/` and linked from the
+- **MUST** - Docs in English, Markdown, under `docs/`.
+- **MUST** - Architectural / methodological choices go in an ADR ([`adr/`](adr/README.md)).
+- **MUST** - Each workspace has a `README.md`: purpose, how to run, main exports.
+- **SHOULD** - Non-obvious statistics are explained in `docs/statistics/` and linked from the
   code.

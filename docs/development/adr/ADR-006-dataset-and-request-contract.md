@@ -30,9 +30,9 @@ optimistic:
    | `label`  | `variant`    | Meaning                                                                      |
    | -------- | ------------ | ---------------------------------------------------------------------------- |
    | `legit`  | `typical`    | ordinary traffic from the legitimate generators                              |
-   | `legit`  | `hard`       | legitimate but unusual input — the false-positive hard cases (A-05)          |
+   | `legit`  | `hard`       | legitimate but unusual input - the false-positive hard cases (A-05)          |
    | `attack` | `canonical`  | textbook form of a family the rule set targets (sqli, xss, traversal, cmdi)  |
-   | `attack` | `obfuscated` | a targeted family transformed to dodge signatures (encoding, comments, …)    |
+   | `attack` | `obfuscated` | a targeted family transformed to dodge signatures (encoding, comments, ...)  |
    | `attack` | `novel`      | a family the rule set has **no** signature for, by design (e.g. `oversized`) |
 
    The variant records **how the sample was made**, never whether a detector catches it;
@@ -68,7 +68,7 @@ optimistic:
 
 - Results now depend heavily on how realistic the legitimate generators are (A-02): narrow,
   artificial length or character distributions still make detection too easy. After this change
-  the combined detector caught 100% of attacks at 1% FPR on the baseline data — a sign that the
+  the combined detector caught 100% of attacks at 1% FPR on the baseline data - a sign that the
   legitimate traffic is still too regular, not that the detector is good.
 - Changing the generators changes every dataset for a given seed, so results are identified by
   seed **and** commit (ADR-009).
