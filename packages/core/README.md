@@ -14,6 +14,8 @@ import {
   paramFeatures,
   // character stats
   shannonEntropy,
+  entropySummary, // distribution of per-value entropies (C-08)
+  entropySeparation, // AUC / KS between legit and attack entropies (C-08)
   charClassCounts,
   charHistogram,
   classifyChar,
@@ -29,7 +31,9 @@ import {
   pToScore, // s = −log10(p), the common score scale (ADR-007)
   lengthZScore,
   lengthScore, // Chebyshev bound on lengths
-  chiSquareScore /* stub: C-03 */,
+  chiSquareScore, // per-request character-distribution score (C-03)
+  chiSquareLogSurvival, // χ²(df) survival function in log space (C-08)
+  chiSquareHomogeneity, // legit vs attack 7 × 2 test (C-08)
   // detector
   detect,
 } from '@anomaly-guard/core';
@@ -70,10 +74,10 @@ no default threshold on purpose.
 
 Implemented: entropy + the seven character classes, feature extraction, canonical signature
 rules for SQL injection, XSS, path traversal and command injection (B-01), the per-(path,
-parameter) model, a baseline length signal (Chebyshev bound → −log10 p), and a baseline detector
-with a continuous score per mode. Stubs with a backlog id: `chiSquareScore`
-(C-03, the headline method), robust/multivariate outliers (C-05), adding them to `scoreRequest`
-(C-06). The maths is in
+parameter) model, a baseline length signal (Chebyshev bound → −log10 p), a baseline detector
+with a continuous score per mode, the chi-square character-distribution score (C-03), and the
+dataset-level homogeneity test plus entropy summaries for the report (C-08). Stubs with a backlog
+id: robust/multivariate outliers (C-05), adding them to `scoreRequest` (C-06). The maths is in
 [`../../docs/statistics/methods.md`](../../docs/statistics/methods.md).
 
 ## Test

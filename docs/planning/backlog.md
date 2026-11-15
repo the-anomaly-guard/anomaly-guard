@@ -76,11 +76,11 @@
 
 ## 4. B — Server & rules (`packages/server`, `core/rules`)
 
-| ID   | Task                                                                                                                                                   | Theme | Depends on | Status           |
-| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----- | ---------- | ---------------- |
-| B-01 | Rule engine: signatures for the **canonical** families only, written without looking at obfuscated/novel payloads (ADR-006); keep "which rule hit"     | T1    | F-05       | Done             |
-| B-02 | Express monitor: threshold from a legit-only calibration batch at startup (`thresholdAtFpr`, D-06) instead of the fixed placeholder; validate the body | T3    | D-06       | Done             |
-| B-03 | Request log + verdict stream for the dashboard                                                                                                         | —     | B-02       | Cut              |
+| ID   | Task                                                                                                                                                   | Theme | Depends on | Status |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----- | ---------- | ------ |
+| B-01 | Rule engine: signatures for the **canonical** families only, written without looking at obfuscated/novel payloads (ADR-006); keep "which rule hit"     | T1    | F-05       | Done   |
+| B-02 | Express monitor: threshold from a legit-only calibration batch at startup (`thresholdAtFpr`, D-06) instead of the fixed placeholder; validate the body | T3    | D-06       | Done   |
+| B-03 | Request log + verdict stream for the dashboard                                                                                                         | —     | B-02       | Cut    |
 
 ## 5. C — Statistical models (`core/stats`, `core/detector`)
 
@@ -91,7 +91,7 @@
 | C-05 | Outliers in `stats/outliers.js`: IQR / MAD; Mahalanobis with a regularised covariance — each returns a tail probability → score                                                                                                              | T2    | F-05       | Ready            |
 | C-06 | Add C-03/C-04/C-05 to `scoreRequest` (`stats/anomaly.js`; max of the parts, ADR-007) and the model fields they need                                                                                                                          | T2    | C-03       | Ready            |
 | C-07 | Detector explanations: which signal, which parameter, which probability (continuous score per mode already in place)                                                                                                                         | T2    | C-06       | Blocked          |
-| C-08 | For the report, legit vs attack over the whole test set: chi-square test of homogeneity on the seven classes (methods §4b), and the entropy distributions of the two groups (does entropy alone separate them?)                              | T1    | C-03       | Ready            |
+| C-08 | For the report, legit vs attack over the whole test set: chi-square test of homogeneity on the seven classes (methods §4b), and the entropy distributions of the two groups (does entropy alone separate them?)                              | T1    | C-03       | Done             |
 
 ## 6. D — Evaluation (`packages/evaluation`, `packages/experiments`)
 
