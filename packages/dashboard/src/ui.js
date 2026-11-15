@@ -1,7 +1,8 @@
 // Small UI pieces shared by the pages.
 
-import { h, fmt } from './dom.js';
+import { h, fmt, svg } from './dom.js';
 import { severityOf } from './levels.js';
+import { PAGE_SIZES } from './listing.js';
 
 /**
  * A KPI tile: a big number, its label and an optional detail line (e.g. a confidence interval).
@@ -30,5 +31,66 @@ export function levelBadge(level) {
     'span',
     { class: `level sev-${severity}`, title: `Level ${level} · ${severity} severity` },
     String(level),
+  );
+}
+
+/**
+ * The order switch of a list of requests, the same everywhere: an arrow and "Newest first" or
+ * "Oldest first". A button where the page reorders the rows itself (Overview), a link where it
+ * opens the other order (Security events).
+ * @param {'button' | 'a'} tag
+ * @param {Record<string, any>} attrs
+ * @param {boolean} newestFirst
+ */
+export function sortToggle(tag, attrs, newestFirst) {
+  const toggle = h(
+    tag,
+    { ...attrs, class: 'btn btn-small sort-toggle' },
+    svg(
+      'svg',
+      { class: 'sort-icon', viewBox: '0 0 16 16', 'aria-hidden': 'true' },
+      svg('path', { d: 'M8 3v10M4 9l4 4 4-4' }),
+    ),
+    h('span', { class: 'sort-label' }),
+  );
+  setSortToggle(toggle, newestFirst);
+  return toggle;
+}
+
+/**
+ * Show the order a sortToggle stands for.
+ * @param {Element} toggle
+ * @param {boolean} newestFirst
+ */
+export function setSortToggle(toggle, newestFirst) {
+  toggle.classList.toggle('is-ascending', !newestFirst);
+  const label = toggle.querySelector('.sort-label');
+  if (label) label.textContent = newestFirst ? 'Newest first' : 'Oldest first';
+}
+
+/**
+ * "Rows 25 50 100": links to the same list with another number of rows per page, the current one
+ * marked. The same control wherever a list is split into pages (listing.js).
+ * @param {number} size  the current one
+ * @param {(n: number) => string} href  the link for n rows per page
+ */
+export function pageSizeLinks(size, href) {
+  return h(
+    'span',
+    { class: 'page-size', role: 'group', 'aria-label': 'Rows per page' },
+    h('span', { class: 'page-size-label', 'aria-hidden': 'true' }, 'Rows'),
+    PAGE_SIZES.map((n) =>
+      h(
+        'a',
+        {
+          class: 'page-size-option',
+          href: href(n),
+          'aria-current': n === size ? 'true' : null,
+          'data-keep-live': true,
+          title: `${n} per page`,
+        },
+        String(n),
+      ),
+    ),
   );
 }

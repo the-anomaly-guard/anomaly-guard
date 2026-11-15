@@ -936,6 +936,75 @@ pre.json {
   opacity: 0.6;
 }
 
+/* A list's own controls (ui.js): rows per page and the order, next to its count. */
+.list-controls {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+}
+
+.page-size {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.page-size-label {
+  margin-right: 6px;
+}
+
+.page-size-option {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 9px;
+  border: 1px solid var(--border-strong);
+  background: var(--panel-bg);
+  color: var(--text);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.page-size-option + .page-size-option {
+  margin-left: -1px;
+}
+
+.page-size-label + .page-size-option {
+  border-radius: 4px 0 0 4px;
+}
+
+.page-size-option:last-child {
+  border-radius: 0 4px 4px 0;
+}
+
+.page-size-option:hover {
+  background: var(--nav-hover);
+}
+
+.page-size-option[aria-current='true'] {
+  position: relative;
+  border-color: var(--primary);
+  background: var(--primary-weak);
+  color: var(--primary);
+}
+
+.page-size-option:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+/* An acronym or a code (a rule id, a task, an ADR) that explains itself on hover (term-help.js). */
+abbr[data-term] {
+  text-decoration: underline dotted;
+  text-decoration-color: var(--text-subtle);
+  text-underline-offset: 2px;
+  cursor: help;
+}
+
 /* ---------- placeholders, callouts, prose ---------- */
 
 .placeholder {
@@ -1330,6 +1399,14 @@ pre.json {
   flex-wrap: wrap;
   align-items: center;
   gap: 6px 12px;
+}
+
+/* A link that looks like a button (e.g. the order switch of Security events). */
+a.btn {
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  text-decoration: none;
 }
 
 .btn-small {

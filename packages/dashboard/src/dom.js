@@ -53,6 +53,43 @@ export function mount(selector, ...children) {
   return append(host, children);
 }
 
+/**
+ * Make `nodes` the children of `parent`, in order, touching only what changed: a node that stays
+ * keeps its place and its identity, so a click that has started on it is not lost when the page
+ * draws again (the live replay draws about ten times a second).
+ * @param {Element} parent
+ * @param {Node[]} nodes
+ */
+export function patchChildren(parent, nodes) {
+  nodes.forEach((node, i) => {
+    const current = parent.childNodes[i] ?? null;
+    if (current !== node) parent.insertBefore(node, current);
+  });
+  while (parent.childNodes.length > nodes.length) parent.lastChild?.remove();
+}
+
+/**
+ * Set an element's text only when it changes (no needless redraw).
+ * @param {Element} node
+ * @param {string} text
+ */
+export function setText(node, text) {
+  if (node.textContent !== text) node.textContent = text;
+}
+
+/**
+ * An SVG element (h() makes HTML ones, which an <svg> cannot hold).
+ * @param {string} tag
+ * @param {Record<string, string>} [attrs]
+ * @param {...SVGElement} children
+ */
+export function svg(tag, attrs = {}, ...children) {
+  const node = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, value);
+  node.append(...children);
+  return node;
+}
+
 /** Number formatting, the same on every page. */
 export const fmt = {
   /** @param {number} n */

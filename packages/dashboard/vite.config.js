@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
+import { adrTerms, backlogTerms } from './src/terms.js';
 
 // Multi-page app (ADR-010): every section is its own HTML document with its own URL, so GitHub
 // Pages serves each one as a real file (no client-side router, no 404 on reload) and a portfolio
@@ -35,6 +36,29 @@ function partials() {
     },
     handleHotUpdate({ file, server }) {
       if (file.startsWith(partialsDir + sep)) server.ws.send({ type: 'full-reload' });
+    },
+  };
+}
+
+// `import docs from 'virtual:term-sources'` (src/term-data.js): the explanations of the backlog's
+// tasks and themes and of the ADRs, read from the docs when the dashboard is built, so a code such
+// as C-06 or ADR-009 explains itself on every page. Only the short texts reach the bundle.
+const TERM_SOURCES = 'virtual:term-sources';
+const TERM_DOCS = ['docs/planning/backlog.md', 'docs/development/adr/README.md'].map((file) =>
+  resolve(root, '../..', file),
+);
+
+function termSources() {
+  return {
+    name: 'anomaly-guard-term-sources',
+    resolveId: (id) => (id === TERM_SOURCES ? `\0${TERM_SOURCES}` : null),
+    load(id) {
+      if (id !== `\0${TERM_SOURCES}`) return null;
+      const [backlog, adrIndex] = TERM_DOCS.map((file) => {
+        this.addWatchFile(file);
+        return readFileSync(file, 'utf8');
+      });
+      return `export default ${JSON.stringify({ ...backlogTerms(backlog), ...adrTerms(adrIndex) })};`;
     },
   };
 }
@@ -76,7 +100,7 @@ function cspMeta() {
 
 export default defineConfig({
   base: './',
-  plugins: [partials(), cspMeta()],
+  plugins: [partials(), termSources(), cspMeta()],
   server: { port: 5173 },
   build: {
     outDir: 'dist',

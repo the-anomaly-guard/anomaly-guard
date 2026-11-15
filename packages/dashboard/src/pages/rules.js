@@ -68,7 +68,11 @@ function render(frame) {
         {},
         h('td', { class: 'mono nowrap' }, rule.id),
         h('td', {}, rule.kind),
-        h('td', { class: 'mono pattern' }, `/${rule.pattern.source}/${rule.pattern.flags}`),
+        h(
+          'td',
+          { class: 'mono pattern', 'data-raw': true },
+          `/${rule.pattern.source}/${rule.pattern.flags}`,
+        ),
         h('td', { class: 'num' }, fmt.int(m.all)),
         h('td', { class: 'num' }, fmt.int(m.attack)),
         h('td', { class: m.legit ? 'num is-bad' : 'num' }, fmt.int(m.legit)),

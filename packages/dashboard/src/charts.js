@@ -17,11 +17,58 @@ import {
   Tooltip,
 } from 'chart.js';
 import { densify } from './lines.js';
+import { findTerms, wrapLines } from './terms.js';
+import { TERMS } from './term-data.js';
 
 /** Hover points along the ROC lines: at most this far apart, in FPR or TPR (see lines.js). */
 const HOVER_STEP = 0.01;
 
+/**
+ * The explanations of the acronyms and codes in a chart text (terms.js), one per line.
+ * @param {unknown} text
+ */
+function termHelp(text) {
+  return findTerms(String(text ?? ''), TERMS).map(({ help }) => help);
+}
+
+/**
+ * The legend entry or category label (e.g. a rule id on the axis) under the pointer, if any.
+ * @param {Chart} chart
+ * @param {number} x
+ * @param {number} y
+ */
+function labelAt(chart, x, y) {
+  const legend = /** @type {any} */ (chart.legend);
+  const boxes = legend?.legendHitBoxes ?? [];
+  const hit = boxes.findIndex(
+    (/** @type {any} */ b) =>
+      x >= b.left && x <= b.left + b.width && y >= b.top && y <= b.top + b.height,
+  );
+  if (hit >= 0) return legend.legendItems?.[hit]?.text;
+  for (const scale of Object.values(chart.scales)) {
+    if (scale.type !== 'category' || x < scale.left || x > scale.right) continue;
+    if (y < scale.top || y > scale.bottom) continue;
+    const index = Math.round(scale.getValueForPixel(scale.isHorizontal() ? x : y) ?? -1);
+    return /** @type {any} */ (scale).getLabels()[index];
+  }
+  return null;
+}
+
+// Hover help on every chart, present and future (registered once): a legend entry or an axis
+// label with an acronym or a code explains it in the canvas's title; a bar or point explains the
+// codes of its label in the tooltip's footer (setupCharts).
+const termHelpPlugin = {
+  id: 'termHelp',
+  afterEvent(/** @type {Chart} */ chart, /** @type {any} */ { event }) {
+    if (event.type !== 'mousemove' && event.type !== 'mouseout') return;
+    const text = event.type === 'mousemove' ? labelAt(chart, event.x, event.y) : null;
+    const help = termHelp(text).join('\n');
+    if (chart.canvas.title !== help) chart.canvas.title = help;
+  },
+};
+
 Chart.register(
+  termHelpPlugin,
   ArcElement,
   BarController,
   BarElement,
@@ -52,6 +99,10 @@ export function setupCharts() {
   Chart.defaults.maintainAspectRatio = false;
   Chart.defaults.animation = false;
   Chart.defaults.plugins.legend.labels.boxWidth = 12;
+  // A bar or point whose label is a code (a rule id) explains it under the values.
+  Chart.defaults.plugins.tooltip.callbacks.footer = (items) =>
+    termHelp(items[0]?.label).flatMap((help) => wrapLines(help, 56));
+  Chart.defaults.plugins.tooltip.footerFont = { weight: 'normal' };
 }
 
 /**

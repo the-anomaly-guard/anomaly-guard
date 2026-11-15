@@ -29,14 +29,17 @@
         <section class="panel" aria-labelledby="events-title">
           <div class="panel-head">
             <h2 class="panel-title" id="events-title">Events</h2>
-            <span class="panel-meta" id="events-meta"></span>
+            <div class="panel-tools">
+              <span class="panel-meta" id="events-meta"></span>
+              <span class="list-controls" id="events-controls"></span>
+            </div>
           </div>
           <div class="table-wrap">
             <table class="data">
               <thead>
                 <tr>
                   <th scope="col"><span class="visually-hidden">Details</span></th>
-                  <th scope="col" class="num">#</th>
+                  <th scope="col" class="num" id="events-order" aria-sort="descending">#</th>
                   <th scope="col">Request</th>
                   <th scope="col">Parameters</th>
                   <th scope="col">Level</th>
