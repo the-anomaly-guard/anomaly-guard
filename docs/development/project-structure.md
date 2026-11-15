@@ -99,7 +99,7 @@ core/
 │   ├── stats/                # one file per signal
 │   │   ├── entropy.js        # Shannon entropy, the seven character classes
 │   │   ├── model.js          # per-(path, param) model, paramKey, pToScore (−log10 p)
-│   │   ├── length.js         # length signal: Chebyshev bound (C-04)
+│   │   ├── length.js         # length signal: Chebyshev on log-length (C-04)
 │   │   ├── chisquare.js      # character-distribution signal: chi-square (C-03, C-08)
 │   │   ├── outliers.js       # (to create, C-05) IQR / MAD, Mahalanobis
 │   │   └── anomaly.js        # scoreRequest: the max of the signals (C-06)

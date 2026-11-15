@@ -16,7 +16,14 @@ export { extractFeatures, paramFeatures } from './features/extract.js';
 export { RuleEngine, DEFAULT_RULES } from './rules/engine.js';
 
 export { trainStatModel, paramKey, pToScore } from './stats/model.js';
-export { lengthZScore, lengthScore } from './stats/length.js';
+export {
+  lengthZScore,
+  lengthScore,
+  unseenPairScore,
+  LENGTH_METHODS,
+  DEFAULT_LENGTH_METHOD,
+  MIN_STD,
+} from './stats/length.js';
 export { chiSquareScore, chiSquareLogSurvival, chiSquareHomogeneity } from './stats/chisquare.js';
 export { scoreRequest } from './stats/anomaly.js';
 

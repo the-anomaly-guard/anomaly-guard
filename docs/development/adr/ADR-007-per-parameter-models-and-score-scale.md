@@ -32,7 +32,8 @@
    inequality gives `P(|X − μ| ≥ zσ) ≤ 1/z²` for _any_ distribution, so `p = min(1, 1/z²)`. It
    needs no normality (lengths are skewed and bounded below by 0), it is what Kruegel & Vigna use
    for lengths, and it bounds a new observation. C-04 may compare it with a normal-theory
-   prediction interval (methods.md §3).
+   prediction interval (methods.md §3). _C-04 outcome: the default became Chebyshev on
+   `ln(1 + length)`, see [ADR-012](ADR-012-length-signal-log-scale-and-unseen-pairs.md)._
 4. **Combination.** The statistical score is the **maximum** of the signal scores; the arg-max is
    reported as the reason. The detector score depends on the mode:
    - `stats`: the statistical score;

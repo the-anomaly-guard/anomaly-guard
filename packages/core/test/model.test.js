@@ -17,6 +17,12 @@ test('trainStatModel: learns length stats per (path, parameter) pair', () => {
   assert.equal(q.n, 3);
   assert.equal(q.length.mean, 4);
   assert.equal(q.length.std, 1);
+  // log scale (C-04): ln(1 + length) for lengths 3, 5, 4
+  const logs = [3, 5, 4].map((len) => Math.log1p(len));
+  const logMean = logs.reduce((a, b) => a + b, 0) / 3;
+  assert.ok(Math.abs(q.logLength.mean - logMean) < 1e-12);
+  const logStd = Math.sqrt(logs.reduce((a, b) => a + (b - logMean) ** 2, 0) / 2);
+  assert.ok(Math.abs(q.logLength.std - logStd) < 1e-12);
 });
 
 test('trainStatModel: the same name on two paths gets two separate models (ADR-007)', () => {

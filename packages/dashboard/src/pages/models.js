@@ -18,7 +18,12 @@ import { initLive } from '../live.js';
  * `probe` for the outliers when C-05 lands.
  */
 const SIGNALS = [
-  { part: 'length', name: 'Length', method: 'Chebyshev bound: p ≤ 1/z²', task: 'C-04 · T2' },
+  {
+    part: 'length',
+    name: 'Length',
+    method: 'Chebyshev bound on ln(1 + length): p ≤ 1/z²',
+    task: 'C-04 · T2',
+  },
   {
     part: 'chiSquare',
     name: 'Character distribution',
