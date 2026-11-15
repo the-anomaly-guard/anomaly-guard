@@ -1,4 +1,4 @@
-/* The Anomaly Guard — SIEM-style console (ADR-010). Plain CSS: design tokens on :root, light and
+/* The Anomaly Guard - SIEM-style console (ADR-010). Plain CSS: design tokens on :root, light and
    dark themes from the system setting. No inline styles anywhere (the CSP forbids them). */
 
 :root {
@@ -38,7 +38,7 @@
   --danger: #bd271e;
   --danger-weak: #f8e9e9;
 
-  /* alert levels: low 0–1, medium 2–3, high 4–14, critical 15 (src/levels.js) */
+  /* alert levels: low 0-1, medium 2-3, high 4-14, critical 15 (src/levels.js) */
   --sev-low: #54b399;
   --sev-medium: #d6bf57;
   --sev-high: #e7664c;
@@ -334,6 +334,13 @@ body[data-page='about'] [data-nav='about'] svg {
 .content {
   min-width: 0;
   padding: 0 24px 40px;
+}
+
+/* Until the page's script has read the settings from the URL (shell.js sets data-ready), the
+   content stays hidden: otherwise the default values of the static HTML (1,000 requests, seed
+   42) would flash for a moment before the real ones replace them. */
+body:not([data-ready]) .content {
+  visibility: hidden;
 }
 
 /* ---------- settings bar ---------- */
@@ -681,6 +688,13 @@ table.data {
   background: var(--nav-hover);
 }
 
+/* A column header that explains itself on hover (title). */
+.data th[title] {
+  cursor: help;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+}
+
 .data .num {
   text-align: right;
   font-variant-numeric: tabular-nums;
@@ -858,6 +872,11 @@ pre.json {
   color: var(--success);
 }
 
+.badge.is-pending {
+  background: var(--primary-weak);
+  color: var(--primary);
+}
+
 .badge.is-mistake {
   background: var(--warning-weak);
   color: var(--warning);
@@ -1033,6 +1052,354 @@ pre.json {
   margin: 0;
 }
 
+/* ---------- live replay: run bar and latest requests (E-08, ADR-011) ---------- */
+
+/* These set `display`, which would otherwise win over the `hidden` attribute. */
+.runbar [hidden],
+.chart-box[hidden],
+.empty-chart[hidden] {
+  display: none;
+}
+
+.runbar {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel-bg);
+}
+
+.runbar-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+}
+
+.runbar-dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--border-strong);
+}
+
+.runbar[data-stage='intro'] .runbar-dot,
+.runbar[data-stage='playing'] .runbar-dot {
+  background: var(--success);
+  animation: runbar-pulse 1.2s ease-in-out infinite;
+}
+
+.runbar[data-stage='paused'] .runbar-dot {
+  background: var(--warning);
+}
+
+.runbar[data-stage='done'] .runbar-dot {
+  background: var(--primary);
+}
+
+/* The experiment's description gives the run away: it takes no space until the replay is done. */
+.page-sub.is-concealed {
+  display: none;
+}
+
+.runbar-status {
+  flex: 1 1 220px;
+  min-width: 0;
+  margin: 0;
+  font-size: 13px;
+}
+
+.runbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn {
+  height: 32px;
+  padding: 0 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  background: var(--panel-bg);
+  color: var(--text);
+  font: 600 13px var(--font);
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: var(--nav-hover);
+}
+
+.btn-primary {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  border-color: var(--primary-hover);
+  background: var(--primary-hover);
+}
+
+.runbar-speed {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.runbar-speed select {
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  background: var(--panel-bg);
+  color: var(--text);
+  font: 13px var(--font);
+}
+
+.runbar-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--text-subtle);
+  font-size: 12px;
+}
+
+.runbar-steps li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.runbar-steps span {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  font-weight: 600;
+}
+
+.runbar-steps .is-current {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.runbar-steps .is-current span {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #fff;
+}
+
+.runbar-steps .is-done span {
+  border-color: var(--success);
+  background: var(--success);
+  color: var(--panel-bg);
+}
+
+.runbar-progress {
+  width: 100%;
+  height: 4px;
+  border: 0;
+  border-radius: 2px;
+  background: var(--border);
+  appearance: none;
+}
+
+.runbar-progress::-webkit-progress-bar {
+  border-radius: 2px;
+  background: var(--border);
+}
+
+.runbar-progress::-webkit-progress-value {
+  border-radius: 2px;
+  background: var(--primary);
+}
+
+.runbar-progress::-moz-progress-bar {
+  border-radius: 2px;
+  background: var(--primary);
+}
+
+@keyframes runbar-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.feed-row.is-mistake > td:first-child {
+  box-shadow: inset 3px 0 0 var(--danger);
+}
+
+.feed-row.is-new > td {
+  animation: feed-arrive 1.4s ease-out;
+}
+
+.feed-row.is-new.is-alert > td {
+  animation-name: feed-arrive-alert;
+}
+
+@keyframes feed-arrive {
+  from {
+    background: var(--primary-weak);
+  }
+}
+
+@keyframes feed-arrive-alert {
+  from {
+    background: color-mix(in srgb, var(--danger) 35%, var(--panel-bg));
+  }
+}
+
+/* Every request that has arrived, in a box as tall as the header and eight rows (the size of the
+   table before it held them all): scroll to see the rest. The header stays on top. */
+.feed-scroll {
+  max-height: 315px;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.feed-scroll thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.feed-scroll:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+
+/* An alert stands out: its whole row is tinted red, in the Overview's requests and in Events,
+   where an open row is a shade stronger (blue is the open colour of a row with no alert). */
+.feed-row.is-alert > td,
+.event-row.is-alert > td {
+  background: var(--danger-weak);
+}
+
+.event-row.is-alert.is-open > td {
+  background: color-mix(in srgb, var(--danger) 12%, var(--danger-weak));
+}
+
+.panel-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+}
+
+.btn-small {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+.sort-icon {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.15s ease;
+}
+
+.sort-toggle.is-ascending .sort-icon {
+  transform: rotate(180deg);
+}
+
+/* ---------- a chart opened large (src/chart-modal.js) ---------- */
+
+/* A panel title that opens its chart large. */
+.title-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: zoom-in;
+}
+
+.title-button:hover:not(:disabled) {
+  color: var(--primary);
+}
+
+.title-button:disabled {
+  cursor: default;
+}
+
+.expand-icon {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Nearly the whole window, whatever its size; Chart.js follows the box when it changes. */
+.chart-modal {
+  width: min(96vw, 1600px);
+  height: min(92vh, 1000px);
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--panel-bg);
+  color: var(--text);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.35);
+}
+
+.chart-modal[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-modal::backdrop {
+  background: rgba(10, 12, 16, 0.65);
+  backdrop-filter: blur(2px);
+}
+
+.chart-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.chart-modal-body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  margin: 16px;
+}
+
+/* The page behind does not scroll while the chart is open. */
+body:has(.chart-modal[open]) {
+  overflow: hidden;
+}
+
 /* ---------- narrow screens (also a narrow iframe in a portfolio) ---------- */
 
 @media (max-width: 1180px) {
@@ -1123,6 +1490,16 @@ pre.json {
 
 @media (prefers-reduced-motion: reduce) {
   .sidebar {
+    transition: none;
+  }
+
+  /* The requests still arrive one after another; only the pulse and the highlight stop. */
+  .runbar-dot,
+  .feed-row.is-new > td {
+    animation: none !important;
+  }
+
+  .sort-icon {
     transition: none;
   }
 }

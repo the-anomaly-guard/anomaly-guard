@@ -1,4 +1,4 @@
-// Detection quality of one run, for evaluation.html (E-06, and the ROC of E-02 — theme T3): the
+// Detection quality of one run, for evaluation.html (E-06, and the ROC of E-02 - theme T3): the
 // error rates with their 95% Wilson intervals, the results by variant, the ROC curve of every
 // mode on the same test requests, and McNemar's test between the modes (D-07). Pure: no DOM,
 // tested in Node; the page only renders it.
@@ -125,6 +125,19 @@ export const PAIRS = Object.freeze([
  *   legit: ReturnType<typeof mcnemarTest> }[]}  onlyA: requests that A flags and B does not
  */
 export function pairedComparison(run, curves) {
+  return compareFlags(
+    flagsByMode(run, curves),
+    run.dataset.test.map((s) => s.label),
+  );
+}
+
+/**
+ * Which test requests each mode flags, each at its own operating point for the current target.
+ * @param {ReturnType<typeof import('./pipeline.js').runExperiment>} run
+ * @param {NonNullable<ReturnType<typeof rocByMode>>} curves  their test scores are reused
+ * @returns {Record<string, boolean[]>}  in the order of the test split
+ */
+export function flagsByMode(run, curves) {
   const { state, dataset, ruleEngine, model } = run;
   /** @type {Record<string, boolean[]>} */
   const flagged = {};
@@ -136,7 +149,18 @@ export function pairedComparison(run, curves) {
     const cut = mode === 'rules' ? 1 : point.threshold; // rules mode: 1 on a rule match
     flagged[mode] = scored.map((s) => s.score >= cut);
   }
-  const only = (values, label) => values.filter((_v, j) => dataset.test[j].label === label);
+  return flagged;
+}
+
+/**
+ * McNemar's test for every pair of modes on the first requests of the test split - all of them,
+ * or the ones that have arrived so far in the live replay (E-08): pass the flags and the labels
+ * of the same requests.
+ * @param {Record<string, boolean[]>} flagged  from flagsByMode, possibly cut to the first n
+ * @param {('attack' | 'legit')[]} labels      the labels of those requests
+ */
+export function compareFlags(flagged, labels) {
+  const only = (values, label) => values.filter((_v, j) => labels[j] === label);
   return PAIRS.map(([a, b]) => ({
     modes: [a, b],
     attack: mcnemarTest(only(flagged[a], 'attack'), only(flagged[b], 'attack')),

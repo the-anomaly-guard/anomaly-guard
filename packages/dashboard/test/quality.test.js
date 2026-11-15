@@ -9,6 +9,8 @@ import {
   rocByMode,
   aucInterval,
   pairedComparison,
+  flagsByMode,
+  compareFlags,
   ROC_MODES,
   BROWSER_RESAMPLES,
   PAIRS,
@@ -103,4 +105,26 @@ test('pairedComparison: McNemar on attacks and on legitimate requests, each mode
   const rules = pairs.find((p) => p.modes[0] === 'rules' && p.modes[1] === 'combined');
   assert.equal(rules.attack.onlyA, 0);
   assert.equal(rules.legit.onlyA, 0);
+});
+
+test('compareFlags: on the first n requests (live replay, E-08); all of them = pairedComparison', () => {
+  const curves = rocByMode(run);
+  const flags = flagsByMode(run, curves);
+  const labels = run.dataset.test.map((s) => s.label);
+  assert.deepEqual(compareFlags(flags, labels), pairedComparison(run, curves));
+
+  const n = 150;
+  const cut = Object.fromEntries(Object.entries(flags).map(([mode, f]) => [mode, f.slice(0, n)]));
+  const first = compareFlags(cut, labels.slice(0, n));
+  const all = pairedComparison(run, curves);
+  first.forEach((pair, i) => {
+    // The first n requests disagree at most as often as all of them.
+    for (const group of ['attack', 'legit']) {
+      assert.ok(pair[group].onlyA <= all[i][group].onlyA);
+      assert.ok(pair[group].onlyB <= all[i][group].onlyB);
+    }
+  });
+  // Counted by hand on the first n: stats flags, combined does not.
+  const statsOnly = cut.stats.filter((f, j) => labels[j] === 'attack' && f && !cut.combined[j]);
+  assert.equal(first[0].attack.onlyA, statsOnly.length);
 });

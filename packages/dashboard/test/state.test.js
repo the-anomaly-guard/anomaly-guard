@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { DEFAULTS, FPR_TARGETS, parseState, toQuery, withState } from '../src/state.js';
+import { DEFAULTS, FPR_TARGETS, parseState, readAt, toQuery, withState } from '../src/state.js';
 
 test('parseState: no query gives the defaults', () => {
   assert.deepEqual(parseState(''), { ...DEFAULTS });
@@ -73,6 +73,18 @@ test('withState: adds the settings and keeps other parameters and the hash', () 
     withState('./events.html?show=alerts&seed=1#top', state),
     './events.html?show=alerts&seed=9&mode=combined&fpr=0.01&threshold=1&prevalence=0.1&size=1000#top',
   );
+});
+
+test('readAt: the live replay position (E-08) - absent, a request count, or end', () => {
+  assert.equal(readAt(null, 1000), null); // not started: the page opens empty
+  assert.equal(readAt('', 1000), null);
+  assert.equal(readAt('0', 1000), 0);
+  assert.equal(readAt('412', 1000), 412);
+  assert.equal(readAt('end', 1000), 1000);
+  assert.equal(readAt('5000', 1000), 1000); // past the end: everything
+  for (const raw of ['-1', '1.5', 'abc', 'END']) assert.equal(readAt(raw, 1000), null, raw);
+  // A page parameter, not a setting: it never changes the experiment.
+  assert.deepEqual(parseState('?at=412'), { ...DEFAULTS });
 });
 
 test('withState: extra parameters are set or removed, never duplicated', () => {

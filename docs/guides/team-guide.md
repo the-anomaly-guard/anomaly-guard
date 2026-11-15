@@ -10,13 +10,13 @@ Step-by-step instructions for the members of the group, with the commands to run
 Repository: <https://github.com/the-anomaly-guard/anomaly-guard> · Live demo:
 <https://the-anomaly-guard.github.io/anomaly-guard/>
 
-## Part 1 — Access the repository and work on it
+## Part 1 - Access the repository and work on it
 
 ### 1.1 An owner invites you (owners only)
 
 The repository belongs to the organization
 [`the-anomaly-guard`](https://github.com/the-anomaly-guard), and every member of the group is one
-of its owners. To invite someone: **the organization → People → Invite member**, their username,
+of its owners. To invite someone: **the organization -> People -> Invite member**, their username,
 role **Owner**. Or from a terminal, once per person:
 
 ```bash
@@ -24,7 +24,7 @@ gh auth refresh -h github.com -s admin:org     # once: lets gh manage the organi
 gh api -X PUT orgs/the-anomaly-guard/memberships/<their-github-username> -f role=admin
 ```
 
-An owner can push branches, merge pull requests, republish the demo and change every setting —
+An owner can push branches, merge pull requests, republish the demo and change every setting -
 deleting the repository included, so handle the settings with care.
 
 ### 1.2 Accept the invitation
@@ -66,7 +66,7 @@ own account and your own git settings:
 
 1. it logs you in to GitHub through the browser (or adds the permission it needs to an existing
    login);
-2. it makes your e-mail private on GitHub — the **Keep my email addresses private** setting;
+2. it makes your e-mail private on GitHub - the **Keep my email addresses private** setting;
 3. it makes git sign your commits with your GitHub noreply address
    (`12345678+your-username@users.noreply.github.com`) instead of your personal e-mail, asking
    before it changes your global git settings;
@@ -76,19 +76,19 @@ own account and your own git settings:
 It prints every change; `npm run team-setup -- --dry-run` only shows the plan. Running it again
 is safe. Everything it uses is free: the GitHub API is the same thing the website does, available
 to every account. One setting has no API: open <https://github.com/settings/emails> and tick
-**Block command line pushes that expose my email** — GitHub then refuses a push that would
+**Block command line pushes that expose my email** - GitHub then refuses a push that would
 publish your personal address, whatever computer you use.
 
 Then read [`AGENTS.md`](../../AGENTS.md) (the rules, ten minutes), ADR-006 to ADR-010 in
 [`docs/development/adr/`](../development/adr/README.md), and your theme in
-[`docs/planning/backlog.md`](../planning/backlog.md) §8 — and write your name next to it.
+[`docs/planning/backlog.md`](../planning/backlog.md) §8 - and write your name next to it.
 
 ### 1.5 Work on a task: one task, one branch, one pull request
 
 ```bash
 git switch main && git pull                   # start from the latest main
 git switch -c feat/c-03-chi-square            # <type>/<task-id>-<short-description>
-# … write the code and its tests …
+# ... write the code and its tests ...
 npm test && npm run lint && npm run format:check
 git add -A
 git commit -m "feat(stats): add the chi-square character score"
@@ -101,10 +101,10 @@ Update your task's status in `docs/planning/backlog.md` in the same pull request
 teammate's review, merge it on GitHub and delete the branch. The dashboard has its own notes for
 adding your theme's chart: [`packages/dashboard/README.md`](../../packages/dashboard/README.md).
 
-Working with an AI assistant — Claude Code, an editor agent or a chat — or with none: one
+Working with an AI assistant - Claude Code, an editor agent or a chat - or with none: one
 prompt for every task, with the files each task needs, in [`task-prompt.md`](task-prompt.md).
 
-## Part 2 — Show the live demo in your portfolio
+## Part 2 - Show the live demo in your portfolio
 
 The demo is published once, from this repository. Your portfolio only **points to it**: no code is
 copied, and every portfolio shows the latest version as soon as the repository republishes it.
@@ -124,21 +124,23 @@ Any page, with any settings, is a plain address:
 | `https://the-anomaly-guard.github.io/anomaly-guard/about.html`      | About the project  |
 
 Add settings to open a specific experiment, for example
-`…/events.html?seed=7&mode=stats&fpr=0.01&prevalence=0.1&size=1000&show=mistakes`: the threshold
-is calibrated for 1% false positives (`fpr=manual&threshold=2` sets it by hand instead).
+`.../events.html?seed=7&mode=stats&fpr=0.01&prevalence=0.1&size=1000&show=mistakes&at=end`: the
+threshold is calibrated for 1% false positives (`fpr=manual&threshold=2` sets it by hand
+instead). Without `at=end` the page opens empty and waits for **Start monitoring**, which replays
+the training, the calibration and then the test requests (live replay, E-08, ADR-011).
 
-### 2.2 Option A — a link (works everywhere)
+### 2.2 Option A - a link (works everywhere)
 
 ```html
 <a
   href="https://the-anomaly-guard.github.io/anomaly-guard/"
   target="_blank"
   rel="noopener noreferrer"
-  >The Anomaly Guard — live demo</a
+  >The Anomaly Guard - live demo</a
 >
 ```
 
-### 2.3 Option B — the demo inside your page
+### 2.3 Option B - the demo inside your page
 
 Plain HTML (also Jekyll, Hugo and similar):
 
@@ -146,7 +148,7 @@ Plain HTML (also Jekyll, Hugo and similar):
 <iframe
   class="anomaly-guard-demo"
   src="https://the-anomaly-guard.github.io/anomaly-guard/"
-  title="The Anomaly Guard — live demo"
+  title="The Anomaly Guard - live demo"
   loading="lazy"
   referrerpolicy="no-referrer"
   sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"
@@ -159,7 +161,7 @@ React (JSX):
 <iframe
   className="anomaly-guard-demo"
   src="https://the-anomaly-guard.github.io/anomaly-guard/"
-  title="The Anomaly Guard — live demo"
+  title="The Anomaly Guard - live demo"
   loading="lazy"
   referrerPolicy="no-referrer"
   sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"
@@ -232,9 +234,11 @@ GitHub Pages updates within a few minutes.
 ### 2.6 Check it
 
 Open your portfolio page and reload it without the cache (Ctrl+Shift+R). The frame must show the
-Overview with its numbers and charts. If it does not, see [Troubleshooting](#troubleshooting).
+Overview with the **Start monitoring** bar; press it and the requests start arriving (add `?at=end`
+to the frame's address to show the finished run instead). If it does not, see
+[Troubleshooting](#troubleshooting).
 
-## Part 3 — Using the demo from your portfolio
+## Part 3 - Using the demo from your portfolio
 
 Visitors use the demo inside your page exactly as on its own site:
 
@@ -250,13 +254,13 @@ Everything runs in the visitor's browser: no request leaves it and no payload is
 
 ## Troubleshooting
 
-| What you see                                                                | Cause                                    | Fix                                                      |
-| --------------------------------------------------------------------------- | ---------------------------------------- | -------------------------------------------------------- |
-| Blank frame; the browser console says "Refused to frame … `frame-src` …"    | your site's Content Security Policy      | step 2.4                                                 |
-| Blank frame; the console mentions `X-Frame-Options` or "refused to connect" | the address points to github.com         | use `https://the-anomaly-guard.github.io/anomaly-guard/` |
-| "404" inside the frame                                                      | a typo in the page name                  | open the address in a new tab and correct it             |
-| An old version                                                              | browser or GitHub Pages cache (≤ 10 min) | wait, then reload without the cache                      |
-| "Source code" does nothing                                                  | the sandbox does not allow new tabs      | add `allow-popups allow-popups-to-escape-sandbox`        |
+| What you see                                                                 | Cause                                    | Fix                                                      |
+| ---------------------------------------------------------------------------- | ---------------------------------------- | -------------------------------------------------------- |
+| Blank frame; the browser console says "Refused to frame ... `frame-src` ..." | your site's Content Security Policy      | step 2.4                                                 |
+| Blank frame; the console mentions `X-Frame-Options` or "refused to connect"  | the address points to github.com         | use `https://the-anomaly-guard.github.io/anomaly-guard/` |
+| "404" inside the frame                                                       | a typo in the page name                  | open the address in a new tab and correct it             |
+| An old version                                                               | browser or GitHub Pages cache (≤ 10 min) | wait, then reload without the cache                      |
+| "Source code" does nothing                                                   | the sandbox does not allow new tabs      | add `allow-popups allow-popups-to-escape-sandbox`        |
 
 ## For the repository owner: republishing the demo
 

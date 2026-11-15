@@ -1,69 +1,91 @@
 # @anomaly-guard/dashboard
 
 The project's console: a **multi-page**, SIEM-style web app (ADR-010) that runs the whole pipeline
-in the browser — generate the seeded traffic, learn normal behaviour from legitimate requests only,
-detect, evaluate — with no backend, so it is hosted on **GitHub Pages** (ADR-003).
+in the browser - generate the seeded traffic, learn normal behaviour from legitimate requests only,
+detect, evaluate - with no backend, so it is hosted on **GitHub Pages** (ADR-003).
 
 **Live:** <https://the-anomaly-guard.github.io/anomaly-guard/>. Showing it in a portfolio:
 [`docs/guides/team-guide.md`](../../docs/guides/team-guide.md).
 
 ## Pages
 
-| Page               | File              | Shows                                                                                                                              | Theme panels still to add                             |
-| ------------------ | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| Overview           | `index.html`      | key figures, alerts by severity and level, what raised them, top signatures                                                        | —                                                     |
-| Security events    | `events.html`     | every test request: verdict, level, reason, ground truth; filters and pages in the URL                                             | —                                                     |
-| Rules              | `rules.html`      | the signature rules and how often each matched                                                                                     | — (the ruleset itself is B-01)                        |
-| Statistical models | `models.html`     | the signals in the score; the learned model per endpoint and parameter                                                             | E-02: character classes (T1), lengths and scores (T2) |
-| Detection quality  | `evaluation.html` | the calibrated operating point, confusion matrix, rates and variants with Wilson intervals, ROC and AUC, McNemar between the modes | —                                                     |
-| Base rate          | `base-rate.html`  | Bayes and the base-rate fallacy, with a worked example                                                                             | E-03 (T4)                                             |
-| About              | `about.html`      | the project, the method, the themes                                                                                                | —                                                     |
+| Page               | File              | Shows                                                                                                                                                         | Theme panels still to add                             |
+| ------------------ | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Overview           | `index.html`      | key figures, alerts by severity, every request (a box that scrolls, newest or oldest first; alerts in red), alerts by level, what raised them, top signatures | -                                                     |
+| Security events    | `events.html`     | every test request: verdict, level, reason, ground truth; filters and pages in the URL                                                                        | -                                                     |
+| Rules              | `rules.html`      | the signature rules and how often each matched                                                                                                                | - (the ruleset itself is B-01)                        |
+| Statistical models | `models.html`     | the signals in the score; the learned model per endpoint and parameter                                                                                        | E-02: character classes (T1), lengths and scores (T2) |
+| Detection quality  | `evaluation.html` | the calibrated operating point, confusion matrix, rates and variants with Wilson intervals, ROC (its title opens it large) and AUC, McNemar between the modes | -                                                     |
+| Base rate          | `base-rate.html`  | Bayes and the base-rate fallacy, with a worked example                                                                                                        | E-03 (T4)                                             |
+| About              | `about.html`      | the project, the method, the themes, the team                                                                                                                 | -                                                     |
+
+Every page except Base rate and About opens empty and waits for **Start monitoring** (live replay,
+E-08, [ADR-011](../../docs/development/adr/ADR-011-live-replay.md)); add `at=end` to a
+link to open the finished run.
 
 ## How it is built
 
 ```
 dashboard/
 ├── *.html            one file per page
-├── partials/         header, settings bar, sidebar, footer — inserted by vite.config.js
+├── partials/         header, settings bar, run bar, sidebar, footer - inserted by vite.config.js
 ├── src/
 │   ├── styles.css    the whole look: tokens, layout, components, dark mode
-│   ├── shell.js      shared behaviour: settings from the URL, links, sidebar
+│   ├── shell.js      shared behaviour: settings from the URL, links, sidebar, column help
+│   ├── glossary.js   what every table column means: hover help on every header (tested)
+│   ├── replay.js     live replay: intro steps, then the test requests over time (pure, tested)
+│   ├── live.js       the run bar: buttons, progress, the position (`at`) in every link
 │   ├── state.js      settings ⇄ URL (pure, tested)
-│   ├── pipeline.js   dataset → train on legit traffic → threshold from the calibration split →
-│   │                 detect → metrics (pure, tested)
+│   ├── pipeline.js   dataset -> train on legit traffic -> threshold from the calibration split ->
+│   │                 detect -> metrics (pure, tested)
 │   ├── quality.js    Wilson intervals, results by variant, ROC and AUC per mode (pure, tested)
-│   ├── levels.js     alert level 0–15 and severity (pure, tested)
+│   ├── levels.js     alert level 0-15 and severity (pure, tested)
 │   ├── dom.js        DOM helpers: data goes in as text, never as HTML
 │   ├── ui.js         KPI tile, level badge
 │   ├── charts.js     Chart.js setup and helpers (bar, doughnut, ROC)
+│   ├── chart-modal.js  a chart opened large over the dimmed page (the ROC title opens one)
+│   ├── lines.js      hover points along the straight parts of a line (pure, tested)
 │   ├── assets/       icon
 │   └── pages/        one script per page
-├── test/             node:test for state, shell, levels, pipeline, quality
+├── test/             node:test for state, shell, levels, pipeline, quality, replay, glossary,
+│                     lines
 └── vite.config.js    page list, partials plugin, CSP
 ```
 
 - **Settings in the URL**: `?seed=42&mode=combined&fpr=0.01&threshold=1&prevalence=0.1&size=1000`.
   The same URL always shows the same experiment, every internal link keeps the settings, and
-  nothing is kept in browser storage — so the demo also works inside a sandboxed iframe.
+  nothing is kept in browser storage - so the demo also works inside a sandboxed iframe.
 - **The threshold is calibrated** (ADR-009, E-06): every page sets it on 2,000 legitimate
   calibration requests so that at most `fpr` of them raise an alert (5%, 2%, 1% or 0.5%; lower
   targets need more requests, n ≥ 10/α, and are in `npm run experiments`). `fpr=manual` uses the
   `threshold` setting instead. 5% of the legitimate test requests are hard cases.
+- **Live replay** (E-08, ADR-011): the experiment is computed at once, as before, and
+  then shown in order: training on the legitimate split, the threshold on the calibration split,
+  then the test requests arriving (20 s at normal speed). Each page draws itself for a frame from
+  `run.events.slice(0, frame.at)`; the last frame is the whole run, so the finished page has the
+  same numbers as without the replay. The position travels in the URL as `at` (absent: not
+  started; `end`: finished), so it carries on from page to page, also in a sandboxed iframe.
+  There is no shortcut to the result, and the line under the page title (seed, size, attack share)
+  stays concealed until the replay is done.
+- **No flash of the defaults**: the content stays hidden until `shell.js` has read the settings
+  from the URL (`body[data-ready]`), and the page draws the rest in the same task. Without it,
+  the default values written in the HTML (seed 42, 1,000 requests) would show for a moment on
+  every page change.
 - **Alert level** k means p ≤ 10^−k for a statistical alert; 15 means a signature matched. Severity:
-  low 0–1, medium 2–3, high 4–14, critical 15. For display only: the threshold decides the verdict.
+  low 0-1, medium 2-3, high 4-14, critical 15. For display only: the threshold decides the verdict.
 - **Security**: a strict Content Security Policy is added to every page at build time (no inline
   scripts or styles), and payloads are inserted as text only.
 
 ## Run, test, build
 
 ```bash
-npm run dev                                       # from the repo root → http://localhost:5173/
+npm run dev                                       # from the repo root -> http://localhost:5173/
 npm test                                          # includes test/*.test.js of this package
-npm run build                                     # → packages/dashboard/dist
-npm run preview --workspace @anomaly-guard/dashboard   # serve the build → http://localhost:4173/
+npm run build                                     # -> packages/dashboard/dist
+npm run preview --workspace @anomaly-guard/dashboard   # serve the build -> http://localhost:4173/
 ```
 
-Every page has its own address: `/events.html`, `/models.html`, …
+Every page has its own address: `/events.html`, `/models.html`, ...
 
 ## Adding your theme's chart
 
@@ -82,14 +104,21 @@ Every page has its own address: `/events.html`, `/models.html`, …
    ```
 
 2. In the page's script (`src/pages/<page>.js`), take the data from `runExperiment(state)` and draw
-   it: call `setupCharts()`, then `barChart(…)`, `rocChart(…)` or `new Chart(…)`. Register any
+   it: call `setupCharts()`, then `barChart(...)`, `rocChart(...)` or `new Chart(...)`. Register any
    other Chart.js component you need in `src/charts.js` (bars, doughnuts and lines are there).
-3. Keep the statistics in the pure packages (`core`, `evaluation`) with their tests: the page only
+   To follow the live replay, create the chart once and update it in the page's `render(frame)`
+   from the requests so far, `run.events.slice(0, frame.at)`, with `setChartData(...)`; a chart
+   drawn once shows the finished run from the start.
+   To let people open it large, give `chartModal(...)` (`src/chart-modal.js`) the button and a
+   function that draws the same chart on the modal's canvas, as the ROC does.
+3. A new table: add its column names to `COLUMN_HELP` in `src/glossary.js`, each with one short
+   sentence. Every header then explains itself on hover; a test fails while one is missing.
+4. Keep the statistics in the pure packages (`core`, `evaluation`) with their tests: the page only
    draws.
-4. No inline styles or scripts (the CSP blocks them); data goes into the page as text only (`h()`
+5. No inline styles or scripts (the CSP blocks them); data goes into the page as text only (`h()`
    in `src/dom.js`).
 
-## Publish to GitHub Pages (manual — no CI, ADR-005)
+## Publish to GitHub Pages (manual - no CI, ADR-005)
 
 The repository is public, so GitHub Free serves it. `dist/` is git-ignored, so it is pushed from a
 throwaway repository created inside it. From the repo root, on an up-to-date `main`, in bash (Git
@@ -107,7 +136,7 @@ rm -rf .git                          # drop the throwaway repository
 cd ../../..
 ```
 
-GitHub Pages is already set to **Deploy from a branch → `gh-pages` / `(root)`**; the new version is
+GitHub Pages is already set to **Deploy from a branch -> `gh-pages` / `(root)`**; the new version is
 online within a few minutes at <https://the-anomaly-guard.github.io/anomaly-guard/>. `gh-pages` keeps
 no history: each publish replaces it. (An automated GitHub Actions deploy is intentionally
 omitted; add it with a follow-up ADR if the team wants it.)

@@ -1,0 +1,35 @@
+<section class="runbar" data-runbar data-stage="idle" aria-label="Live monitor">
+  <div class="runbar-main">
+    <span class="runbar-dot" aria-hidden="true"></span>
+    <p class="runbar-status" data-run-status>Ready.</p>
+    <div class="runbar-actions">
+      <button class="btn btn-primary" type="button" data-run-start>Start monitoring</button>
+      <button class="btn" type="button" data-run-pause hidden>Pause</button>
+      <label class="runbar-speed" data-run-speed-box hidden>
+        Speed
+        <select data-run-speed>
+          <option value="0.25">Slow</option>
+          <option value="1" selected>Normal</option>
+          <option value="4">Fast</option>
+        </select>
+      </label>
+      <button class="btn" type="button" data-run-skip hidden>Skip to the end</button>
+      <button class="btn" type="button" data-run-replay hidden>Replay</button>
+    </div>
+  </div>
+  <ol class="runbar-steps">
+    <li data-step="training"><span aria-hidden="true">1</span>Training on legitimate requests</li>
+    <li data-step="calibration">
+      <span aria-hidden="true">2</span>Threshold on the calibration split
+    </li>
+    <li data-step="monitoring"><span aria-hidden="true">3</span>Monitoring the test requests</li>
+  </ol>
+  <progress
+    class="runbar-progress"
+    data-run-progress
+    max="1"
+    value="0"
+    aria-label="Progress of the current step"
+  ></progress>
+  <p class="visually-hidden" data-run-announce aria-live="polite"></p>
+</section>

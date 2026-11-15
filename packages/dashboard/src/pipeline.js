@@ -23,7 +23,7 @@ export const HARD_SHARE = 0.05;
  * @property {number} id          1-based position in the test split
  * @property {any} sample         `{ request, label, kind, variant }` from the dataset
  * @property {ReturnType<typeof detect>} result
- * @property {number} level       alert level 0–15 (src/levels.js)
+ * @property {number} level       alert level 0-15 (src/levels.js)
  * @property {boolean} alert      the detector flagged it
  * @property {boolean} attack     ground truth from the simulator (never seen by the detector)
  * @property {boolean} correct    alert === attack
@@ -75,11 +75,20 @@ export function runExperiment(state) {
     };
   });
 
+  return { state, dataset, model, ruleEngine, operating, events, ...summarise(events) };
+}
+
+/**
+ * Confusion matrix and metrics of some events: the whole test split, or the requests that have
+ * arrived so far in the live replay (E-08).
+ * @param {DashboardEvent[]} events
+ */
+export function summarise(events) {
   const cm = confusionMatrix(
     events.map((e) => e.alert),
     events.map((e) => e.attack),
   );
-  return { state, dataset, model, ruleEngine, operating, events, cm, metrics: metrics(cm) };
+  return { cm, metrics: metrics(cm) };
 }
 
 /**

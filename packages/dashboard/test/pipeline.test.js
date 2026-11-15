@@ -5,6 +5,7 @@ import { thresholdAtFpr } from '@anomaly-guard/evaluation';
 import {
   runExperiment,
   operatingPoint,
+  summarise,
   sourceOf,
   topPart,
   countBy,
@@ -30,7 +31,7 @@ test('runExperiment: trains on legitimate traffic only and scores the whole test
   assert.equal(tp + fp, run.events.filter((e) => e.alert).length);
 });
 
-test('runExperiment: every alert has a source, every non-alert none; levels stay in 0–15', () => {
+test('runExperiment: every alert has a source, every non-alert none; levels stay in 0-15', () => {
   for (const mode of ['combined', 'stats', 'rules']) {
     const run = runExperiment({ ...state, mode });
     for (const e of run.events) {
@@ -87,6 +88,16 @@ test('operatingPoint: a manual threshold, and rules mode without a threshold', (
       .calibrationFpr,
     rules.operating.calibrationFpr,
   );
+});
+
+test('summarise: the matrix of the first n requests (live replay, E-08) adds up to n', () => {
+  const run = runExperiment(state);
+  assert.deepEqual(summarise(run.events), { cm: run.cm, metrics: run.metrics });
+  for (const n of [0, 1, 37, state.size]) {
+    const { cm } = summarise(run.events.slice(0, n));
+    assert.equal(cm.tp + cm.fp + cm.tn + cm.fn, n);
+    assert.equal(cm.tp + cm.fp, run.events.slice(0, n).filter((e) => e.alert).length);
+  }
 });
 
 test('sourceOf: signature, statistics or both', () => {

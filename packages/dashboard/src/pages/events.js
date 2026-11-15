@@ -1,6 +1,7 @@
 // Security events: every analysed request with its verdict, alert level and reason, and the
-// simulator's ground truth to check it against. Filters and page numbers are plain links
-// (?show=…&page=…), like the rest of the multi-page app (ADR-010). Payloads are shown as text only.
+// simulator's ground truth to check it against, newest first. Filters and page numbers are plain
+// links (?show=...&page=...), like the rest of the multi-page app (ADR-010). The table fills up as the
+// live replay brings the requests in (E-08, ADR-011). Payloads are shown as text only.
 
 import { initShell } from '../shell.js';
 import { runExperiment, topPart } from '../pipeline.js';
@@ -8,6 +9,7 @@ import { severityOf } from '../levels.js';
 import { withState } from '../state.js';
 import { h, mount, fmt } from '../dom.js';
 import { levelBadge } from '../ui.js';
+import { initLive } from '../live.js';
 
 const PAGE_SIZE = 25;
 const COLUMNS = 8;
@@ -21,62 +23,89 @@ const FILTERS = {
 };
 
 const state = initShell();
-const { events } = runExperiment(state);
+const run = runExperiment(state);
+const { events } = run;
 const query = new URLSearchParams(location.search);
 const requested = query.get('show') ?? 'all';
 const show = Object.hasOwn(FILTERS, requested) ? requested : 'all';
-const rows = events.filter(FILTERS[show].keep);
-const pages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
-const page = clampPage(query.get('page'), pages);
-const first = (page - 1) * PAGE_SIZE;
-const shown = rows.slice(first, first + PAGE_SIZE);
 
-mount(
-  '#tabs',
-  Object.entries(FILTERS).map(([key, filter]) =>
-    h(
-      'a',
-      {
-        href: link({ show: key === 'all' ? null : key, page: null }),
-        'aria-current': key === show ? 'page' : null,
-      },
-      filter.label,
-      h('span', { class: 'count' }, fmt.int(events.filter(filter.keep).length)),
-    ),
-  ),
-);
+/** Events whose details are open: they stay open while new requests arrive. */
+const open = new Set();
+let drawn = ''; // the rows the table shows now: an unchanged page is not drawn again
 
-mount(
-  '#events-meta',
-  rows.length
-    ? `${fmt.int(first + 1)}–${fmt.int(first + shown.length)} of ${fmt.int(rows.length)}`
-    : 'No events',
-);
+initLive({ state, run, render });
 
-if (shown.length) mount('#events-body', shown.map(eventRows));
-else {
+/** @param {import('../replay.js').Frame} frame */
+function render(frame) {
+  const view = events.slice(0, frame.at).reverse(); // newest first, as in a SIEM
+  const rows = view.filter(FILTERS[show].keep);
+  const pages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+  const page = clampPage(query.get('page'), pages);
+  const first = (page - 1) * PAGE_SIZE;
+  const shown = rows.slice(first, first + PAGE_SIZE);
+
   mount(
-    '#events-body',
-    h('tr', {}, h('td', { colspan: COLUMNS, class: 'empty' }, 'No events match this filter.')),
+    '#tabs',
+    Object.entries(FILTERS).map(([key, filter]) =>
+      h(
+        'a',
+        {
+          href: link({ show: key === 'all' ? null : key, page: null }),
+          'aria-current': key === show ? 'page' : null,
+          'data-keep-live': true,
+        },
+        filter.label,
+        h('span', { class: 'count' }, fmt.int(view.filter(filter.keep).length)),
+      ),
+    ),
+  );
+
+  mount(
+    '#events-meta',
+    rows.length
+      ? `${fmt.int(first + 1)}-${fmt.int(first + shown.length)} of ${fmt.int(rows.length)} · ` +
+          'newest first'
+      : 'No events',
+  );
+
+  const key = `${frame.stage === 'idle'}:${shown.map((e) => e.id).join(',')}`;
+  if (key !== drawn) {
+    drawn = key;
+    if (shown.length) mount('#events-body', shown.map(eventRows));
+    else {
+      let text = 'No events match this filter.';
+      if (frame.stage === 'idle') {
+        text = 'No traffic yet. Press Start monitoring to watch the requests arrive.';
+      } else if (view.length === 0) text = 'Waiting for the first request...';
+      mount('#events-body', h('tr', {}, h('td', { colspan: COLUMNS, class: 'empty' }, text)));
+    }
+  }
+
+  mount(
+    '#pager',
+    h('span', {}, `Page ${page} of ${pages}`),
+    h(
+      'span',
+      { class: 'pager-links' },
+      page > 1
+        ? h(
+            'a',
+            { href: link({ page: page - 1 > 1 ? page - 1 : null }), 'data-keep-live': true },
+            '<- Previous',
+          )
+        : h('span', { class: 'is-disabled' }, '<- Previous'),
+      page < pages
+        ? h('a', { href: link({ page: page + 1 }), 'data-keep-live': true }, 'Next ->')
+        : h('span', { class: 'is-disabled' }, 'Next ->'),
+    ),
   );
 }
 
-mount(
-  '#pager',
-  h('span', {}, `Page ${page} of ${pages}`),
-  h(
-    'span',
-    { class: 'pager-links' },
-    page > 1
-      ? h('a', { href: link({ page: page - 1 > 1 ? page - 1 : null }) }, '← Previous')
-      : h('span', { class: 'is-disabled' }, '← Previous'),
-    page < pages
-      ? h('a', { href: link({ page: page + 1 }) }, 'Next →')
-      : h('span', { class: 'is-disabled' }, 'Next →'),
-  ),
-);
-
-/** A link to this page with the current settings and filter. @param {Record<string, any>} extra */
+/**
+ * A link to this page with the current settings and filter; src/live.js adds the replay's
+ * position (`data-keep-live`).
+ * @param {Record<string, any>} extra
+ */
 function link(extra) {
   return withState('./events.html', state, { show: show === 'all' ? null : show, ...extra });
 }
@@ -95,20 +124,25 @@ function eventRows(e) {
     .map(([name, value]) => `${name}=${value}`)
     .join('  ');
 
+  const isOpen = open.has(e.id);
   const toggle = h(
     'button',
     {
       class: 'row-toggle',
       type: 'button',
-      'aria-expanded': 'false',
+      'aria-expanded': String(isOpen),
       'aria-controls': detailId,
       'aria-label': `Details of event ${e.id}`,
     },
     h('span', { class: 'chevron', 'aria-hidden': 'true' }),
   );
+  const classes = ['event-row'];
+  if (e.alert) classes.push('is-alert');
+  if (!e.correct) classes.push('is-mistake');
+  if (isOpen) classes.push('is-open');
   const row = h(
     'tr',
-    { class: e.correct ? 'event-row' : 'event-row is-mistake' },
+    { class: classes.join(' ') },
     h('td', {}, toggle),
     h('td', { class: 'num' }, String(e.id)),
     h('td', { class: 'mono nowrap' }, `${request.method} ${request.path}`),
@@ -126,15 +160,17 @@ function eventRows(e) {
   );
   const detail = h(
     'tr',
-    { class: 'event-detail', id: detailId, hidden: true },
+    { class: 'event-detail', id: detailId, hidden: !isOpen },
     h('td', { colspan: COLUMNS }, detailView(e)),
   );
 
   const flip = () => {
-    const open = detail.hidden;
-    detail.hidden = !open;
-    toggle.setAttribute('aria-expanded', String(open));
-    row.classList.toggle('is-open', open);
+    const opening = detail.hidden;
+    detail.hidden = !opening;
+    toggle.setAttribute('aria-expanded', String(opening));
+    row.classList.toggle('is-open', opening);
+    if (opening) open.add(e.id);
+    else open.delete(e.id);
   };
   toggle.addEventListener('click', (event) => {
     event.stopPropagation();
@@ -158,7 +194,7 @@ function detection(e) {
     const top = topPart(result.detail.parts);
     return top ? `${top.name} · s = ${fmt.score(top.score)}` : 'statistics';
   }
-  return h('span', { class: 'muted' }, '—');
+  return h('span', { class: 'muted' }, '-');
 }
 
 /** The simulator's label, and whether the detector got it wrong. @param {import('../pipeline.js').DashboardEvent} e */

@@ -18,16 +18,16 @@ anomaly-guard/
 ├── docs/
 │   ├── project-brief.md      # The assignment (scope)
 │   ├── development/          # standards, project-structure, tech-stack, adr/
-│   ├── statistics/           # methods.md — the maths
-│   ├── planning/             # backlog.md — task board
+│   ├── statistics/           # methods.md - the maths
+│   ├── planning/             # backlog.md - task board
 │   └── report/               # the report, one chapter per theme (E-05)
 └── packages/
     ├── core/                 # shared engine (pure JS)
     ├── traffic/              # traffic generator + dataset
     ├── evaluation/           # metrics, ROC/AUC, base-rate
     ├── server/               # Express live monitor (Node only)
-    ├── dashboard/            # multi-page SIEM-style console (→ GitHub Pages, ADR-010)
-    └── experiments/          # Node-only multi-seed runner → results/ (D-04)
+    ├── dashboard/            # multi-page SIEM-style console (-> GitHub Pages, ADR-010)
+    └── experiments/          # Node-only multi-seed runner -> results/ (D-04)
 ```
 
 **Rules:**
@@ -48,7 +48,7 @@ anomaly-guard/
                     │           │           │
         ┌───────────┴──┐   ┌────┴─────┐   ┌─┴──────────────┐
         │   traffic    │   │  server  │   │   dashboard    │
-        │ (gen+dataset)│   │ (Express)│   │ (Vite→Pages)   │
+        │ (gen+dataset)│   │ (Express)│   │ (Vite->Pages)   │
         └───────▲──────┘   └──────────┘   └───────▲────────┘
                 │                                 │
                 └────────────┐      ┌─────────────┘
@@ -70,10 +70,10 @@ anomaly-guard/
 - Purity is enforced by ESLint (`eslint.config.js`): in `core`, `traffic` and `evaluation` `src/`,
   browser globals, Node globals and modules, `fetch` and `Math.random` are errors. In
   `experiments/src` the network and `Math.random` are errors too.
-- A workspace **never** reaches into another workspace's `src/` internals — import from its
+- A workspace **never** reaches into another workspace's `src/` internals - import from its
   package entry (`@anomaly-guard/<name>`).
 
-The work is owned by statistical theme (T1–T4, [backlog](../planning/backlog.md) §8), not by
+The work is owned by statistical theme (T1-T4, [backlog](../planning/backlog.md) §8), not by
 workspace: a theme spans several workspaces, and the **Themes** column says who works where.
 
 | Workspace     | Area             | Themes                                                  | Key exports (planned)                                                                                                                                          |
@@ -93,7 +93,7 @@ core/
 ├── src/
 │   ├── index.js              # public surface (re-exports)
 │   ├── features/
-│   │   └── extract.js        # request → flat numeric feature record
+│   │   └── extract.js        # request -> flat numeric feature record
 │   ├── rules/
 │   │   └── engine.js         # signature / regex rule engine
 │   ├── stats/                # one file per signal
@@ -104,13 +104,14 @@ core/
 │   │   ├── outliers.js       # (to create, C-05) IQR / MAD, Mahalanobis
 │   │   └── anomaly.js        # scoreRequest: the max of the signals (C-06)
 │   └── detector/
-│       └── detect.js         # combine rule hits + stat scores → explained verdict
+│       └── detect.js         # combine rule hits + stat scores -> explained verdict
 └── test/                     # one test file per source file, so people rarely edit the same file
     ├── entropy.test.js
     ├── features.test.js
     ├── rules.test.js
     ├── model.test.js
-    ├── length.test.js        # chisquare.test.js comes with C-03
+    ├── length.test.js
+    ├── chisquare.test.js
     ├── anomaly.test.js
     └── detect.test.js
 ```
@@ -120,13 +121,13 @@ core/
 - **`stats/*`** functions are pure and return scores on the `−log10(p)` scale (ADR-007);
   thresholds are applied by callers. Each signal imports the shared conventions from `model.js`,
   and only `anomaly.js` imports the signals, so there are no import cycles.
-- **`detector/detect.js`** returns `{ verdict, score, reasons, … }`: one continuous score per mode
-  (so the ROC can sweep every configuration) and `reasons` naming the rule or signal that fired —
+- **`detector/detect.js`** returns `{ verdict, score, reasons, ... }`: one continuous score per mode
+  (so the ROC can sweep every configuration) and `reasons` naming the rule or signal that fired -
   the dashboard needs this to explain a decision.
 
 ## 4. Runtime boundary (why `core` is pure)
 
-The dashboard is hosted on **GitHub Pages**, which serves static files only — no Node process
+The dashboard is hosted on **GitHub Pages**, which serves static files only - no Node process
 runs there. So the whole detection pipeline has to be able to run **in the browser**. Keeping
 `core` (and `traffic`, `evaluation`) free of Node-only APIs is what makes the Pages demo
 possible and what lets `node:test` exercise the same code. The `server` workspace is the only

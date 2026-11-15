@@ -1,7 +1,7 @@
 // Experiment settings live in the page URL (ADR-010), e.g.
 //   ?seed=42&mode=combined&fpr=0.01&threshold=1&prevalence=0.1&size=1000
-// Every page of the multi-page app rebuilds the same experiment from them (same seed → same data,
-// standards §3), links carry them from page to page, and nothing needs browser storage — which a
+// Every page of the multi-page app rebuilds the same experiment from them (same seed -> same data,
+// standards §3), links carry them from page to page, and nothing needs browser storage - which a
 // sandboxed iframe in a portfolio does not have. Pure: no DOM, tested in Node.
 
 /** @typedef {'combined' | 'stats' | 'rules'} Mode */
@@ -13,7 +13,7 @@
  * @property {number | 'manual'} fpr  target false-positive rate: the threshold is calibrated for it
  *   on legitimate requests (ADR-009, E-06); 'manual' uses `threshold` instead
  * @property {number} threshold   the manual threshold, on the −log10(p) scale (ADR-007)
- * @property {number} prevalence  share of attacks in the test split, 0–1
+ * @property {number} prevalence  share of attacks in the test split, 0-1
  * @property {number} size        number of test requests
  */
 
@@ -100,6 +100,22 @@ export function toQuery(state) {
   const q = new URLSearchParams();
   for (const key of STATE_KEYS) q.set(key, String(state[key]));
   return q.toString();
+}
+
+/**
+ * The position of the live replay (E-08, ADR-011), from the `at` page parameter: how
+ * many test requests have arrived. A page parameter like `show`, not a setting: the same settings
+ * give the same experiment whatever `at` says, and only how much of it is shown changes.
+ * @param {string | null} raw  absent: not started, the page opens empty; `end`: every request
+ * @param {number} size        test requests in the experiment
+ * @returns {number | null}    null when absent or invalid; otherwise 0-size
+ */
+export function readAt(raw, size) {
+  if (raw === null || raw.trim() === '') return null;
+  if (raw === 'end') return size;
+  const n = Number(raw);
+  if (!Number.isInteger(n) || n < 0) return null;
+  return Math.min(n, size);
 }
 
 /**

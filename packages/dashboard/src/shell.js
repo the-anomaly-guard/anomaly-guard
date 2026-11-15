@@ -1,8 +1,10 @@
 // What every page shares (ADR-010): read the experiment settings from the URL, keep them in every
 // internal link, fill the settings form, mark the current page and open the sidebar on narrow
-// screens. Works inside a sandboxed iframe: no storage, no access to the embedding page.
+// screens. Every table header gets its explanation from the glossary (src/glossary.js). Works
+// inside a sandboxed iframe: no storage, no access to the embedding page.
 
 import { parseState, toQuery, withState } from './state.js';
+import { watchHeaders } from './glossary.js';
 
 /**
  * Wire up the shared header, settings bar and sidebar.
@@ -11,9 +13,16 @@ import { parseState, toQuery, withState } from './state.js';
 export function initShell() {
   const state = parseState(location.search);
   const page = document.body.dataset.page;
+  watchHeaders(); // hover explanations on every column, also of the tables drawn later
+  // The live replay's position (E-08, ADR-011) goes on to the next page as it is; on
+  // the pages with the run bar, src/live.js keeps it up to date while the replay runs.
+  const at = new URLSearchParams(location.search).get('at');
 
   for (const link of document.querySelectorAll('a[data-nav], a[data-keep-state]')) {
-    link.setAttribute('href', withState(link.getAttribute('href') ?? './index.html', state));
+    link.setAttribute(
+      'href',
+      withState(link.getAttribute('href') ?? './index.html', state, { at }),
+    );
     if (link instanceof HTMLElement && link.dataset.nav === page) {
       link.setAttribute('aria-current', 'page');
     }
@@ -63,6 +72,9 @@ export function initShell() {
   for (const target of document.querySelectorAll('[data-experiment]')) {
     target.textContent = describe(state);
   }
+  // Show the content (styles.css): the settings are in place, and the page script draws the rest
+  // in this same task, before the browser paints again.
+  document.body.dataset.ready = '';
   return state;
 }
 
@@ -88,7 +100,7 @@ export function describe(state) {
 }
 
 /**
- * A rate as a short percentage: 0.01 → '1%', 0.005 → '0.5%'.
+ * A rate as a short percentage: 0.01 -> '1%', 0.005 -> '0.5%'.
  * @param {number} rate
  */
 export function percent(rate) {
