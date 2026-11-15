@@ -95,6 +95,29 @@ test('POST /ingest rejects malformed bodies with 400', async () => {
   assert.equal(notJson.status, 400);
 });
 
+test('POST /ingest refuses a body that is not JSON (415): no verdict on an empty request', async () => {
+  const plain = await fetch(`${base}/ingest`, { method: 'POST', body: '{"path":"/search"}' });
+  assert.equal(plain.status, 415);
+  assert.match((await plain.json()).error, /application\/json/);
+  const empty = await fetch(`${base}/ingest`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+  });
+  assert.equal(empty.status, 415);
+});
+
+test('every answer is JSON: 405 for other methods on /ingest, 404 elsewhere, no X-Powered-By', async () => {
+  const get = await fetch(`${base}/ingest`);
+  assert.equal(get.status, 405);
+  assert.equal(get.headers.get('allow'), 'POST');
+  assert.ok((await get.json()).error);
+  const missing = await fetch(`${base}/nope`);
+  assert.equal(missing.status, 404);
+  assert.match(missing.headers.get('content-type'), /application\/json/);
+  assert.ok((await missing.json()).error);
+  assert.equal((await fetch(`${base}/health`)).headers.get('x-powered-by'), null);
+});
+
 test('parseIngest: defaults and normalisation', () => {
   assert.deepEqual(parseIngest({}), {
     request: { method: 'GET', path: '/', params: {} },

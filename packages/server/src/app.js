@@ -60,7 +60,16 @@ export function createApp({
   };
 
   const app = express();
-  app.use(express.json({ limit: '64kb' }));
+  app.disable('x-powered-by'); // nothing to advertise about the stack
+  // `verify` sees the raw body only when there is a JSON one: its size tells an empty body apart.
+  app.use(
+    express.json({
+      limit: '64kb',
+      verify: (req, _res, raw) => {
+        /** @type {any} */ (req).bodyBytes = raw.length;
+      },
+    }),
+  );
   // JSON has no Infinity: a rule hit in combined mode scores +Infinity (ADR-007), sent as "Infinity".
   app.set('json replacer', (_key, value) => (value === Infinity ? 'Infinity' : value));
 
@@ -69,11 +78,19 @@ export function createApp({
   });
 
   /**
-   * POST /ingest — body: { method?, path?, params?, mode?, threshold? }. Values are already
+   * POST /ingest - body: { method?, path?, params?, mode?, threshold? }. Values are already
    * URL-decoded (ADR-006). The threshold defaults to the calibrated one for the mode; a request
    * may pass its own (−log10 p scale). Returns the detector verdict, never acts on the payload.
    */
   app.post('/ingest', (req, res) => {
+    // Without a JSON body (no JSON content type, or nothing in it) express.json() leaves req.body
+    // as {}, which would be analysed as an empty GET / and answered "legit": a verdict on a request
+    // nobody sent. Refuse it instead. An explicit {} is a request with every default.
+    if (!req.is('application/json') || !(/** @type {any} */ (req).bodyBytes > 0)) {
+      return res
+        .status(415)
+        .json({ error: 'send a JSON body with Content-Type: application/json' });
+    }
     const parsed = parseIngest(req.body);
     if ('error' in parsed) return res.status(400).json({ error: parsed.error });
     const { request, mode, threshold: requested } = parsed;
@@ -89,13 +106,23 @@ export function createApp({
     });
   });
 
+  // Every answer is JSON, errors included: no Express HTML page (and no stack trace in it).
+  app.all('/ingest', (_req, res) => {
+    res.set('Allow', 'POST').status(405).json({ error: 'use POST /ingest' });
+  });
+  app.use((_req, res) => {
+    res.status(404).json({ error: 'not found: the routes are GET /health and POST /ingest' });
+  });
+
   // Malformed JSON and oversized bodies are the client's fault: answer 400/413, not 500.
-  app.use((err, _req, res, next) => {
+  // eslint-disable-next-line no-unused-vars -- Express tells error handlers by their 4 arguments
+  app.use((err, _req, res, _next) => {
     if (err?.type === 'entity.parse.failed')
       return res.status(400).json({ error: 'body is not valid JSON' });
     if (err?.type === 'entity.too.large')
       return res.status(413).json({ error: 'body larger than 64kb' });
-    return next(err);
+    console.error(err);
+    return res.status(500).json({ error: 'internal error' });
   });
 
   return { app, model, calibration: calibrationInfo };
@@ -118,7 +145,7 @@ export function parseIngest(body) {
     return { error: 'path must be a string that starts with "/" (at most 2048 characters)' };
   }
   if (params === null || typeof params !== 'object' || Array.isArray(params)) {
-    return { error: 'params must be an object of name → string value' };
+    return { error: 'params must be an object of name -> string value' };
   }
   const entries = Object.entries(params);
   if (entries.length > MAX_PARAMS) return { error: `at most ${MAX_PARAMS} parameters` };
