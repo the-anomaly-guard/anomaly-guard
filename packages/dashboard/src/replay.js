@@ -263,7 +263,7 @@ export function statusText(run, frame, alerts) {
     );
   }
   if (frame.stage === 'done') {
-    return `Done: ${total} test requests analysed, ${fmt.int(alerts)} alerts.`;
+    return `Done: ${total} test requests analysed, ${fmt.count(alerts, 'alert')}.`;
   }
   const paused = frame.stage === 'paused' ? ' Paused.' : '';
   if (frame.step === 'training') {
@@ -278,6 +278,6 @@ export function statusText(run, frame, alerts) {
   }
   return (
     `Step 3 of 3 · Monitoring: ${fmt.int(frame.at)} of ${total} test requests, ` +
-    `${fmt.int(alerts)} alerts.${paused}`
+    `${fmt.count(alerts, 'alert')}.${paused}`
   );
 }

@@ -57,6 +57,12 @@ export function mount(selector, ...children) {
 export const fmt = {
   /** @param {number} n */
   int: (n) => n.toLocaleString('en-US'),
+  /**
+   * A count and its noun, singular for one: "1 alert", "2 alerts".
+   * @param {number} n
+   * @param {string} noun  singular, with a regular plural in -s
+   */
+  count: (n, noun) => `${n.toLocaleString('en-US')} ${n === 1 ? noun : `${noun}s`}`,
   /** @param {number} x  a share in 0-1 */
   pct: (x) => `${(x * 100).toFixed(1)}%`,
   /** @param {number} s  a −log10(p) score; +Infinity is a rule hit in combined mode */

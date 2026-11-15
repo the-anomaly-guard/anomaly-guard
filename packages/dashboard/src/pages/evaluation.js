@@ -279,7 +279,7 @@ function drawMatrix(frame, cm, f1, arrived) {
           'tr',
           {},
           h('th', { scope: 'row' }, `Legitimate (${fmt.int(legit)})`),
-          h('td', { class: 'num is-bad' }, `${fmt.int(cm.fp)} false alarms`),
+          h('td', { class: 'num is-bad' }, fmt.count(cm.fp, 'false alarm')),
           h('td', { class: 'num' }, `${fmt.int(cm.tn)} passed`),
           rateCell('FPR', rates.fpr),
         ),
@@ -288,7 +288,11 @@ function drawMatrix(frame, cm, f1, arrived) {
   );
 
   const alarms = cm.tp + cm.fp;
-  let note = `Of the ${fmt.int(alarms)} alerts, ${fmt.int(cm.tp)} are attacks: precision ${value(rates.precision)}.`;
+  const precision = `precision ${value(rates.precision)}`;
+  let note =
+    alarms === 1
+      ? `The one alert ${cm.tp === 1 ? 'is an attack' : 'is a false alarm'}: ${precision}.`
+      : `Of the ${fmt.int(alarms)} alerts, ${fmt.int(cm.tp)} ${cm.tp === 1 ? 'is an attack' : 'are attacks'}: ${precision}.`;
   if (arrived === 0) {
     note = frame.stage === 'idle' ? 'No traffic yet.' : 'Waiting for the first request...';
   } else if (alarms === 0) note = 'No alert at this threshold.';
