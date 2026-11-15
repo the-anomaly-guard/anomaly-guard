@@ -79,43 +79,43 @@
 | ID   | Task                                                                                                                                                   | Theme | Depends on | Status           |
 | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----- | ---------- | ---------------- |
 | B-01 | Rule engine: signatures for the **canonical** families only, written without looking at obfuscated/novel payloads (ADR-006); keep "which rule hit"     | T1    | F-05       | Done             |
-| B-02 | Express monitor: threshold from a legit-only calibration batch at startup (`thresholdAtFpr`, D-06) instead of the fixed placeholder; validate the body | T3    | D-06       | Ready (baseline) |
+| B-02 | Express monitor: threshold from a legit-only calibration batch at startup (`thresholdAtFpr`, D-06) instead of the fixed placeholder; validate the body | T3    | D-06       | Done             |
 | B-03 | Request log + verdict stream for the dashboard                                                                                                         | —     | B-02       | Cut              |
 
 ## 5. C — Statistical models (`core/stats`, `core/detector`)
 
 | ID   | Task                                                                                                                                                                                                                                         | Theme | Depends on | Status           |
 | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- | ---------- | ---------------- |
-| C-03 | **Chi-square score** in `stats/chisquare.js` (ADR-008, methods §4): Laplace-smoothed expected counts, df = 6, survival function in log space, score −log10(p), worst parameter; known-answer tests (χ² = 12.592 → p ≈ 0.05) and monotonicity | T1    | F-05       | Ready            |
+| C-03 | **Chi-square score** in `stats/chisquare.js` (ADR-008, methods §4): Laplace-smoothed expected counts, df = 6, survival function in log space, score −log10(p), worst parameter; known-answer tests (χ² = 12.592 → p ≈ 0.05) and monotonicity | T1    | F-05       | Done             |
 | C-04 | Length model in `stats/length.js`: Chebyshev baseline in place → decide the policy for unseen (path, param) pairs, try a log-transform or robust version, compare with the prediction interval                                               | T2    | F-05       | Ready (baseline) |
 | C-05 | Outliers in `stats/outliers.js`: IQR / MAD; Mahalanobis with a regularised covariance — each returns a tail probability → score                                                                                                              | T2    | F-05       | Ready            |
-| C-06 | Add C-03/C-04/C-05 to `scoreRequest` (`stats/anomaly.js`; max of the parts, ADR-007) and the model fields they need                                                                                                                          | T2    | C-03       | Blocked          |
+| C-06 | Add C-03/C-04/C-05 to `scoreRequest` (`stats/anomaly.js`; max of the parts, ADR-007) and the model fields they need                                                                                                                          | T2    | C-03       | Ready            |
 | C-07 | Detector explanations: which signal, which parameter, which probability (continuous score per mode already in place)                                                                                                                         | T2    | C-06       | Blocked          |
-| C-08 | For the report, legit vs attack over the whole test set: chi-square test of homogeneity on the seven classes (methods §4b), and the entropy distributions of the two groups (does entropy alone separate them?)                              | T1    | C-03       | Blocked          |
+| C-08 | For the report, legit vs attack over the whole test set: chi-square test of homogeneity on the seven classes (methods §4b), and the entropy distributions of the two groups (does entropy alone separate them?)                              | T1    | C-03       | Ready            |
 
 ## 6. D — Evaluation (`packages/evaluation`, `packages/experiments`)
 
-| ID   | Task                                                                                                                                                                                                                 | Theme | Depends on       | Status           |
-| ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- | ---------------- | ---------------- |
-| D-01 | Confusion matrix + precision/recall/F1/FPR/FNR (+ tests)                                                                                                                                                             | T3    | F-01             | Done             |
-| D-02 | Base-rate / PPV helper (Bayes) (+ test)                                                                                                                                                                              | T4    | D-01             | Done             |
-| D-03 | ROC curve + AUC (threshold sweep; handles ties and `+Infinity` scores)                                                                                                                                               | T3    | D-01             | Ready            |
-| D-04 | Experiment runner in a new Node-only workspace `packages/experiments`: ≥ 20 seeds; rules / stats / combined; per-variant breakdown; at target FPR 1% and 0.1%, plus ROC/AUC; writes `results/` with seeds and commit | T3    | D-03, D-05, D-06 | Ready (baseline) |
-| D-05 | Confidence intervals: `wilsonInterval` for rates; seeded bootstrap for AUC (methods §6)                                                                                                                              | T3    | D-01             | Ready            |
-| D-06 | `thresholdAtFpr(legitScores, targetFpr)` on the calibration split (ADR-009); tests with ties                                                                                                                         | T3    | D-01             | Ready            |
-| D-07 | Paired comparison of two modes on the same test requests (e.g. stats vs combined): McNemar's test on the requests where only one of the two is right                                                                 | T3    | D-04             | Proposed         |
+| ID   | Task                                                                                                                                                                                                                 | Theme | Depends on       | Status |
+| ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- | ---------------- | ------ |
+| D-01 | Confusion matrix + precision/recall/F1/FPR/FNR (+ tests)                                                                                                                                                             | T3    | F-01             | Done   |
+| D-02 | Base-rate / PPV helper (Bayes) (+ test)                                                                                                                                                                              | T4    | D-01             | Done   |
+| D-03 | ROC curve + AUC (threshold sweep; handles ties and `+Infinity` scores)                                                                                                                                               | T3    | D-01             | Done   |
+| D-04 | Experiment runner in a new Node-only workspace `packages/experiments`: ≥ 20 seeds; rules / stats / combined; per-variant breakdown; at target FPR 1% and 0.1%, plus ROC/AUC; writes `results/` with seeds and commit | T3    | D-03, D-05, D-06 | Done   |
+| D-05 | Confidence intervals: `wilsonInterval` for rates; seeded bootstrap for AUC (methods §6)                                                                                                                              | T3    | D-01             | Done   |
+| D-06 | `thresholdAtFpr(legitScores, targetFpr)` on the calibration split (ADR-009); tests with ties                                                                                                                         | T3    | D-01             | Done   |
+| D-07 | Paired comparison of two modes on the same test requests (e.g. stats vs combined): McNemar's test on the requests where only one of the two is right                                                                 | T3    | D-04             | Done   |
 
 ## 7. E — Dashboard & report (`packages/dashboard`, `docs/`)
 
-| ID   | Task                                                                                                                                                                                                               | Theme      | Depends on       | Status          |
-| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- | ---------------- | --------------- |
-| E-01 | Dashboard boot (Vite), runs the pipeline client-side, shows a verdict table with the variant                                                                                                                       | shared     | F-05             | Done (baseline) |
-| E-02 | Charts (Chart.js), one per theme, in the placeholders of the console (ADR-010): character classes legit vs attack (T1) and lengths and scores legit vs attack (T2) on `models.html`, ROC (T3) on `evaluation.html` | T1, T2, T3 | E-01 (ROC: D-03) | Ready           |
-| E-03 | Base-rate explainer on `base-rate.html`: PPV vs prevalence at the measured TPR and FPR (Bayes)                                                                                                                     | T4         | E-01, D-02       | Ready           |
-| E-04 | GitHub Pages publish: <https://the-anomaly-guard.github.io/anomaly-guard/> (procedure in the dashboard README)                                                                                                     | anyone     | E-01             | Done            |
-| E-05 | Final report: one chapter per theme; introduction, method overview, conclusions and limitations written together; cite Kruegel & Vigna 2003; **per-member contribution**                                           | all        | D-04             | Blocked         |
-| E-06 | On `evaluation.html`: target-FPR control (threshold from the calibration split via D-06), confusion matrix and per-variant results table                                                                           | T3         | D-06             | Blocked         |
-| E-07 | Multi-page, SIEM-style console (ADR-010): seven pages, settings in the URL, alert levels, CSP, placeholders for the theme charts; team guide for access and portfolios (`docs/guides/team-guide.md`)               | shared     | E-01             | Done            |
+| ID   | Task                                                                                                                                                                                                                                | Theme      | Depends on       | Status          |
+| ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | ---------------- | --------------- |
+| E-01 | Dashboard boot (Vite), runs the pipeline client-side, shows a verdict table with the variant                                                                                                                                        | shared     | F-05             | Done (baseline) |
+| E-02 | Charts (Chart.js), one per theme, in the placeholders of the console (ADR-010): character classes legit vs attack (T1) and lengths and scores legit vs attack (T2) on `models.html`, ROC (T3) on `evaluation.html` (done with E-06) | T1, T2, T3 | E-01 (ROC: D-03) | Ready           |
+| E-03 | Base-rate explainer on `base-rate.html`: PPV vs prevalence at the measured TPR and FPR (Bayes)                                                                                                                                      | T4         | E-01, D-02       | Ready           |
+| E-04 | GitHub Pages publish: <https://the-anomaly-guard.github.io/anomaly-guard/> (procedure in the dashboard README)                                                                                                                      | anyone     | E-01             | Done            |
+| E-05 | Final report: one chapter per theme; introduction, method overview, conclusions and limitations written together; cite Kruegel & Vigna 2003; **per-member contribution**                                                            | all        | D-04             | In progress     |
+| E-06 | On `evaluation.html`: target-FPR control (threshold from the calibration split via D-06), confusion matrix and per-variant results table                                                                                            | T3         | D-06             | Done            |
+| E-07 | Multi-page, SIEM-style console (ADR-010): seven pages, settings in the URL, alert levels, CSP, placeholders for the theme charts; team guide for access and portfolios (`docs/guides/team-guide.md`)                                | shared     | E-01             | Done            |
 
 ## 8. Work split by statistical theme
 
@@ -124,7 +124,7 @@ member owns one theme end to end — its functions and tests, its dashboard char
 of the report — in whatever package the code lives. Each theme is one person's documented
 contribution for the individual grade.
 
-**T1 — Character distributions and chi-square** · member: _…_
+**T1 — Character distributions and chi-square** · member: Andrea Sangiovanni (`Sangioo`)
 
 - _Question:_ is the mix of characters in a value normal for that parameter?
 - _Tasks:_ C-03, B-01, C-08; chart: character classes, legit vs attack (E-02).
@@ -143,7 +143,7 @@ contribution for the individual grade.
 **T3 — Evaluation and uncertainty** · member: Nicholas Arcari (`Nicholas-Arcari`)
 
 - _Question:_ how often is the detector wrong, and how sure are we of those numbers?
-- _Tasks:_ D-06, D-03, D-05, D-04, B-02, E-06, and D-07 if the group agrees; charts: ROC (E-02),
+- _Tasks:_ D-06, D-03, D-05, D-04, B-02, E-06, and D-07 (agreed by the group); charts: ROC (E-02),
   confusion matrix (E-06).
 - _Statistics:_ confusion matrix and error rates; empirical quantiles (the threshold at a target
   FPR); ROC/AUC and its link to the Mann–Whitney statistic; the Wilson interval for proportions;

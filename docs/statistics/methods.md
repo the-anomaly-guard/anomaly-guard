@@ -173,7 +173,7 @@ C-04 may compare the two (on raw and log-transformed lengths) and must decide ho
 never seen in training (Kruegel & Vigna treat an unexpected attribute as anomalous in itself).
 Confidence intervals proper are used on the evaluation metrics (§6).
 
-## 4. Chi-square score on the character distribution — `stats/chisquare.js` (stub, C-03)
+## 4. Chi-square score on the character distribution — `stats/chisquare.js` (implemented, C-03)
 
 The heart of the project (Kruegel & Vigna 2003, adapted in ADR-008). For one parameter value with
 `N` characters, `O_i` is the observed count of class `i`. The expected probabilities come from the
@@ -237,7 +237,7 @@ Use it when single features overlap but the _combination_ is unusual. Drop const
 regularise (`S + λI`) before inverting: on legitimate traffic some features never vary, which
 makes `S` singular.
 
-## 6. Evaluation — `packages/evaluation` (metrics implemented; D-03, D-05, D-06 stubs)
+## 6. Evaluation — `packages/evaluation`, `packages/experiments` (implemented)
 
 From a labelled test set and scores, at a threshold `t` (predict "attack" when `score ≥ t`):
 
@@ -249,15 +249,36 @@ confusion matrix:            metrics:
                                      F1 = 2·P·R / (P + R)
 ```
 
-- **Choosing `t` (ADR-009, D-06).** Never by looking at test results. Score the legitimate-only
-  **calibration** split and take the smallest `t` that at most a fraction `targetFpr` of those
-  scores reach (e.g. 1%: with 1000 calibration requests, about the 10th highest score). Then
-  score the test set once with that `t`.
-- **ROC / AUC (D-03):** sweep `t` over all scores, plot TPR vs. FPR; AUC is the area under it (and
-  the probability that a random attack scores above a random legit request). In `combined` mode a
-  rule hit scores `+Infinity`; in `rules` mode the score is binary, so its ROC is a single point.
-- **Confidence intervals (D-05).** Error rates are proportions estimated from finite samples, so
-  report them with a 95% **Wilson score interval** (`z = 1.96`, `p̂ = x/n`):
+- **Choosing `t` (ADR-009, D-06, `thresholdAtFpr`).** Never by looking at test results. Score
+  the legitimate-only **calibration** split: with `n` scores and target `α`, at most
+  `k = ⌊α·n⌋` of them may reach `t`. So `t` is the smallest number strictly above the
+  `(k+1)`-th largest calibration score, an empirical quantile of the legitimate scores. For
+  example, with `α = 1%` and 1,000 calibration requests, `t` sits just above the 11th highest
+  score and flags the top 10. Then score the test set once with that `t`.
+  - **Ties** move together: if including a tied group would exceed `k`, the whole group stays
+    below `t`, so the calibration FPR can be lower than `α`.
+  - **Rule hits** on legitimate requests score `+∞` in `combined` mode and are flagged at any
+    `t`. If there are more than `k` of them the target is **unattainable**, and the function
+    says so.
+  - **Size:** the estimate rests on the `k` largest scores; with fewer than about 10 of them it
+    is very noisy. Use `n ≥ 10/α`: 1,000 calibration requests for 1%, 10,000 for 0.1%.
+  - **On new data** the FPR is only close to `α`, not equal: it is a quantile estimated from a
+    sample. That is why it gets a confidence interval (below).
+- **ROC / AUC (D-03, `rocCurve`).** Sweep `t` down through the distinct scores. Each step flags
+  one more group of tied scores and adds the point (FPR, TPR). The curve runs from (0, 0), where
+  nothing is flagged, to (1, 1).
+  - **AUC** is the trapezoid area under the points. It equals the **Mann–Whitney** statistic:
+    `AUC = P(score of a random attack > score of a random legitimate request)`, with ties
+    counting ½. A tied group that holds both classes is one diagonal step, which is exactly that
+    half credit.
+  - **In `combined` mode** a rule hit scores `+∞`, so it simply ranks first.
+  - **In `rules` mode** the score is binary (0 or 1). The curve has one inner point, the rules'
+    only operating point, and `AUC = (1 + TPR − FPR)/2`.
+  - **Reading it:** AUC = 0.5 is chance, 1 is perfect separation. Because it uses only the
+    ranking of the scores, AUC does not depend on the threshold.
+- **Confidence intervals (D-05, `wilsonInterval`, `bootstrapAucInterval`).** Error rates are
+  proportions estimated from finite samples, so report them with a 95% **Wilson score interval**
+  (`z = 1.96`, `p̂ = x/n`):
 
   ```
   centre = (p̂ + z²/(2n)) / (1 + z²/n)
@@ -265,10 +286,76 @@ confusion matrix:            metrics:
   ```
 
   Example: 0 false positives out of 900 legitimate requests gives FPR ∈ [0, 0.43%], not "zero".
-  For AUC use a seeded bootstrap (resample the test set, ~1000 times, 2.5th–97.5th percentile).
 
-- **Repeated seeds (ADR-009).** Run every configuration on at least 20 seeds and report the mean
-  and spread; record seeds, git commit, split sizes, prevalence and target FPR.
+  - **Why Wilson, not the textbook Wald interval** `p̂ ± z·√(p̂(1−p̂)/n)`: Wald collapses to
+    [0, 0] when `x = 0` and can leave [0, 1]. Error rates near 0 are exactly where this project
+    lives.
+  - **AUC** is not a simple proportion, so it gets a **seeded, stratified percentile bootstrap**:
+    1. resample the attacks and the legitimate requests separately, with replacement, so each
+       resample keeps the class counts of the test set;
+    2. compute the AUC of each resample, about 1,000 times;
+    3. take the 2.5th and 97.5th percentiles of those AUCs.
+
+    The random source is passed in by the caller (`createRng(seed).next`), so the interval is
+    reproducible.
+
+  - **What they measure:** these intervals capture the uncertainty from the finite **test set**
+    of one run. How much the results move from one dataset to another is a different question,
+    answered by the repeated seeds below (D-04).
+
+- **Repeated seeds (ADR-009, D-04, `npm run experiments`).** Every mode runs on 20 seeds. Each
+  seed is a whole run: a fresh dataset, a model fitted on its training split, thresholds set on
+  its calibration split, one pass over its test split.
+  - **Within one run**, the Wilson and bootstrap intervals above give the uncertainty of the test
+    set.
+  - **Across runs**, report each metric's mean, SD and range, and a 95% interval for the mean
+    (`meanInterval`), with Student's t on `s − 1` degrees of freedom for `s` seeds:
+
+    ```
+    mean ± t(0.975, s − 1) · SD / √s        20 seeds: t(0.975, 19) = 2.093
+    ```
+
+    It covers everything that changes between runs: training data, model, threshold and test
+    set. The t quantile comes from the regularized incomplete beta function, by bisection
+    (`studentTQuantile`).
+
+  - **Why not a Wilson interval on the counts added up over all seeds:** the requests of one seed
+    share one model and one threshold, so they are not independent trials. Such an interval
+    would leave out how much the threshold moves from run to run, and come out too narrow. The
+    seed is the independent unit.
+  - **Zero width:** when a rate is the same in every seed (say 100% of canonical attacks), the SD
+    and the interval are 0. The report then says "every seed" and gives the count.
+  - **Which noise dominates:** compare one seed's bootstrap interval for the AUC (its standard
+    error is about the width / 3.92) with the SD across seeds. If they are close, the test set
+    is the main source of noise; if the SD is larger, the training data and the threshold move
+    the result too.
+  - **Random streams:** the bootstrap of seed `s` uses the seed `s + 2³¹` (mod 2³²). The
+    generator steps through one cycle of 2³² states, so that stream starts half a cycle away from
+    the dataset's, and the two never share numbers. Every mode reuses the same resamples, so the
+    bootstrap is paired.
+  - **Provenance:** `results/<date>-<commit>/results.json` records the seeds, the git commit
+    (and whether the tree had uncommitted changes), the split sizes, prevalence, hard-case share,
+    targets and resamples; `report.md` holds the tables.
+- **Paired comparison of two modes (D-07, `mcnemarTest`).** Two detectors scored on the same
+  requests are not independent samples, so two separate intervals would waste the pairing.
+  McNemar's test uses only the requests where they disagree: `b` flagged by A only, `c` by B only.
+  If both were equally good, each disagreement would be a coin flip: `b ~ Binomial(b + c, ½)`.
+  - **Exact two-sided p** (the one reported): `p = min(1, 2·P(X ≤ min(b, c)))` with
+    `X ~ Binomial(b + c, ½)`, computed as `P(X ≤ k) = I_½(n − k, k + 1)` (regularized incomplete
+    beta).
+  - **Textbook form:** `χ² = (|b − c| − 1)² / (b + c)` on 1 degree of freedom, with continuity
+    correction; close to the exact p once `b + c ≳ 25`.
+  - **Attacks and legitimate requests apart.** On attacks, "flagged by A only" means caught only by
+    A; on legitimate requests it means a false alarm only from A. On all requests together the
+    test would compare accuracy, which the class imbalance makes misleading. Novel attacks get
+    their own test: they are the research question.
+  - **Operating points:** each mode at its own calibrated threshold for the same target FPR, so the
+    detectors are compared as they would be deployed.
+  - **Across seeds** the disagreement counts are added up: under the null hypothesis each seed's
+    `b` is Binomial(`b + c`, ½), so the sums are too. The report also counts the seeds where each
+    mode is significantly ahead (p < 0.05).
+  - **Many tests:** 3 pairs × 3 groups × 2 targets = 18. With a Bonferroni correction a difference
+    counts at p < 0.05/18 ≈ 0.003.
 - Always show the confusion matrix and both error rates, never accuracy alone (standards §3), and
   break the results down by `variant` (canonical / obfuscated / novel attacks, typical / hard
   legitimate requests).
