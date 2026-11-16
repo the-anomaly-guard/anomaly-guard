@@ -29,9 +29,9 @@
           </div>
           <div class="panel-body prose">
             <p>
-              When attacks are a small share of the traffic, even an accurate detector raises mostly
-              false alarms. Bayes' theorem gives the share of alarms that are real attacks, the
-              positive predictive value (PPV):
+              When attacks are a small share of the traffic, even an accurate detector can raise
+              mostly false alarms. Bayes' theorem gives the share of alarms that are real attacks,
+              the positive predictive value (PPV):
             </p>
             <p class="formula">
               PPV = TPR · prevalence / (TPR · prevalence + FPR · (1 − prevalence))
@@ -45,18 +45,49 @@
           </div>
         </section>
 
-        <div class="placeholder">
-          <span class="task">E-03 · T4</span>
-          <strong>Interactive explainer: PPV against prevalence</strong>
-          <span
-            >The share of real attacks among the alarms as the attack rate changes, at the TPR and
-            FPR this detector actually reaches with the current settings.</span
-          >
-        </div>
+        <section class="panel" aria-labelledby="explainer-title">
+          <div class="panel-head">
+            <h2 class="panel-title" id="explainer-title">Alarms as prevalence changes</h2>
+            <span class="panel-meta">held-out test split · current detector settings</span>
+          </div>
+          <div class="panel-body prose">
+            <p id="measured-rates"></p>
+            <p>
+              This hypothetical curve holds those measured rates fixed while the attack share
+              changes. It assumes the detector performs equally well at each share; the samples and
+              rates may differ in other traffic. A zero measured false-positive rate is not proof
+              that the true rate is zero.
+            </p>
+            <div class="base-rate-control">
+              <label for="scenario-prevalence">Hypothetical attack share (%)</label>
+              <input
+                id="scenario-prevalence"
+                type="number"
+                min="0"
+                max="100"
+                step="any"
+                value="0.1"
+              />
+            </div>
+            <p id="scenario-result" aria-live="polite"></p>
+            <div class="chart-box is-tall" id="base-rate-box">
+              <canvas
+                id="chart-base-rate"
+                role="img"
+                aria-label="Positive predictive value against hypothetical attack prevalence"
+              ></canvas>
+            </div>
+            <p class="note">
+              The horizontal axis is logarithmic, from 0.0001% to 100%, so rare attack shares are
+              visible. Zero and smaller shares can be entered above but do not appear on the chart.
+              Rates are estimates from one synthetic test split, not guarantees.
+            </p>
+          </div>
+        </section>
 
         <!-- include: partials/footer.html -->
       </main>
     </div>
-    <script type="module" src="./src/pages/static.js"></script>
+    <script type="module" src="./src/pages/base-rate.js"></script>
   </body>
 </html>

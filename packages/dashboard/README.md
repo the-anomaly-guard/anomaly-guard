@@ -16,7 +16,7 @@ detect, evaluate - with no backend, so it is hosted on **GitHub Pages** (ADR-003
 | Rules              | `rules.html`      | the signature rules and how often each matched                                                                                                                | - (the ruleset itself is B-01)                        |
 | Statistical models | `models.html`     | the signals in the score; the learned model per endpoint and parameter                                                                                        | E-02: character classes (T1), lengths and scores (T2) |
 | Detection quality  | `evaluation.html` | the calibrated operating point, confusion matrix, rates and variants with Wilson intervals, ROC (its title opens it large) and AUC, McNemar between the modes | -                                                     |
-| Base rate          | `base-rate.html`  | Bayes and the base-rate fallacy, with a worked example                                                                                                        | E-03 (T4)                                             |
+| Base rate          | `base-rate.html`  | Bayes, a worked example, and PPV against hypothetical prevalence using the measured test rates                                                                | -                                                     |
 | About              | `about.html`      | the project, the method, the themes, the team                                                                                                                 | -                                                     |
 
 Every page except Base rate and About opens empty and waits for **Start monitoring** (live replay,
@@ -39,6 +39,7 @@ dashboard/
 │   ├── state.js      settings ⇄ URL (pure, tested)
 │   ├── pipeline.js   dataset -> train on legit traffic -> threshold from the calibration split ->
 │   │                 detect -> metrics (pure, tested)
+│   ├── base-rate-data.js  measured rates and Bayes curve (pure, tested)
 │   ├── quality.js    Wilson intervals, results by variant, ROC and AUC per mode (pure, tested)
 │   ├── levels.js     alert level 0-15 and severity (pure, tested)
 │   ├── rows.js       the look of a row that shows one request, in every table (pure, tested)
@@ -49,7 +50,7 @@ dashboard/
 │   ├── listing.js    rows per page and order of a list (pure, tested)
 │   ├── dom.js        DOM helpers: data goes in as text, never as HTML
 │   ├── ui.js         KPI tile, level badge
-│   ├── charts.js     Chart.js setup and helpers (bar, doughnut, ROC)
+│   ├── charts.js     Chart.js setup and helpers (bar, doughnut, ROC, base rate)
 │   ├── chart-modal.js  a chart opened large over the dimmed page (the ROC title opens one)
 │   ├── lines.js      hover points along the straight parts of a line (pure, tested)
 │   ├── assets/       icon
