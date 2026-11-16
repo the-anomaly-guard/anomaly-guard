@@ -4,7 +4,13 @@
 // from more and more legitimate requests, and then stays as it is: the test traffic never changes
 // the model.
 
-import { CHAR_CLASSES, chiSquareScore, scoreRequest, trainStatModel } from '@anomaly-guard/core';
+import {
+  CHAR_CLASSES,
+  chiSquareScore,
+  mahalanobisScore,
+  scoreRequest,
+  trainStatModel,
+} from '@anomaly-guard/core';
 import { initShell } from '../shell.js';
 import { runExperiment } from '../pipeline.js';
 import { h, mount, fmt } from '../dom.js';
@@ -14,8 +20,8 @@ import { initLive } from '../live.js';
 /**
  * The planned signals. `part` is the key a signal adds to `scoreRequest().parts` (C-06): a signal
  * shows as "in the score" as soon as that key appears. `probe` calls the signal's own function: if
- * it answers, the signal is implemented even before C-06 adds it to the score. Set `part` and
- * `probe` for the outliers when C-05 lands.
+ * it answers, the signal is implemented even before C-06 adds it to the score. The outliers have
+ * their `probe` (C-05); their `part` is set when C-06 adds them to the score.
  */
 const SIGNALS = [
   {
@@ -31,7 +37,13 @@ const SIGNALS = [
     task: 'C-03 · T1',
     probe: chiSquareScore,
   },
-  { part: null, name: 'Outliers', method: 'IQR / MAD; Mahalanobis distance', task: 'C-05 · T2' },
+  {
+    part: null,
+    name: 'Outliers',
+    method: 'IQR / MAD (Chebyshev tail); regularised Mahalanobis distance',
+    task: 'C-05 · T2',
+    probe: mahalanobisScore,
+  },
 ];
 
 const state = initShell();

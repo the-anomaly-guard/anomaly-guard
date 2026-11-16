@@ -19,6 +19,7 @@ consequences. ADRs are not deleted; a superseded one is marked `Superseded by AD
 | [ADR-010](ADR-010-multi-page-siem-style-dashboard.md)           | Dashboard as a multi-page, SIEM-style console                           | Accepted                      | 2026-11-09 |
 | [ADR-011](ADR-011-live-replay.md)                               | Live replay in the console                                              | Accepted                      | 2026-11-15 |
 | [ADR-012](ADR-012-length-signal-log-scale-and-unseen-pairs.md)  | Length signal on the log scale; policy for unseen pairs                 | Accepted                      | 2026-11-15 |
+| [ADR-013](ADR-013-outlier-signals.md)                           | Outlier signals: robust scale, Mahalanobis, three features              | Accepted                      | 2026-11-16 |
 
 ## When to write an ADR
 

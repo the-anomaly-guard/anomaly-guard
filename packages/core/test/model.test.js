@@ -47,3 +47,16 @@ test('pToScore: s = -log10(p), 0 for p >= 1, finite for p = 0', () => {
   assert.ok(Math.abs(pToScore(0.001) - 3) < 1e-12);
   assert.ok(Number.isFinite(pToScore(0)));
 });
+
+test('trainStatModel stores the outlier statistics of each pair (C-05)', () => {
+  const model = trainStatModel(
+    [3, 5, 4, 4, 6].map((n) => ({ method: 'GET', path: '/search', params: { q: 'x'.repeat(n) } })),
+  );
+  const o = model.params['/search?q'].outlier;
+  assert.deepEqual(o.features, ['logLength', 'entropy', 'special']);
+  assert.ok(Math.abs(o.median[0] - Math.log1p(4)) < 1e-12); // lengths 3, 4, 4, 5, 6 -> median 4
+  assert.equal(o.precision.length, 3);
+  assert.ok(o.precision.flat().every(Number.isFinite));
+  // still a plain serialisable object
+  assert.deepEqual(JSON.parse(JSON.stringify(model)), model);
+});

@@ -31,6 +31,9 @@ import {
   pToScore, // s = −log10(p), the common score scale (ADR-007)
   lengthZScore,
   lengthScore, // Chebyshev bound on log-lengths (C-04)
+  iqrScore, // robust z from the IQR, Chebyshev tail (C-05)
+  madScore, // robust z from the MAD, Chebyshev tail (C-05)
+  mahalanobisScore, // regularised Mahalanobis distance, chi-square tail (C-05)
   chiSquareScore, // per-request character-distribution score (C-03)
   chiSquareLogSurvival, // χ²(df) survival function in log space (C-08)
   chiSquareHomogeneity, // legit vs attack 7 × 2 test (C-08)
@@ -76,8 +79,8 @@ Implemented: entropy + the seven character classes, feature extraction, canonica
 rules for SQL injection, XSS, path traversal and command injection (B-01), the per-(path,
 parameter) model, the length signal (C-04: Chebyshev bound on log-lengths -> −log10 p), a baseline detector
 with a continuous score per mode, the chi-square character-distribution score (C-03), and the
-dataset-level homogeneity test plus entropy summaries for the report (C-08). Stubs with a backlog
-id: robust/multivariate outliers (C-05), adding them to `scoreRequest` (C-06). The maths is in
+dataset-level homogeneity test plus entropy summaries for the report (C-08). the outlier signals (C-05: IQR, MAD and a regularised Mahalanobis distance). Stub with a backlog
+id: adding the new signals to `scoreRequest` (C-06). The maths is in
 [`../../docs/statistics/methods.md`](../../docs/statistics/methods.md).
 
 ## Test

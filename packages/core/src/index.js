@@ -24,6 +24,34 @@ export {
   DEFAULT_LENGTH_METHOD,
   MIN_STD,
 } from './stats/length.js';
+export {
+  iqrScore,
+  madScore,
+  mahalanobisScore,
+  iqrDeviation,
+  madDeviation,
+  fenceDistance,
+  deviationScore,
+  mahalanobisD2,
+  mahalanobisTailScore,
+  MAD_CONSISTENCY,
+  IQR_NORMAL,
+  FENCE,
+} from './stats/outliers.js';
+export {
+  OUTLIER_FEATURES,
+  FEATURE_FLOORS,
+  MIN_OUTLIER_N,
+  RIDGE,
+  outlierVector,
+  median,
+  quantile,
+  mad,
+  covariance,
+  invertSymmetric,
+  regularise,
+  fitOutlierStats,
+} from './stats/robust.js';
 export { chiSquareScore, chiSquareLogSurvival, chiSquareHomogeneity } from './stats/chisquare.js';
 export { scoreRequest } from './stats/anomaly.js';
 
