@@ -44,9 +44,9 @@ dashboard/
 │   ├── levels.js     alert level 0-15 and severity (pure, tested)
 │   ├── rows.js       the look of a row that shows one request, in every table (pure, tested)
 │   ├── team.js       the members' GitHub nicknames, listed on About (pure, tested)
-│   ├── terms.js      what every acronym and code means: rule ids, tasks, ADRs (pure, tested)
+│   ├── terms.js      what every acronym and code means: rule ids, ADRs (pure, tested)
 │   ├── term-help.js  hover help on those terms in any text of any page
-│   ├── term-data.js  the dictionary: the ruleset, plus the backlog and the ADR index at build
+│   ├── term-data.js  the dictionary: the ruleset, plus the ADR index at build
 │   ├── listing.js    rows per page and order of a list (pure, tested)
 │   ├── dom.js        DOM helpers: data goes in as text, never as HTML
 │   ├── ui.js         KPI tile, level badge
@@ -76,11 +76,10 @@ dashboard/
   There is no shortcut to the result, and the line under the page title (seed, size, attack share)
   stays concealed until the replay is done.
 - **Acronyms and codes explain themselves** (`src/terms.js`): AUC, FPR, a rule id such as
-  CMDI-001, a task such as C-06, an ADR, wherever they appear - text, tables, chart legends,
-  axis labels and tooltips. Rule ids come from the ruleset, tasks and themes from the backlog,
-  ADRs from their index (read at build time), so new ones are covered with no change; a new
-  acronym goes in `ACRONYMS`. Cells that show a request as typed carry `data-raw` and are left
-  alone.
+  CMDI-001, an ADR, wherever they appear - text, tables, chart legends, axis labels and tooltips.
+  Rule ids come from the ruleset, ADRs from their index (read at build time), so new ones are
+  covered with no change; a new acronym goes in `ACRONYMS`. Task codes (C-06) and themes (T1)
+  stay plain text, and cells that show a request as typed carry `data-raw` and are left alone.
 - **No flash of the defaults**: the content stays hidden until `shell.js` has read the settings
   from the URL (`body[data-ready]`), and the page draws the rest in the same task. Without it,
   the default values written in the HTML (seed 42, 1,000 requests) would show for a moment on
