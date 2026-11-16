@@ -6,20 +6,17 @@ import {
   ACRONYMS,
   FAMILIES,
   adrTerms,
-  backlogTerms,
   buildTerms,
   explain,
   findTerms,
   plain,
-  shorten,
   wrapLines,
 } from '../src/terms.js';
 
 const read = (path) => readFileSync(new URL(path, import.meta.url), 'utf8');
-const backlog = read('../../../docs/planning/backlog.md');
 const adrIndex = read('../../../docs/development/adr/README.md');
-// What the dashboard bundles (vite.config.js, virtual:term-sources), from the real docs.
-const docs = { ...backlogTerms(backlog), ...adrTerms(adrIndex) };
+// What the dashboard bundles (vite.config.js, virtual:term-sources), from the real index.
+const docs = adrTerms(adrIndex);
 const TERMS = buildTerms({ rules: DEFAULT_RULES, docs });
 
 test('every rule of the ruleset explains itself: its family and its number', () => {
@@ -36,23 +33,25 @@ test('every rule of the ruleset explains itself: its family and its number', () 
   assert.match(later.get('ssti'), /an attack family/);
 });
 
-test('every task and theme of the backlog, and every ADR of the index, explains itself', () => {
-  const tasks = [...backlog.matchAll(/^\|\s*([A-Z]-\d{2})\s*\|/gm)].map((m) => m[1]);
-  assert.ok(tasks.length > 30, `${tasks.length} tasks`);
-  for (const id of tasks) {
-    assert.match(docs[id], new RegExp(`^${id}: backlog task`), id);
+test('every ADR of the index explains itself', () => {
+  const adrs = [...adrIndex.matchAll(/^\|\s*\[(ADR-\d{3})\]/gm)].map((m) => m[1]);
+  assert.ok(adrs.length >= 14);
+  for (const id of adrs) {
+    assert.match(docs[id], new RegExp(`^${id}: architecture decision record, `));
     assert.ok(!docs[id].includes('**') && !docs[id].includes('`'), `${id}: plain text`);
   }
-  assert.match(docs['C-06'], /^C-06: backlog task of T2, \w/);
-  for (const theme of ['T1', 'T2', 'T3', 'T4']) {
-    assert.match(docs[theme], new RegExp(`^${theme}: the statistical theme "[A-Z]`), theme);
+});
+
+test('task codes and themes get no hover help, wherever they appear', () => {
+  // The group's bookkeeping (the Task column of Statistical models, the chart placeholders):
+  // every task of the backlog, the four themes, and codes of tasks not written yet.
+  const backlog = read('../../../docs/planning/backlog.md');
+  const tasks = [...backlog.matchAll(/^\|\s*([A-Z]-\d{2})\s*\|/gm)].map((m) => m[1]);
+  assert.ok(tasks.length > 30, `${tasks.length} tasks`);
+  for (const code of [...tasks, 'T1', 'T2', 'T3', 'T4', 'C-99', 'Z-01']) {
+    assert.equal(explain(code, TERMS), null, code);
   }
-  const adrs = [...adrIndex.matchAll(/^\|\s*\[(ADR-\d{3})\]/gm)].map((m) => m[1]);
-  assert.ok(adrs.length >= 11);
-  for (const id of adrs)
-    assert.match(docs[id], new RegExp(`^${id}: architecture decision record, `));
-  // public pages name nobody: the theme lines' "member: ..." never reaches the explanations
-  for (const help of Object.values(docs)) assert.doesNotMatch(help, /member:|\(`/, help);
+  assert.deepEqual(findTerms('C-04 · T2, E-02 · T1, task · theme', TERMS), []);
 });
 
 test('every code the pages show has its own explanation, not just the generic one', () => {
@@ -66,10 +65,6 @@ test('every code the pages show has its own explanation, not just the generic on
     const text = readFileSync(new URL(file, dir), 'utf8').replace(/^\s*\/\/.*$/gm, ''); // not comments
     for (const { term, help } of findTerms(text, TERMS)) {
       assert.ok(
-        !help.includes("a task of the project's backlog"),
-        `${file}: ${term} is not in the backlog`,
-      );
-      assert.ok(
         !help.includes(', in docs/development/adr'),
         `${file}: ${term} is not in the ADR index`,
       );
@@ -82,11 +77,10 @@ test('findTerms: whole words only, in order, with the code patterns as a fallbac
   const found = findTerms(text, TERMS);
   assert.deepEqual(
     found.map((t) => t.term),
-    ['CI', 'AUC', 'ADR-099', 'C-99', 'SQLI-001', 'sqli'],
+    ['CI', 'AUC', 'ADR-099', 'SQLI-001', 'sqli'],
   );
   for (const { index, term } of found) assert.equal(text.slice(index, index + term.length), term);
   assert.match(explain('ADR-099', TERMS), /architecture decision record no\. 99/);
-  assert.match(explain('C-99', TERMS), /a task of the project's backlog/);
   assert.equal(explain('HELLO', TERMS), null);
 });
 
@@ -98,13 +92,11 @@ test('the explanations are plain sentences, with no special typography', () => {
   }
 });
 
-test('plain, shorten and wrapLines', () => {
+test('plain and wrapLines', () => {
   assert.equal(
     plain('**Chi-square** in `stats/x.js` ([ADR-008](a.md)), _see_ <https://x.y>'),
     'Chi-square in stats/x.js (ADR-008), see https://x.y',
   );
-  assert.equal(shorten('one two three four', 100), 'one two three four');
-  assert.equal(shorten('one two three four five six', 16), 'one two three...');
   assert.deepEqual(wrapLines('aa bb cc dd', 5), ['aa bb', 'cc dd']);
   assert.deepEqual(wrapLines('averyveryverylongword x', 5), ['averyveryverylongword', 'x']);
 });

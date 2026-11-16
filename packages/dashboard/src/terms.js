@@ -1,8 +1,9 @@
 // Hover help for the acronyms and codes the console shows: rule ids (CMDI-001), attack families
-// (sqli), backlog tasks (C-06) and themes (T1), decision records (ADR-009) and metric acronyms
-// (AUC, FPR). One dictionary, built from the sources themselves (the ruleset, the backlog, the
-// ADR index), so a new rule, task or ADR is explained with no change to the pages. term-help.js
-// puts it on the text of every page, charts.js on every chart. Pure: no DOM, tested in Node.
+// (sqli), decision records (ADR-009) and metric acronyms (AUC, FPR). One dictionary, built from
+// the sources themselves (the ruleset, the ADR index), so a new rule or ADR is explained with no
+// change to the pages. Task codes (C-06) and themes (T1) get no help: they are the group's
+// bookkeeping, not something a visitor needs explained. term-help.js puts the help on the text of
+// every page, charts.js on every chart. Pure: no DOM, tested in Node.
 
 /** Acronyms of the console's own text: add one here and every page and chart explains it. */
 export const ACRONYMS = Object.freeze({
@@ -45,11 +46,6 @@ const PATTERNS = [
     help: (/** @type {RegExpExecArray} */ m) =>
       `ADR-${m[1]}: architecture decision record no. ${Number(m[1])}, in docs/development/adr.`,
   },
-  {
-    re: /^([A-Z])-(\d{2})$/,
-    help: (/** @type {RegExpExecArray} */ m) =>
-      `${m[0]}: a task of the project's backlog (docs/planning/backlog.md).`,
-  },
 ];
 
 /**
@@ -83,56 +79,6 @@ export function plain(text) {
 }
 
 /**
- * At most `max` characters, cut at a word.
- * @param {string} text
- * @param {number} max
- */
-export function shorten(text, max) {
-  if (text.length <= max) return text;
-  const cut = text.slice(0, max - 3);
-  const space = cut.lastIndexOf(' ');
-  return `${(space > max / 2 ? cut.slice(0, space) : cut).replace(/[\s,;:.]+$/, '')}...`;
-}
-
-/**
- * Tasks and themes of the backlog (docs/planning/backlog.md): "C-06" -> its task, theme and
- * status; "T1" -> the theme's title. Member names are left out: public pages name nobody.
- * @param {string} markdown
- * @returns {Record<string, string>}
- */
-export function backlogTerms(markdown) {
-  /** @type {Record<string, string>} */
-  const out = {};
-  /** @type {string[] | null} */
-  let columns = null;
-  for (const line of markdown.split('\n')) {
-    const cells = /^\|(.*)\|\s*$/
-      .exec(line)?.[1]
-      .split('|')
-      .map((cell) => plain(cell));
-    if (!cells) {
-      columns = null;
-      const theme = /^\*\*(T\d+) - (.+?)\*\*/.exec(line);
-      if (theme) out[theme[1]] = `${theme[1]}: the statistical theme "${plain(theme[2])}".`;
-      continue;
-    }
-    if (cells[0] === 'ID') {
-      columns = cells.map((cell) => cell.toLowerCase());
-      continue;
-    }
-    if (!columns || !/^[A-Z]-\d{2}$/.test(cells[0])) continue;
-    const field = (/** @type {string} */ name) => cells[columns?.indexOf(name) ?? -1] ?? '';
-    const theme = field('theme');
-    const status = field('status');
-    const owner = theme && !/^(-|shared|anyone|all)$/.test(theme) ? ` of ${theme}` : '';
-    out[cells[0]] =
-      `${cells[0]}: backlog task${owner}${status ? `, ${status}` : ''}. ` +
-      shorten(field('task'), 180);
-  }
-  return out;
-}
-
-/**
  * Decision records of the ADR index (docs/development/adr/README.md): "ADR-009" -> its title and
  * status.
  * @param {string} markdown
@@ -153,8 +99,8 @@ export function adrTerms(markdown) {
 }
 
 /**
- * The whole dictionary: acronyms, attack families and rule ids from the ruleset, and what the
- * docs list (backlogTerms, adrTerms).
+ * The whole dictionary: acronyms, attack families and rule ids from the ruleset, and the ADRs
+ * of the index (adrTerms).
  * @param {{ rules?: { id: string, kind: string }[], docs?: Record<string, string> }} sources
  * @returns {Map<string, string>}
  */
@@ -186,10 +132,7 @@ function termPattern(terms) {
     const words = [...terms.keys()]
       .sort((a, b) => b.length - a.length)
       .map((term) => term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-    re = new RegExp(
-      `(?<![\\w-])(?:${[...words, 'ADR-\\d{3}', '[A-Z]-\\d{2}'].join('|')})(?![\\w-])`,
-      'g',
-    );
+    re = new RegExp(`(?<![\\w-])(?:${[...words, 'ADR-\\d{3}'].join('|')})(?![\\w-])`, 'g');
     patterns.set(terms, re);
   }
   return re;
