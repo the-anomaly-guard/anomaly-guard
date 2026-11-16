@@ -180,6 +180,9 @@ npm run format:check # prettier
 npm run build        # dashboard static build (when the UI changed)
 ```
 
+If `npm test` says the detector's results changed, commit, run `npm run report -- --update` and
+commit `docs/report/`: the report's numbers are generated, never typed (ADR-014).
+
 Then, in your summary: what changed and why (with the backlog id / brief section / ADR), which
 checks you ran and their outcome, open questions, and **your individual contribution** for the
 grade.

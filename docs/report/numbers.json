@@ -1,0 +1,3148 @@
+{
+  "about": "The numbers the chapters of the report are generated from: one run of the experiment of ADR-009 (D-04), summarised across seeds. Written by `npm run report -- --update`, never by hand (ADR-014); `fingerprint` is the fingerprint of the code that produced it.",
+  "provenance": {
+    "createdAt": "2026-11-16T09:27:08.465Z",
+    "commit": "dcc229576ec0c5ea9ab0776436e9d0f8020f75df",
+    "dirty": false,
+    "node": "v24.21.0"
+  },
+  "config": {
+    "seeds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+    "trainSize": 2000,
+    "calibrationSize": 10000,
+    "testSize": 5000,
+    "prevalence": 0.1,
+    "hardShare": 0.05,
+    "targets": [0.01, 0.001],
+    "resamples": 1000
+  },
+  "setup": {
+    "signals": ["length"],
+    "families": {
+      "cmdi": "targeted",
+      "crlf": "novel",
+      "ldap": "novel",
+      "nosql": "novel",
+      "oversized": "novel",
+      "sqli": "targeted",
+      "template": "novel",
+      "traversal": "targeted",
+      "xss": "targeted"
+    },
+    "endpoints": {
+      "cart": "/cart",
+      "comments": "/comments",
+      "login": "/login",
+      "products": "/products",
+      "profile": "/profile",
+      "search": "/search"
+    },
+    "hardCases": 4,
+    "split": {
+      "train": 2000,
+      "calibration": 10000,
+      "test": 5000,
+      "testLegit": 4500,
+      "testHard": 225,
+      "testAttacks": 500
+    }
+  },
+  "fingerprint": "e31a5e29e20a54b3c9296329bff52ea5109c9a53d4eb6c009061c4291eb2cb27",
+  "summary": {
+    "modes": {
+      "rules": {
+        "auc": {
+          "estimate": 0.70435,
+          "lower": 0.6996790404935269,
+          "upper": 0.7090209595064731,
+          "n": 20,
+          "sd": 0.009980375480754292,
+          "min": 0.687,
+          "max": 0.727,
+          "level": 0.95
+        },
+        "aucBootstrapWidth": 0.042959999999999963,
+        "points": [
+          {
+            "target": 0.01,
+            "calibrated": false,
+            "attainableSeeds": 20,
+            "threshold": {
+              "estimate": 1,
+              "lower": 1,
+              "upper": 1,
+              "n": 20,
+              "sd": 0,
+              "min": 1,
+              "max": 1,
+              "level": 0.95
+            },
+            "calibrationFpr": {
+              "estimate": 0,
+              "lower": 0,
+              "upper": 0,
+              "n": 20,
+              "sd": 0,
+              "min": 0,
+              "max": 0,
+              "level": 0.95
+            },
+            "tpr": {
+              "estimate": 0.40869999999999995,
+              "lower": 0.3993580809870536,
+              "upper": 0.4180419190129463,
+              "n": 20,
+              "sd": 0.019960750961508643,
+              "min": 0.374,
+              "max": 0.454,
+              "level": 0.95
+            },
+            "fpr": {
+              "estimate": 0,
+              "lower": 0,
+              "upper": 0,
+              "n": 20,
+              "sd": 0,
+              "min": 0,
+              "max": 0,
+              "level": 0.95
+            },
+            "fnr": {
+              "estimate": 0.5912999999999999,
+              "lower": 0.5819580809870536,
+              "upper": 0.6006419190129463,
+              "n": 20,
+              "sd": 0.01996075096150864,
+              "min": 0.546,
+              "max": 0.626,
+              "level": 0.95
+            },
+            "precision": {
+              "estimate": 1,
+              "lower": 1,
+              "upper": 1,
+              "n": 20,
+              "sd": 0,
+              "min": 1,
+              "max": 1,
+              "level": 0.95
+            },
+            "precisionSeeds": 20,
+            "f1": {
+              "estimate": 0.5799829082853877,
+              "lower": 0.5706502148546365,
+              "upper": 0.5893156017161388,
+              "n": 20,
+              "sd": 0.01994103878583907,
+              "min": 0.544395924308588,
+              "max": 0.624484181568088,
+              "level": 0.95
+            },
+            "pooled": {
+              "tp": 4087,
+              "fp": 0,
+              "tn": 90000,
+              "fn": 5913
+            },
+            "byVariant": {
+              "attack": {
+                "canonical": {
+                  "requests": 3560,
+                  "flagged": 3560,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 163,
+                    "max": 197
+                  },
+                  "rate": {
+                    "estimate": 1,
+                    "lower": 1,
+                    "upper": 1,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 1,
+                    "max": 1,
+                    "level": 0.95
+                  }
+                },
+                "novel": {
+                  "requests": 5540,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 258,
+                    "max": 296
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "obfuscated": {
+                  "requests": 900,
+                  "flagged": 527,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 33,
+                    "max": 56
+                  },
+                  "rate": {
+                    "estimate": 0.5818799006819185,
+                    "lower": 0.5480124841758205,
+                    "upper": 0.6157473171880166,
+                    "n": 20,
+                    "sd": 0.07236404700694367,
+                    "min": 0.41025641025641024,
+                    "max": 0.7142857142857143,
+                    "level": 0.95
+                  }
+                }
+              },
+              "legit": {
+                "hard": {
+                  "requests": 4500,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 225,
+                    "max": 225
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "typical": {
+                  "requests": 85500,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 4275,
+                    "max": 4275
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                }
+              }
+            },
+            "byKind": {
+              "attack": {
+                "cmdi": {
+                  "requests": 1098,
+                  "flagged": 1098,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 43,
+                    "max": 67
+                  },
+                  "rate": {
+                    "estimate": 1,
+                    "lower": 1,
+                    "upper": 1,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 1,
+                    "max": 1,
+                    "level": 0.95
+                  }
+                },
+                "crlf": {
+                  "requests": 1096,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 39,
+                    "max": 70
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "ldap": {
+                  "requests": 1107,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 45,
+                    "max": 66
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "nosql": {
+                  "requests": 1105,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 44,
+                    "max": 68
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "oversized": {
+                  "requests": 1114,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 45,
+                    "max": 70
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "sqli": {
+                  "requests": 1077,
+                  "flagged": 979,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 44,
+                    "max": 64
+                  },
+                  "rate": {
+                    "estimate": 0.909477477041414,
+                    "lower": 0.888128998208815,
+                    "upper": 0.9308259558740131,
+                    "n": 20,
+                    "sd": 0.045615003597654843,
+                    "min": 0.7962962962962963,
+                    "max": 0.9772727272727273,
+                    "level": 0.95
+                  }
+                },
+                "template": {
+                  "requests": 1118,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 45,
+                    "max": 67
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "traversal": {
+                  "requests": 1132,
+                  "flagged": 978,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 46,
+                    "max": 68
+                  },
+                  "rate": {
+                    "estimate": 0.8639000445263261,
+                    "lower": 0.847874357475652,
+                    "upper": 0.8799257315770002,
+                    "n": 20,
+                    "sd": 0.0342418669828192,
+                    "min": 0.7966101694915254,
+                    "max": 0.9137931034482759,
+                    "level": 0.95
+                  }
+                },
+                "xss": {
+                  "requests": 1153,
+                  "flagged": 1032,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 47,
+                    "max": 73
+                  },
+                  "rate": {
+                    "estimate": 0.8942583022229561,
+                    "lower": 0.8704518688115142,
+                    "upper": 0.918064735634398,
+                    "n": 20,
+                    "sd": 0.050866881627746025,
+                    "min": 0.7945205479452054,
+                    "max": 0.9824561403508771,
+                    "level": 0.95
+                  }
+                }
+              },
+              "legit": {
+                "cart": {
+                  "requests": 12749,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 611,
+                    "max": 674
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "comments": {
+                  "requests": 13981,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 659,
+                    "max": 741
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "login": {
+                  "requests": 12793,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 588,
+                    "max": 710
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "products": {
+                  "requests": 17224,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 806,
+                    "max": 906
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "profile": {
+                  "requests": 9659,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 453,
+                    "max": 517
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "search": {
+                  "requests": 23594,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 1131,
+                    "max": 1242
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                }
+              }
+            }
+          },
+          {
+            "target": 0.001,
+            "calibrated": false,
+            "attainableSeeds": 20,
+            "threshold": {
+              "estimate": 1,
+              "lower": 1,
+              "upper": 1,
+              "n": 20,
+              "sd": 0,
+              "min": 1,
+              "max": 1,
+              "level": 0.95
+            },
+            "calibrationFpr": {
+              "estimate": 0,
+              "lower": 0,
+              "upper": 0,
+              "n": 20,
+              "sd": 0,
+              "min": 0,
+              "max": 0,
+              "level": 0.95
+            },
+            "tpr": {
+              "estimate": 0.40869999999999995,
+              "lower": 0.3993580809870536,
+              "upper": 0.4180419190129463,
+              "n": 20,
+              "sd": 0.019960750961508643,
+              "min": 0.374,
+              "max": 0.454,
+              "level": 0.95
+            },
+            "fpr": {
+              "estimate": 0,
+              "lower": 0,
+              "upper": 0,
+              "n": 20,
+              "sd": 0,
+              "min": 0,
+              "max": 0,
+              "level": 0.95
+            },
+            "fnr": {
+              "estimate": 0.5912999999999999,
+              "lower": 0.5819580809870536,
+              "upper": 0.6006419190129463,
+              "n": 20,
+              "sd": 0.01996075096150864,
+              "min": 0.546,
+              "max": 0.626,
+              "level": 0.95
+            },
+            "precision": {
+              "estimate": 1,
+              "lower": 1,
+              "upper": 1,
+              "n": 20,
+              "sd": 0,
+              "min": 1,
+              "max": 1,
+              "level": 0.95
+            },
+            "precisionSeeds": 20,
+            "f1": {
+              "estimate": 0.5799829082853877,
+              "lower": 0.5706502148546365,
+              "upper": 0.5893156017161388,
+              "n": 20,
+              "sd": 0.01994103878583907,
+              "min": 0.544395924308588,
+              "max": 0.624484181568088,
+              "level": 0.95
+            },
+            "pooled": {
+              "tp": 4087,
+              "fp": 0,
+              "tn": 90000,
+              "fn": 5913
+            },
+            "byVariant": {
+              "attack": {
+                "canonical": {
+                  "requests": 3560,
+                  "flagged": 3560,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 163,
+                    "max": 197
+                  },
+                  "rate": {
+                    "estimate": 1,
+                    "lower": 1,
+                    "upper": 1,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 1,
+                    "max": 1,
+                    "level": 0.95
+                  }
+                },
+                "novel": {
+                  "requests": 5540,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 258,
+                    "max": 296
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "obfuscated": {
+                  "requests": 900,
+                  "flagged": 527,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 33,
+                    "max": 56
+                  },
+                  "rate": {
+                    "estimate": 0.5818799006819185,
+                    "lower": 0.5480124841758205,
+                    "upper": 0.6157473171880166,
+                    "n": 20,
+                    "sd": 0.07236404700694367,
+                    "min": 0.41025641025641024,
+                    "max": 0.7142857142857143,
+                    "level": 0.95
+                  }
+                }
+              },
+              "legit": {
+                "hard": {
+                  "requests": 4500,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 225,
+                    "max": 225
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "typical": {
+                  "requests": 85500,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 4275,
+                    "max": 4275
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                }
+              }
+            },
+            "byKind": {
+              "attack": {
+                "cmdi": {
+                  "requests": 1098,
+                  "flagged": 1098,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 43,
+                    "max": 67
+                  },
+                  "rate": {
+                    "estimate": 1,
+                    "lower": 1,
+                    "upper": 1,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 1,
+                    "max": 1,
+                    "level": 0.95
+                  }
+                },
+                "crlf": {
+                  "requests": 1096,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 39,
+                    "max": 70
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "ldap": {
+                  "requests": 1107,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 45,
+                    "max": 66
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "nosql": {
+                  "requests": 1105,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 44,
+                    "max": 68
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "oversized": {
+                  "requests": 1114,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 45,
+                    "max": 70
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "sqli": {
+                  "requests": 1077,
+                  "flagged": 979,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 44,
+                    "max": 64
+                  },
+                  "rate": {
+                    "estimate": 0.909477477041414,
+                    "lower": 0.888128998208815,
+                    "upper": 0.9308259558740131,
+                    "n": 20,
+                    "sd": 0.045615003597654843,
+                    "min": 0.7962962962962963,
+                    "max": 0.9772727272727273,
+                    "level": 0.95
+                  }
+                },
+                "template": {
+                  "requests": 1118,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 45,
+                    "max": 67
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "traversal": {
+                  "requests": 1132,
+                  "flagged": 978,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 46,
+                    "max": 68
+                  },
+                  "rate": {
+                    "estimate": 0.8639000445263261,
+                    "lower": 0.847874357475652,
+                    "upper": 0.8799257315770002,
+                    "n": 20,
+                    "sd": 0.0342418669828192,
+                    "min": 0.7966101694915254,
+                    "max": 0.9137931034482759,
+                    "level": 0.95
+                  }
+                },
+                "xss": {
+                  "requests": 1153,
+                  "flagged": 1032,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 47,
+                    "max": 73
+                  },
+                  "rate": {
+                    "estimate": 0.8942583022229561,
+                    "lower": 0.8704518688115142,
+                    "upper": 0.918064735634398,
+                    "n": 20,
+                    "sd": 0.050866881627746025,
+                    "min": 0.7945205479452054,
+                    "max": 0.9824561403508771,
+                    "level": 0.95
+                  }
+                }
+              },
+              "legit": {
+                "cart": {
+                  "requests": 12749,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 611,
+                    "max": 674
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "comments": {
+                  "requests": 13981,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 659,
+                    "max": 741
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "login": {
+                  "requests": 12793,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 588,
+                    "max": 710
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "products": {
+                  "requests": 17224,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 806,
+                    "max": 906
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "profile": {
+                  "requests": 9659,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 453,
+                    "max": 517
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "search": {
+                  "requests": 23594,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 1131,
+                    "max": 1242
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "stats": {
+        "auc": {
+          "estimate": 0.8696801000000001,
+          "lower": 0.8653604728352186,
+          "upper": 0.8739997271647816,
+          "n": 20,
+          "sd": 0.009229688457294459,
+          "min": 0.857548222222222,
+          "max": 0.8891173333333335,
+          "level": 0.95
+        },
+        "aucBootstrapWidth": 0.04208743027777788,
+        "points": [
+          {
+            "target": 0.01,
+            "calibrated": true,
+            "attainableSeeds": 20,
+            "threshold": {
+              "estimate": 0.8995755073651663,
+              "lower": 0.8461855920454758,
+              "upper": 0.9529654226848568,
+              "n": 20,
+              "sd": 0.11407750399842802,
+              "min": 0.7591985269531986,
+              "max": 1.192610088773079,
+              "level": 0.95
+            },
+            "calibrationFpr": {
+              "estimate": 0.009415000000000001,
+              "lower": 0.008626979040232833,
+              "upper": 0.01020302095976717,
+              "n": 20,
+              "sd": 0.0016837536386863354,
+              "min": 0.0044,
+              "max": 0.01,
+              "level": 0.95
+            },
+            "tpr": {
+              "estimate": 0.6203000000000001,
+              "lower": 0.6084278829662029,
+              "upper": 0.6321721170337973,
+              "n": 20,
+              "sd": 0.02536699056897204,
+              "min": 0.56,
+              "max": 0.66,
+              "level": 0.95
+            },
+            "fpr": {
+              "estimate": 0.020366666666666665,
+              "lower": 0.017467258034141248,
+              "upper": 0.02326607529919208,
+              "n": 20,
+              "sd": 0.006195126886594063,
+              "min": 0.003111111111111111,
+              "max": 0.026444444444444444,
+              "level": 0.95
+            },
+            "fnr": {
+              "estimate": 0.37970000000000004,
+              "lower": 0.36782788296620283,
+              "upper": 0.39157211703379724,
+              "n": 20,
+              "sd": 0.02536699056897204,
+              "min": 0.34,
+              "max": 0.44,
+              "level": 0.95
+            },
+            "precision": {
+              "estimate": 0.7767598897645784,
+              "lower": 0.7471913224632821,
+              "upper": 0.8063284570658747,
+              "n": 20,
+              "sd": 0.06317875453339403,
+              "min": 0.715311004784689,
+              "max": 0.9551282051282052,
+              "level": 0.95
+            },
+            "precisionSeeds": 20,
+            "f1": {
+              "estimate": 0.6881484320866569,
+              "lower": 0.6779457060896925,
+              "upper": 0.6983511580836212,
+              "n": 20,
+              "sd": 0.021800025505646622,
+              "min": 0.6435754189944134,
+              "max": 0.7339901477832512,
+              "level": 0.95
+            },
+            "pooled": {
+              "tp": 6203,
+              "fp": 1833,
+              "tn": 88167,
+              "fn": 3797
+            },
+            "byVariant": {
+              "attack": {
+                "canonical": {
+                  "requests": 3560,
+                  "flagged": 2083,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 163,
+                    "max": 197
+                  },
+                  "rate": {
+                    "estimate": 0.5855762920489088,
+                    "lower": 0.5697092802702967,
+                    "upper": 0.601443303827521,
+                    "n": 20,
+                    "sd": 0.03390282769282035,
+                    "min": 0.49473684210526314,
+                    "max": 0.6257668711656442,
+                    "level": 0.95
+                  }
+                },
+                "novel": {
+                  "requests": 5540,
+                  "flagged": 3523,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 258,
+                    "max": 296
+                  },
+                  "rate": {
+                    "estimate": 0.635837361976664,
+                    "lower": 0.6205426984051795,
+                    "upper": 0.6511320255481484,
+                    "n": 20,
+                    "sd": 0.03267989908362247,
+                    "min": 0.5618374558303887,
+                    "max": 0.6996466431095406,
+                    "level": 0.95
+                  }
+                },
+                "obfuscated": {
+                  "requests": 900,
+                  "flagged": 597,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 33,
+                    "max": 56
+                  },
+                  "rate": {
+                    "estimate": 0.6627676117213588,
+                    "lower": 0.6270337041308058,
+                    "upper": 0.6985015193119117,
+                    "n": 20,
+                    "sd": 0.07635215305421833,
+                    "min": 0.5384615384615384,
+                    "max": 0.8222222222222222,
+                    "level": 0.95
+                  }
+                }
+              },
+              "legit": {
+                "hard": {
+                  "requests": 4500,
+                  "flagged": 1042,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 225,
+                    "max": 225
+                  },
+                  "rate": {
+                    "estimate": 0.23155555555555557,
+                    "lower": 0.1926709764746406,
+                    "upper": 0.27044013463647054,
+                    "n": 20,
+                    "sd": 0.08308414986274192,
+                    "min": 0,
+                    "max": 0.30666666666666664,
+                    "level": 0.95
+                  }
+                },
+                "typical": {
+                  "requests": 85500,
+                  "flagged": 791,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 4275,
+                    "max": 4275
+                  },
+                  "rate": {
+                    "estimate": 0.009251461988304092,
+                    "lower": 0.007974022551049535,
+                    "upper": 0.01052890142555865,
+                    "n": 20,
+                    "sd": 0.0027294874254541342,
+                    "min": 0.0032748538011695906,
+                    "max": 0.014035087719298246,
+                    "level": 0.95
+                  }
+                }
+              }
+            },
+            "byKind": {
+              "attack": {
+                "cmdi": {
+                  "requests": 1098,
+                  "flagged": 490,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 43,
+                    "max": 67
+                  },
+                  "rate": {
+                    "estimate": 0.4483025651179552,
+                    "lower": 0.40791099439816525,
+                    "upper": 0.4886941358377451,
+                    "n": 20,
+                    "sd": 0.08630411834705135,
+                    "min": 0.30357142857142855,
+                    "max": 0.6046511627906976,
+                    "level": 0.95
+                  }
+                },
+                "crlf": {
+                  "requests": 1096,
+                  "flagged": 690,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 39,
+                    "max": 70
+                  },
+                  "rate": {
+                    "estimate": 0.6294769076392283,
+                    "lower": 0.6030915350410593,
+                    "upper": 0.6558622802373972,
+                    "n": 20,
+                    "sd": 0.05637726581966564,
+                    "min": 0.5208333333333334,
+                    "max": 0.72,
+                    "level": 0.95
+                  }
+                },
+                "ldap": {
+                  "requests": 1107,
+                  "flagged": 681,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 45,
+                    "max": 66
+                  },
+                  "rate": {
+                    "estimate": 0.6148943545948596,
+                    "lower": 0.594223007149199,
+                    "upper": 0.6355657020405203,
+                    "n": 20,
+                    "sd": 0.04416818619705798,
+                    "min": 0.5272727272727272,
+                    "max": 0.6981132075471698,
+                    "level": 0.95
+                  }
+                },
+                "nosql": {
+                  "requests": 1105,
+                  "flagged": 697,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 44,
+                    "max": 68
+                  },
+                  "rate": {
+                    "estimate": 0.628642418439252,
+                    "lower": 0.5789944359393772,
+                    "upper": 0.6782904009391267,
+                    "n": 20,
+                    "sd": 0.1060821671701461,
+                    "min": 0.40384615384615385,
+                    "max": 0.78,
+                    "level": 0.95
+                  }
+                },
+                "oversized": {
+                  "requests": 1114,
+                  "flagged": 977,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 45,
+                    "max": 70
+                  },
+                  "rate": {
+                    "estimate": 0.8750534928284145,
+                    "lower": 0.857182202417543,
+                    "upper": 0.892924783239286,
+                    "n": 20,
+                    "sd": 0.03818534251451363,
+                    "min": 0.7659574468085106,
+                    "max": 0.9215686274509803,
+                    "level": 0.95
+                  }
+                },
+                "sqli": {
+                  "requests": 1077,
+                  "flagged": 613,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 44,
+                    "max": 64
+                  },
+                  "rate": {
+                    "estimate": 0.5693752111400924,
+                    "lower": 0.5396568115950375,
+                    "upper": 0.5990936106851472,
+                    "n": 20,
+                    "sd": 0.0634988990454074,
+                    "min": 0.48148148148148145,
+                    "max": 0.6785714285714286,
+                    "level": 0.95
+                  }
+                },
+                "template": {
+                  "requests": 1118,
+                  "flagged": 478,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 45,
+                    "max": 67
+                  },
+                  "rate": {
+                    "estimate": 0.4281127137167632,
+                    "lower": 0.4046855621704636,
+                    "upper": 0.4515398652630628,
+                    "n": 20,
+                    "sd": 0.050056475238669865,
+                    "min": 0.3333333333333333,
+                    "max": 0.5510204081632653,
+                    "level": 0.95
+                  }
+                },
+                "traversal": {
+                  "requests": 1132,
+                  "flagged": 747,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 46,
+                    "max": 68
+                  },
+                  "rate": {
+                    "estimate": 0.6606288653682718,
+                    "lower": 0.6282395797354665,
+                    "upper": 0.6930181510010771,
+                    "n": 20,
+                    "sd": 0.06920574492688657,
+                    "min": 0.5396825396825397,
+                    "max": 0.8076923076923077,
+                    "level": 0.95
+                  }
+                },
+                "xss": {
+                  "requests": 1153,
+                  "flagged": 830,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 47,
+                    "max": 73
+                  },
+                  "rate": {
+                    "estimate": 0.7221671317768542,
+                    "lower": 0.6960373424489379,
+                    "upper": 0.7482969211047705,
+                    "n": 20,
+                    "sd": 0.055831164531443093,
+                    "min": 0.6,
+                    "max": 0.8163265306122449,
+                    "level": 0.95
+                  }
+                }
+              },
+              "legit": {
+                "cart": {
+                  "requests": 12749,
+                  "flagged": 130,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 611,
+                    "max": 674
+                  },
+                  "rate": {
+                    "estimate": 0.010173855392889154,
+                    "lower": 0.00815595758178235,
+                    "upper": 0.012191753203995959,
+                    "n": 20,
+                    "sd": 0.004311614735415353,
+                    "min": 0.004573170731707317,
+                    "max": 0.0189873417721519,
+                    "level": 0.95
+                  }
+                },
+                "comments": {
+                  "requests": 13981,
+                  "flagged": 81,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 659,
+                    "max": 741
+                  },
+                  "rate": {
+                    "estimate": 0.00579088247712503,
+                    "lower": 0.0034226323520112505,
+                    "upper": 0.00815913260223881,
+                    "n": 20,
+                    "sd": 0.005060207747085651,
+                    "min": 0,
+                    "max": 0.021398002853067047,
+                    "level": 0.95
+                  }
+                },
+                "login": {
+                  "requests": 12793,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 588,
+                    "max": 710
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "products": {
+                  "requests": 17224,
+                  "flagged": 191,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 806,
+                    "max": 906
+                  },
+                  "rate": {
+                    "estimate": 0.011110360054234924,
+                    "lower": 0.009398901984554352,
+                    "upper": 0.012821818123915495,
+                    "n": 20,
+                    "sd": 0.003656849118753368,
+                    "min": 0.0044742729306487695,
+                    "max": 0.02085747392815759,
+                    "level": 0.95
+                  }
+                },
+                "profile": {
+                  "requests": 9659,
+                  "flagged": 36,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 453,
+                    "max": 517
+                  },
+                  "rate": {
+                    "estimate": 0.0038016722060047504,
+                    "lower": 0.0018442177986138764,
+                    "upper": 0.005759126613395624,
+                    "n": 20,
+                    "sd": 0.0041824661389473685,
+                    "min": 0,
+                    "max": 0.014799154334038054,
+                    "level": 0.95
+                  }
+                },
+                "search": {
+                  "requests": 23594,
+                  "flagged": 1395,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 1131,
+                    "max": 1242
+                  },
+                  "rate": {
+                    "estimate": 0.05916063917397594,
+                    "lower": 0.0494508405413288,
+                    "upper": 0.06887043780662308,
+                    "n": 20,
+                    "sd": 0.02074679432823936,
+                    "min": 0,
+                    "max": 0.07563025210084033,
+                    "level": 0.95
+                  }
+                }
+              }
+            }
+          },
+          {
+            "target": 0.001,
+            "calibrated": true,
+            "attainableSeeds": 20,
+            "threshold": {
+              "estimate": 1.3780471030594221,
+              "lower": 1.3751198145895953,
+              "upper": 1.380974391529249,
+              "n": 20,
+              "sd": 0.006254697354765454,
+              "min": 1.364393544474484,
+              "max": 1.3912352461562665,
+              "level": 0.95
+            },
+            "calibrationFpr": {
+              "estimate": 0.00030000000000000003,
+              "lower": 0.00021410410519134268,
+              "upper": 0.0003858958948086574,
+              "n": 20,
+              "sd": 0.00018353258709644942,
+              "min": 0,
+              "max": 0.0006,
+              "level": 0.95
+            },
+            "tpr": {
+              "estimate": 0.5174,
+              "lower": 0.5057243968980426,
+              "upper": 0.5290756031019573,
+              "n": 20,
+              "sd": 0.024947101930621968,
+              "min": 0.458,
+              "max": 0.564,
+              "level": 0.95
+            },
+            "fpr": {
+              "estimate": 0.0003333333333333334,
+              "lower": 0.0001629390596995357,
+              "upper": 0.0005037276069671311,
+              "n": 20,
+              "sd": 0.00036407912084850005,
+              "min": 0,
+              "max": 0.0013333333333333333,
+              "level": 0.95
+            },
+            "fnr": {
+              "estimate": 0.48260000000000003,
+              "lower": 0.4709243968980427,
+              "upper": 0.49427560310195734,
+              "n": 20,
+              "sd": 0.024947101930621968,
+              "min": 0.436,
+              "max": 0.542,
+              "level": 0.95
+            },
+            "precision": {
+              "estimate": 0.9941547680475817,
+              "lower": 0.991164720810356,
+              "upper": 0.9971448152848075,
+              "n": 20,
+              "sd": 0.006388793157240786,
+              "min": 0.9761904761904762,
+              "max": 1,
+              "level": 0.95
+            },
+            "precisionSeeds": 20,
+            "f1": {
+              "estimate": 0.6802806452931878,
+              "lower": 0.6697803238576189,
+              "upper": 0.6907809667287567,
+              "n": 20,
+              "sd": 0.022435893621077018,
+              "min": 0.6265389876880985,
+              "max": 0.7212276214833758,
+              "level": 0.95
+            },
+            "pooled": {
+              "tp": 5174,
+              "fp": 30,
+              "tn": 89970,
+              "fn": 4826
+            },
+            "byVariant": {
+              "attack": {
+                "canonical": {
+                  "requests": 3560,
+                  "flagged": 1814,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 163,
+                    "max": 197
+                  },
+                  "rate": {
+                    "estimate": 0.50924399658683,
+                    "lower": 0.49397008026874006,
+                    "upper": 0.5245179129049199,
+                    "n": 20,
+                    "sd": 0.03263556871021943,
+                    "min": 0.45789473684210524,
+                    "max": 0.5806451612903226,
+                    "level": 0.95
+                  }
+                },
+                "novel": {
+                  "requests": 5540,
+                  "flagged": 2814,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 258,
+                    "max": 296
+                  },
+                  "rate": {
+                    "estimate": 0.5077575511825854,
+                    "lower": 0.48619456263268573,
+                    "upper": 0.529320539732485,
+                    "n": 20,
+                    "sd": 0.04607334358539478,
+                    "min": 0.3957597173144876,
+                    "max": 0.5800711743772242,
+                    "level": 0.95
+                  }
+                },
+                "obfuscated": {
+                  "requests": 900,
+                  "flagged": 546,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 33,
+                    "max": 56
+                  },
+                  "rate": {
+                    "estimate": 0.6057728183158011,
+                    "lower": 0.5663692392424355,
+                    "upper": 0.6451763973891667,
+                    "n": 20,
+                    "sd": 0.08419309006913572,
+                    "min": 0.46153846153846156,
+                    "max": 0.7777777777777778,
+                    "level": 0.95
+                  }
+                }
+              },
+              "legit": {
+                "hard": {
+                  "requests": 4500,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 225,
+                    "max": 225
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "typical": {
+                  "requests": 85500,
+                  "flagged": 30,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 4275,
+                    "max": 4275
+                  },
+                  "rate": {
+                    "estimate": 0.00035087719298245617,
+                    "lower": 0.00017151479968372175,
+                    "upper": 0.0005302395862811905,
+                    "n": 20,
+                    "sd": 0.0003832411798405264,
+                    "min": 0,
+                    "max": 0.0014035087719298245,
+                    "level": 0.95
+                  }
+                }
+              }
+            },
+            "byKind": {
+              "attack": {
+                "cmdi": {
+                  "requests": 1098,
+                  "flagged": 406,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 43,
+                    "max": 67
+                  },
+                  "rate": {
+                    "estimate": 0.3716234225931864,
+                    "lower": 0.33974190951184535,
+                    "upper": 0.4035049356745275,
+                    "n": 20,
+                    "sd": 0.06812079424054239,
+                    "min": 0.2641509433962264,
+                    "max": 0.4883720930232558,
+                    "level": 0.95
+                  }
+                },
+                "crlf": {
+                  "requests": 1096,
+                  "flagged": 509,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 39,
+                    "max": 70
+                  },
+                  "rate": {
+                    "estimate": 0.46436538605817673,
+                    "lower": 0.4240336090151106,
+                    "upper": 0.5046971631012429,
+                    "n": 20,
+                    "sd": 0.08617635801338736,
+                    "min": 0.3125,
+                    "max": 0.64,
+                    "level": 0.95
+                  }
+                },
+                "ldap": {
+                  "requests": 1107,
+                  "flagged": 487,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 45,
+                    "max": 66
+                  },
+                  "rate": {
+                    "estimate": 0.4355641415524755,
+                    "lower": 0.3967052783670575,
+                    "upper": 0.47442300473789356,
+                    "n": 20,
+                    "sd": 0.08302920305951493,
+                    "min": 0.24528301886792453,
+                    "max": 0.5689655172413793,
+                    "level": 0.95
+                  }
+                },
+                "nosql": {
+                  "requests": 1105,
+                  "flagged": 404,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 44,
+                    "max": 68
+                  },
+                  "rate": {
+                    "estimate": 0.36264206431049645,
+                    "lower": 0.3264953830991842,
+                    "upper": 0.3987887455218087,
+                    "n": 20,
+                    "sd": 0.07723412082080224,
+                    "min": 0.19148936170212766,
+                    "max": 0.45454545454545453,
+                    "level": 0.95
+                  }
+                },
+                "oversized": {
+                  "requests": 1114,
+                  "flagged": 977,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 45,
+                    "max": 70
+                  },
+                  "rate": {
+                    "estimate": 0.8750534928284145,
+                    "lower": 0.857182202417543,
+                    "upper": 0.892924783239286,
+                    "n": 20,
+                    "sd": 0.03818534251451363,
+                    "min": 0.7659574468085106,
+                    "max": 0.9215686274509803,
+                    "level": 0.95
+                  }
+                },
+                "sqli": {
+                  "requests": 1077,
+                  "flagged": 530,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 44,
+                    "max": 64
+                  },
+                  "rate": {
+                    "estimate": 0.4903203094039316,
+                    "lower": 0.46025830225869063,
+                    "upper": 0.5203823165491726,
+                    "n": 20,
+                    "sd": 0.06423308071903265,
+                    "min": 0.34782608695652173,
+                    "max": 0.625,
+                    "level": 0.95
+                  }
+                },
+                "template": {
+                  "requests": 1118,
+                  "flagged": 437,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 45,
+                    "max": 67
+                  },
+                  "rate": {
+                    "estimate": 0.39072311233936785,
+                    "lower": 0.351671558143532,
+                    "upper": 0.4297746665352037,
+                    "n": 20,
+                    "sd": 0.08344092331379473,
+                    "min": 0.23728813559322035,
+                    "max": 0.5510204081632653,
+                    "level": 0.95
+                  }
+                },
+                "traversal": {
+                  "requests": 1132,
+                  "flagged": 649,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 46,
+                    "max": 68
+                  },
+                  "rate": {
+                    "estimate": 0.5733688244072314,
+                    "lower": 0.532408202456762,
+                    "upper": 0.6143294463577007,
+                    "n": 20,
+                    "sd": 0.08752000235163232,
+                    "min": 0.37735849056603776,
+                    "max": 0.6909090909090909,
+                    "level": 0.95
+                  }
+                },
+                "xss": {
+                  "requests": 1153,
+                  "flagged": 775,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 47,
+                    "max": 73
+                  },
+                  "rate": {
+                    "estimate": 0.6761151870518546,
+                    "lower": 0.6437053807978252,
+                    "upper": 0.7085249933058839,
+                    "n": 20,
+                    "sd": 0.0692495910584213,
+                    "min": 0.5454545454545454,
+                    "max": 0.7959183673469388,
+                    "level": 0.95
+                  }
+                }
+              },
+              "legit": {
+                "cart": {
+                  "requests": 12749,
+                  "flagged": 15,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 611,
+                    "max": 674
+                  },
+                  "rate": {
+                    "estimate": 0.0011643509085966983,
+                    "lower": 0.0004679845574881874,
+                    "upper": 0.0018607172597052092,
+                    "n": 20,
+                    "sd": 0.001487916486236756,
+                    "min": 0,
+                    "max": 0.004746835443037975,
+                    "level": 0.95
+                  }
+                },
+                "comments": {
+                  "requests": 13981,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 659,
+                    "max": 741
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "login": {
+                  "requests": 12793,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 588,
+                    "max": 710
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "products": {
+                  "requests": 17224,
+                  "flagged": 15,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 806,
+                    "max": 906
+                  },
+                  "rate": {
+                    "estimate": 0.0008738246556398479,
+                    "lower": 0.00037736968072148397,
+                    "upper": 0.0013702796305582118,
+                    "n": 20,
+                    "sd": 0.0010607685748735783,
+                    "min": 0,
+                    "max": 0.0034762456546929316,
+                    "level": 0.95
+                  }
+                },
+                "profile": {
+                  "requests": 9659,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 453,
+                    "max": 517
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "search": {
+                  "requests": 23594,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 1131,
+                    "max": 1242
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "combined": {
+        "auc": {
+          "estimate": 0.9205023777777779,
+          "lower": 0.9157335407292858,
+          "upper": 0.92527121482627,
+          "n": 20,
+          "sd": 0.010189509090054127,
+          "min": 0.9003426666666665,
+          "max": 0.9349742222222222,
+          "level": 0.95
+        },
+        "aucBootstrapWidth": 0.035659653333333416,
+        "points": [
+          {
+            "target": 0.01,
+            "calibrated": true,
+            "attainableSeeds": 20,
+            "threshold": {
+              "estimate": 0.8995755073651663,
+              "lower": 0.8461855920454758,
+              "upper": 0.9529654226848568,
+              "n": 20,
+              "sd": 0.11407750399842802,
+              "min": 0.7591985269531986,
+              "max": 1.192610088773079,
+              "level": 0.95
+            },
+            "calibrationFpr": {
+              "estimate": 0.009415000000000001,
+              "lower": 0.008626979040232833,
+              "upper": 0.01020302095976717,
+              "n": 20,
+              "sd": 0.0016837536386863354,
+              "min": 0.0044,
+              "max": 0.01,
+              "level": 0.95
+            },
+            "tpr": {
+              "estimate": 0.7846,
+              "lower": 0.7753084421033286,
+              "upper": 0.7938915578966713,
+              "n": 20,
+              "sd": 0.019853145051126102,
+              "min": 0.738,
+              "max": 0.82,
+              "level": 0.95
+            },
+            "fpr": {
+              "estimate": 0.020366666666666665,
+              "lower": 0.017467258034141248,
+              "upper": 0.02326607529919208,
+              "n": 20,
+              "sd": 0.006195126886594063,
+              "min": 0.003111111111111111,
+              "max": 0.026444444444444444,
+              "level": 0.95
+            },
+            "fnr": {
+              "estimate": 0.21540000000000004,
+              "lower": 0.20610844210332865,
+              "upper": 0.22469155789667142,
+              "n": 20,
+              "sd": 0.0198531450511261,
+              "min": 0.18,
+              "max": 0.262,
+              "level": 0.95
+            },
+            "precision": {
+              "estimate": 0.8136429947518868,
+              "lower": 0.7884340948549133,
+              "upper": 0.8388518946488603,
+              "n": 20,
+              "sd": 0.05386351264229037,
+              "min": 0.7643564356435644,
+              "max": 0.964735516372796,
+              "level": 0.95
+            },
+            "precisionSeeds": 20,
+            "f1": {
+              "estimate": 0.797917801939122,
+              "lower": 0.7860620325022244,
+              "upper": 0.8097735713760196,
+              "n": 20,
+              "sd": 0.025332060881604748,
+              "min": 0.7561475409836066,
+              "max": 0.8580931263858093,
+              "level": 0.95
+            },
+            "pooled": {
+              "tp": 7846,
+              "fp": 1833,
+              "tn": 88167,
+              "fn": 2154
+            },
+            "byVariant": {
+              "attack": {
+                "canonical": {
+                  "requests": 3560,
+                  "flagged": 3560,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 163,
+                    "max": 197
+                  },
+                  "rate": {
+                    "estimate": 1,
+                    "lower": 1,
+                    "upper": 1,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 1,
+                    "max": 1,
+                    "level": 0.95
+                  }
+                },
+                "novel": {
+                  "requests": 5540,
+                  "flagged": 3523,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 258,
+                    "max": 296
+                  },
+                  "rate": {
+                    "estimate": 0.635837361976664,
+                    "lower": 0.6205426984051795,
+                    "upper": 0.6511320255481484,
+                    "n": 20,
+                    "sd": 0.03267989908362247,
+                    "min": 0.5618374558303887,
+                    "max": 0.6996466431095406,
+                    "level": 0.95
+                  }
+                },
+                "obfuscated": {
+                  "requests": 900,
+                  "flagged": 763,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 33,
+                    "max": 56
+                  },
+                  "rate": {
+                    "estimate": 0.8471378673092793,
+                    "lower": 0.8208898649708013,
+                    "upper": 0.8733858696477573,
+                    "n": 20,
+                    "sd": 0.05608374865906855,
+                    "min": 0.7692307692307693,
+                    "max": 0.9534883720930233,
+                    "level": 0.95
+                  }
+                }
+              },
+              "legit": {
+                "hard": {
+                  "requests": 4500,
+                  "flagged": 1042,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 225,
+                    "max": 225
+                  },
+                  "rate": {
+                    "estimate": 0.23155555555555557,
+                    "lower": 0.1926709764746406,
+                    "upper": 0.27044013463647054,
+                    "n": 20,
+                    "sd": 0.08308414986274192,
+                    "min": 0,
+                    "max": 0.30666666666666664,
+                    "level": 0.95
+                  }
+                },
+                "typical": {
+                  "requests": 85500,
+                  "flagged": 791,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 4275,
+                    "max": 4275
+                  },
+                  "rate": {
+                    "estimate": 0.009251461988304092,
+                    "lower": 0.007974022551049535,
+                    "upper": 0.01052890142555865,
+                    "n": 20,
+                    "sd": 0.0027294874254541342,
+                    "min": 0.0032748538011695906,
+                    "max": 0.014035087719298246,
+                    "level": 0.95
+                  }
+                }
+              }
+            },
+            "byKind": {
+              "attack": {
+                "cmdi": {
+                  "requests": 1098,
+                  "flagged": 1098,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 43,
+                    "max": 67
+                  },
+                  "rate": {
+                    "estimate": 1,
+                    "lower": 1,
+                    "upper": 1,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 1,
+                    "max": 1,
+                    "level": 0.95
+                  }
+                },
+                "crlf": {
+                  "requests": 1096,
+                  "flagged": 690,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 39,
+                    "max": 70
+                  },
+                  "rate": {
+                    "estimate": 0.6294769076392283,
+                    "lower": 0.6030915350410593,
+                    "upper": 0.6558622802373972,
+                    "n": 20,
+                    "sd": 0.05637726581966564,
+                    "min": 0.5208333333333334,
+                    "max": 0.72,
+                    "level": 0.95
+                  }
+                },
+                "ldap": {
+                  "requests": 1107,
+                  "flagged": 681,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 45,
+                    "max": 66
+                  },
+                  "rate": {
+                    "estimate": 0.6148943545948596,
+                    "lower": 0.594223007149199,
+                    "upper": 0.6355657020405203,
+                    "n": 20,
+                    "sd": 0.04416818619705798,
+                    "min": 0.5272727272727272,
+                    "max": 0.6981132075471698,
+                    "level": 0.95
+                  }
+                },
+                "nosql": {
+                  "requests": 1105,
+                  "flagged": 697,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 44,
+                    "max": 68
+                  },
+                  "rate": {
+                    "estimate": 0.628642418439252,
+                    "lower": 0.5789944359393772,
+                    "upper": 0.6782904009391267,
+                    "n": 20,
+                    "sd": 0.1060821671701461,
+                    "min": 0.40384615384615385,
+                    "max": 0.78,
+                    "level": 0.95
+                  }
+                },
+                "oversized": {
+                  "requests": 1114,
+                  "flagged": 977,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 45,
+                    "max": 70
+                  },
+                  "rate": {
+                    "estimate": 0.8750534928284145,
+                    "lower": 0.857182202417543,
+                    "upper": 0.892924783239286,
+                    "n": 20,
+                    "sd": 0.03818534251451363,
+                    "min": 0.7659574468085106,
+                    "max": 0.9215686274509803,
+                    "level": 0.95
+                  }
+                },
+                "sqli": {
+                  "requests": 1077,
+                  "flagged": 1042,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 44,
+                    "max": 64
+                  },
+                  "rate": {
+                    "estimate": 0.9681540309539205,
+                    "lower": 0.9553335669966728,
+                    "upper": 0.9809744949111682,
+                    "n": 20,
+                    "sd": 0.027393310507934778,
+                    "min": 0.9074074074074074,
+                    "max": 1,
+                    "level": 0.95
+                  }
+                },
+                "template": {
+                  "requests": 1118,
+                  "flagged": 478,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 45,
+                    "max": 67
+                  },
+                  "rate": {
+                    "estimate": 0.4281127137167632,
+                    "lower": 0.4046855621704636,
+                    "upper": 0.4515398652630628,
+                    "n": 20,
+                    "sd": 0.050056475238669865,
+                    "min": 0.3333333333333333,
+                    "max": 0.5510204081632653,
+                    "level": 0.95
+                  }
+                },
+                "traversal": {
+                  "requests": 1132,
+                  "flagged": 1072,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 46,
+                    "max": 68
+                  },
+                  "rate": {
+                    "estimate": 0.9469736600555055,
+                    "lower": 0.9346709885160099,
+                    "upper": 0.9592763315950011,
+                    "n": 20,
+                    "sd": 0.026286950509931836,
+                    "min": 0.8888888888888888,
+                    "max": 0.9824561403508771,
+                    "level": 0.95
+                  }
+                },
+                "xss": {
+                  "requests": 1153,
+                  "flagged": 1111,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 47,
+                    "max": 73
+                  },
+                  "rate": {
+                    "estimate": 0.9628411577229018,
+                    "lower": 0.9515781619517714,
+                    "upper": 0.9741041534940322,
+                    "n": 20,
+                    "sd": 0.02406548947346901,
+                    "min": 0.9148936170212766,
+                    "max": 1,
+                    "level": 0.95
+                  }
+                }
+              },
+              "legit": {
+                "cart": {
+                  "requests": 12749,
+                  "flagged": 130,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 611,
+                    "max": 674
+                  },
+                  "rate": {
+                    "estimate": 0.010173855392889154,
+                    "lower": 0.00815595758178235,
+                    "upper": 0.012191753203995959,
+                    "n": 20,
+                    "sd": 0.004311614735415353,
+                    "min": 0.004573170731707317,
+                    "max": 0.0189873417721519,
+                    "level": 0.95
+                  }
+                },
+                "comments": {
+                  "requests": 13981,
+                  "flagged": 81,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 659,
+                    "max": 741
+                  },
+                  "rate": {
+                    "estimate": 0.00579088247712503,
+                    "lower": 0.0034226323520112505,
+                    "upper": 0.00815913260223881,
+                    "n": 20,
+                    "sd": 0.005060207747085651,
+                    "min": 0,
+                    "max": 0.021398002853067047,
+                    "level": 0.95
+                  }
+                },
+                "login": {
+                  "requests": 12793,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 588,
+                    "max": 710
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "products": {
+                  "requests": 17224,
+                  "flagged": 191,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 806,
+                    "max": 906
+                  },
+                  "rate": {
+                    "estimate": 0.011110360054234924,
+                    "lower": 0.009398901984554352,
+                    "upper": 0.012821818123915495,
+                    "n": 20,
+                    "sd": 0.003656849118753368,
+                    "min": 0.0044742729306487695,
+                    "max": 0.02085747392815759,
+                    "level": 0.95
+                  }
+                },
+                "profile": {
+                  "requests": 9659,
+                  "flagged": 36,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 453,
+                    "max": 517
+                  },
+                  "rate": {
+                    "estimate": 0.0038016722060047504,
+                    "lower": 0.0018442177986138764,
+                    "upper": 0.005759126613395624,
+                    "n": 20,
+                    "sd": 0.0041824661389473685,
+                    "min": 0,
+                    "max": 0.014799154334038054,
+                    "level": 0.95
+                  }
+                },
+                "search": {
+                  "requests": 23594,
+                  "flagged": 1395,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 1131,
+                    "max": 1242
+                  },
+                  "rate": {
+                    "estimate": 0.05916063917397594,
+                    "lower": 0.0494508405413288,
+                    "upper": 0.06887043780662308,
+                    "n": 20,
+                    "sd": 0.02074679432823936,
+                    "min": 0,
+                    "max": 0.07563025210084033,
+                    "level": 0.95
+                  }
+                }
+              }
+            }
+          },
+          {
+            "target": 0.001,
+            "calibrated": true,
+            "attainableSeeds": 20,
+            "threshold": {
+              "estimate": 1.3780471030594221,
+              "lower": 1.3751198145895953,
+              "upper": 1.380974391529249,
+              "n": 20,
+              "sd": 0.006254697354765454,
+              "min": 1.364393544474484,
+              "max": 1.3912352461562665,
+              "level": 0.95
+            },
+            "calibrationFpr": {
+              "estimate": 0.00030000000000000003,
+              "lower": 0.00021410410519134268,
+              "upper": 0.0003858958948086574,
+              "n": 20,
+              "sd": 0.00018353258709644942,
+              "min": 0,
+              "max": 0.0006,
+              "level": 0.95
+            },
+            "tpr": {
+              "estimate": 0.7121000000000001,
+              "lower": 0.6999544791759592,
+              "upper": 0.7242455208240409,
+              "n": 20,
+              "sd": 0.02595116871924532,
+              "min": 0.644,
+              "max": 0.744,
+              "level": 0.95
+            },
+            "fpr": {
+              "estimate": 0.0003333333333333334,
+              "lower": 0.0001629390596995357,
+              "upper": 0.0005037276069671311,
+              "n": 20,
+              "sd": 0.00036407912084850005,
+              "min": 0,
+              "max": 0.0013333333333333333,
+              "level": 0.95
+            },
+            "fnr": {
+              "estimate": 0.2879,
+              "lower": 0.27575447917595913,
+              "upper": 0.30004552082404085,
+              "n": 20,
+              "sd": 0.025951168719245313,
+              "min": 0.256,
+              "max": 0.356,
+              "level": 0.95
+            },
+            "precision": {
+              "estimate": 0.9957571564808475,
+              "lower": 0.9935866020373986,
+              "upper": 0.9979277109242964,
+              "n": 20,
+              "sd": 0.004637794079999812,
+              "min": 0.9828571428571429,
+              "max": 1,
+              "level": 0.95
+            },
+            "precisionSeeds": 20,
+            "f1": {
+              "estimate": 0.8301378553621307,
+              "lower": 0.821432427611065,
+              "upper": 0.8388432831131963,
+              "n": 20,
+              "sd": 0.018600768761923136,
+              "min": 0.7815533980582523,
+              "max": 0.8532110091743119,
+              "level": 0.95
+            },
+            "pooled": {
+              "tp": 7121,
+              "fp": 30,
+              "tn": 89970,
+              "fn": 2879
+            },
+            "byVariant": {
+              "attack": {
+                "canonical": {
+                  "requests": 3560,
+                  "flagged": 3560,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 163,
+                    "max": 197
+                  },
+                  "rate": {
+                    "estimate": 1,
+                    "lower": 1,
+                    "upper": 1,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 1,
+                    "max": 1,
+                    "level": 0.95
+                  }
+                },
+                "novel": {
+                  "requests": 5540,
+                  "flagged": 2814,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 258,
+                    "max": 296
+                  },
+                  "rate": {
+                    "estimate": 0.5077575511825854,
+                    "lower": 0.48619456263268573,
+                    "upper": 0.529320539732485,
+                    "n": 20,
+                    "sd": 0.04607334358539478,
+                    "min": 0.3957597173144876,
+                    "max": 0.5800711743772242,
+                    "level": 0.95
+                  }
+                },
+                "obfuscated": {
+                  "requests": 900,
+                  "flagged": 747,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 33,
+                    "max": 56
+                  },
+                  "rate": {
+                    "estimate": 0.8289767607847172,
+                    "lower": 0.8000374310242099,
+                    "upper": 0.8579160905452244,
+                    "n": 20,
+                    "sd": 0.061834271260747795,
+                    "min": 0.6923076923076923,
+                    "max": 0.9534883720930233,
+                    "level": 0.95
+                  }
+                }
+              },
+              "legit": {
+                "hard": {
+                  "requests": 4500,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 225,
+                    "max": 225
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "typical": {
+                  "requests": 85500,
+                  "flagged": 30,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 4275,
+                    "max": 4275
+                  },
+                  "rate": {
+                    "estimate": 0.00035087719298245617,
+                    "lower": 0.00017151479968372175,
+                    "upper": 0.0005302395862811905,
+                    "n": 20,
+                    "sd": 0.0003832411798405264,
+                    "min": 0,
+                    "max": 0.0014035087719298245,
+                    "level": 0.95
+                  }
+                }
+              }
+            },
+            "byKind": {
+              "attack": {
+                "cmdi": {
+                  "requests": 1098,
+                  "flagged": 1098,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 43,
+                    "max": 67
+                  },
+                  "rate": {
+                    "estimate": 1,
+                    "lower": 1,
+                    "upper": 1,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 1,
+                    "max": 1,
+                    "level": 0.95
+                  }
+                },
+                "crlf": {
+                  "requests": 1096,
+                  "flagged": 509,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 39,
+                    "max": 70
+                  },
+                  "rate": {
+                    "estimate": 0.46436538605817673,
+                    "lower": 0.4240336090151106,
+                    "upper": 0.5046971631012429,
+                    "n": 20,
+                    "sd": 0.08617635801338736,
+                    "min": 0.3125,
+                    "max": 0.64,
+                    "level": 0.95
+                  }
+                },
+                "ldap": {
+                  "requests": 1107,
+                  "flagged": 487,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 45,
+                    "max": 66
+                  },
+                  "rate": {
+                    "estimate": 0.4355641415524755,
+                    "lower": 0.3967052783670575,
+                    "upper": 0.47442300473789356,
+                    "n": 20,
+                    "sd": 0.08302920305951493,
+                    "min": 0.24528301886792453,
+                    "max": 0.5689655172413793,
+                    "level": 0.95
+                  }
+                },
+                "nosql": {
+                  "requests": 1105,
+                  "flagged": 404,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 44,
+                    "max": 68
+                  },
+                  "rate": {
+                    "estimate": 0.36264206431049645,
+                    "lower": 0.3264953830991842,
+                    "upper": 0.3987887455218087,
+                    "n": 20,
+                    "sd": 0.07723412082080224,
+                    "min": 0.19148936170212766,
+                    "max": 0.45454545454545453,
+                    "level": 0.95
+                  }
+                },
+                "oversized": {
+                  "requests": 1114,
+                  "flagged": 977,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 45,
+                    "max": 70
+                  },
+                  "rate": {
+                    "estimate": 0.8750534928284145,
+                    "lower": 0.857182202417543,
+                    "upper": 0.892924783239286,
+                    "n": 20,
+                    "sd": 0.03818534251451363,
+                    "min": 0.7659574468085106,
+                    "max": 0.9215686274509803,
+                    "level": 0.95
+                  }
+                },
+                "sqli": {
+                  "requests": 1077,
+                  "flagged": 1037,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 44,
+                    "max": 64
+                  },
+                  "rate": {
+                    "estimate": 0.9634724341187912,
+                    "lower": 0.9492586160260961,
+                    "upper": 0.9776862522114864,
+                    "n": 20,
+                    "sd": 0.030370471288317477,
+                    "min": 0.8888888888888888,
+                    "max": 1,
+                    "level": 0.95
+                  }
+                },
+                "template": {
+                  "requests": 1118,
+                  "flagged": 437,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 45,
+                    "max": 67
+                  },
+                  "rate": {
+                    "estimate": 0.39072311233936785,
+                    "lower": 0.351671558143532,
+                    "upper": 0.4297746665352037,
+                    "n": 20,
+                    "sd": 0.08344092331379473,
+                    "min": 0.23728813559322035,
+                    "max": 0.5510204081632653,
+                    "level": 0.95
+                  }
+                },
+                "traversal": {
+                  "requests": 1132,
+                  "flagged": 1061,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 46,
+                    "max": 68
+                  },
+                  "rate": {
+                    "estimate": 0.9370300601948796,
+                    "lower": 0.924836539363807,
+                    "upper": 0.9492235810259521,
+                    "n": 20,
+                    "sd": 0.026053729679705585,
+                    "min": 0.8888888888888888,
+                    "max": 0.9824561403508771,
+                    "level": 0.95
+                  }
+                },
+                "xss": {
+                  "requests": 1153,
+                  "flagged": 1111,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 47,
+                    "max": 73
+                  },
+                  "rate": {
+                    "estimate": 0.9628411577229018,
+                    "lower": 0.9515781619517714,
+                    "upper": 0.9741041534940322,
+                    "n": 20,
+                    "sd": 0.02406548947346901,
+                    "min": 0.9148936170212766,
+                    "max": 1,
+                    "level": 0.95
+                  }
+                }
+              },
+              "legit": {
+                "cart": {
+                  "requests": 12749,
+                  "flagged": 15,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 611,
+                    "max": 674
+                  },
+                  "rate": {
+                    "estimate": 0.0011643509085966983,
+                    "lower": 0.0004679845574881874,
+                    "upper": 0.0018607172597052092,
+                    "n": 20,
+                    "sd": 0.001487916486236756,
+                    "min": 0,
+                    "max": 0.004746835443037975,
+                    "level": 0.95
+                  }
+                },
+                "comments": {
+                  "requests": 13981,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 659,
+                    "max": 741
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "login": {
+                  "requests": 12793,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 588,
+                    "max": 710
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "products": {
+                  "requests": 17224,
+                  "flagged": 15,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 806,
+                    "max": 906
+                  },
+                  "rate": {
+                    "estimate": 0.0008738246556398479,
+                    "lower": 0.00037736968072148397,
+                    "upper": 0.0013702796305582118,
+                    "n": 20,
+                    "sd": 0.0010607685748735783,
+                    "min": 0,
+                    "max": 0.0034762456546929316,
+                    "level": 0.95
+                  }
+                },
+                "profile": {
+                  "requests": 9659,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 453,
+                    "max": 517
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                },
+                "search": {
+                  "requests": 23594,
+                  "flagged": 0,
+                  "seeds": 20,
+                  "requestsPerSeed": {
+                    "min": 1131,
+                    "max": 1242
+                  },
+                  "rate": {
+                    "estimate": 0,
+                    "lower": 0,
+                    "upper": 0,
+                    "n": 20,
+                    "sd": 0,
+                    "min": 0,
+                    "max": 0,
+                    "level": 0.95
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "comparisons": [
+      {
+        "target": 0.01,
+        "pairs": [
+          {
+            "modes": ["stats", "combined"],
+            "groups": {
+              "attack": {
+                "onlyA": 0,
+                "onlyB": 1643,
+                "exactP": 0,
+                "chiSquare": 1641.0006086427268,
+                "chiSquareP": 0,
+                "seedsMoreA": 0,
+                "seedsMoreB": 20
+              },
+              "novel": {
+                "onlyA": 0,
+                "onlyB": 0,
+                "exactP": 1,
+                "chiSquare": 0,
+                "chiSquareP": 1,
+                "seedsMoreA": 0,
+                "seedsMoreB": 0
+              },
+              "legit": {
+                "onlyA": 0,
+                "onlyB": 0,
+                "exactP": 1,
+                "chiSquare": 0,
+                "chiSquareP": 1,
+                "seedsMoreA": 0,
+                "seedsMoreB": 0
+              }
+            }
+          },
+          {
+            "modes": ["rules", "combined"],
+            "groups": {
+              "attack": {
+                "onlyA": 0,
+                "onlyB": 3759,
+                "exactP": 0,
+                "chiSquare": 3757.000266028199,
+                "chiSquareP": 0,
+                "seedsMoreA": 0,
+                "seedsMoreB": 20
+              },
+              "novel": {
+                "onlyA": 0,
+                "onlyB": 3523,
+                "exactP": 0,
+                "chiSquare": 3521.0002838489922,
+                "chiSquareP": 0,
+                "seedsMoreA": 0,
+                "seedsMoreB": 20
+              },
+              "legit": {
+                "onlyA": 0,
+                "onlyB": 1833,
+                "exactP": 0,
+                "chiSquare": 1831.000545553737,
+                "chiSquareP": 0,
+                "seedsMoreA": 0,
+                "seedsMoreB": 20
+              }
+            }
+          },
+          {
+            "modes": ["rules", "stats"],
+            "groups": {
+              "attack": {
+                "onlyA": 1643,
+                "onlyB": 3759,
+                "exactP": 5.351692042034618e-187,
+                "chiSquare": 828.0683080340615,
+                "chiSquareP": 4.262217747486803e-182,
+                "seedsMoreA": 0,
+                "seedsMoreB": 20
+              },
+              "novel": {
+                "onlyA": 0,
+                "onlyB": 3523,
+                "exactP": 0,
+                "chiSquare": 3521.0002838489922,
+                "chiSquareP": 0,
+                "seedsMoreA": 0,
+                "seedsMoreB": 20
+              },
+              "legit": {
+                "onlyA": 0,
+                "onlyB": 1833,
+                "exactP": 0,
+                "chiSquare": 1831.000545553737,
+                "chiSquareP": 0,
+                "seedsMoreA": 0,
+                "seedsMoreB": 20
+              }
+            }
+          }
+        ]
+      },
+      {
+        "target": 0.001,
+        "pairs": [
+          {
+            "modes": ["stats", "combined"],
+            "groups": {
+              "attack": {
+                "onlyA": 0,
+                "onlyB": 1947,
+                "exactP": 0,
+                "chiSquare": 1945.0005136106831,
+                "chiSquareP": 0,
+                "seedsMoreA": 0,
+                "seedsMoreB": 20
+              },
+              "novel": {
+                "onlyA": 0,
+                "onlyB": 0,
+                "exactP": 1,
+                "chiSquare": 0,
+                "chiSquareP": 1,
+                "seedsMoreA": 0,
+                "seedsMoreB": 0
+              },
+              "legit": {
+                "onlyA": 0,
+                "onlyB": 0,
+                "exactP": 1,
+                "chiSquare": 0,
+                "chiSquareP": 1,
+                "seedsMoreA": 0,
+                "seedsMoreB": 0
+              }
+            }
+          },
+          {
+            "modes": ["rules", "combined"],
+            "groups": {
+              "attack": {
+                "onlyA": 0,
+                "onlyB": 3034,
+                "exactP": 0,
+                "chiSquare": 3032.0003295978904,
+                "chiSquareP": 0,
+                "seedsMoreA": 0,
+                "seedsMoreB": 20
+              },
+              "novel": {
+                "onlyA": 0,
+                "onlyB": 2814,
+                "exactP": 0,
+                "chiSquare": 2812.000355366027,
+                "chiSquareP": 0,
+                "seedsMoreA": 0,
+                "seedsMoreB": 20
+              },
+              "legit": {
+                "onlyA": 0,
+                "onlyB": 30,
+                "exactP": 1.862645149230966e-9,
+                "chiSquare": 28.033333333333335,
+                "chiSquareP": 1.1924366373438289e-7,
+                "seedsMoreA": 0,
+                "seedsMoreB": 1
+              }
+            }
+          },
+          {
+            "modes": ["rules", "stats"],
+            "groups": {
+              "attack": {
+                "onlyA": 1947,
+                "onlyB": 3034,
+                "exactP": 7.616823884883344e-54,
+                "chiSquare": 236.7789600481831,
+                "chiSquareP": 1.981780031261534e-53,
+                "seedsMoreA": 0,
+                "seedsMoreB": 19
+              },
+              "novel": {
+                "onlyA": 0,
+                "onlyB": 2814,
+                "exactP": 0,
+                "chiSquare": 2812.000355366027,
+                "chiSquareP": 0,
+                "seedsMoreA": 0,
+                "seedsMoreB": 20
+              },
+              "legit": {
+                "onlyA": 0,
+                "onlyB": 30,
+                "exactP": 1.862645149230966e-9,
+                "chiSquare": 28.033333333333335,
+                "chiSquareP": 1.1924366373438289e-7,
+                "seedsMoreA": 0,
+                "seedsMoreB": 1
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

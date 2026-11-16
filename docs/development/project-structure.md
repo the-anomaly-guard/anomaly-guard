@@ -20,7 +20,8 @@ anomaly-guard/
 │   ├── development/          # standards, project-structure, tech-stack, adr/
 │   ├── statistics/           # methods.md - the maths
 │   ├── planning/             # backlog.md - task board
-│   └── report/               # the report, one chapter per theme (E-05)
+│   └── report/               # the report, one chapter per theme (E-05), generated from
+│                             # templates/ and numbers.json by npm run report (ADR-014)
 └── packages/
     ├── core/                 # shared engine (pure JS)
     ├── traffic/              # traffic generator + dataset
@@ -65,7 +66,8 @@ anomaly-guard/
   `core` so it can score any detector.
 - `experiments` (D-04, ADR-009) is **Node-only**: it depends on `core`, `traffic` and
   `evaluation`, runs the seeded experiments and may use `fs` to write `results/` (and runs `git`
-  to record the commit). It is the only place experiment code touches the file system, so the
+  to record the commit), and the generated chapters of `docs/report/` with their saved numbers
+  (`npm run report`, ADR-014). It is the only place experiment code touches the file system, so the
   three pure packages stay pure.
 - Purity is enforced by ESLint (`eslint.config.js`): in `core`, `traffic` and `evaluation` `src/`,
   browser globals, Node globals and modules, `fetch` and `Math.random` are errors. In
@@ -83,7 +85,7 @@ workspace: a theme spans several workspaces, and the **Themes** column says who 
 | `evaluation`  | evaluation       | T3 (T4 uses `positivePredictiveValue`)                  | `confusionMatrix`, `metrics`, `thresholdAtFpr`, `rocCurve`, `wilsonInterval`, `bootstrapAucInterval`, `meanInterval`, `mcnemarTest`, `positivePredictiveValue` |
 | `server`      | live monitor     | T3 (B-02)                                               | Express app: `POST /ingest`, `GET /health`                                                                                                                     |
 | `dashboard`   | UI               | everyone: one chart per theme                           | seven HTML pages (ADR-010); GitHub Pages build; internals in its README                                                                                        |
-| `experiments` | experiment runs  | T3                                                      | `runExperiment`, `formatReport`; `npm run experiments` writes `results/<date>-<commit>/`                                                                       |
+| `experiments` | experiment runs  | T3                                                      | `runExperiment`, `formatReport`; `npm run experiments` writes `results/<date>-<commit>/`; `npm run report` writes `docs/report/`                               |
 
 ## 3. `packages/core` internals
 

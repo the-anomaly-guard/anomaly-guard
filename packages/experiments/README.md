@@ -26,7 +26,27 @@ It prints where it wrote two files, `results/<date>-<commit>/`:
 
 `results/` is git-ignored: anyone can regenerate the same numbers from the seeds and the commit.
 Run it from a clean tree before quoting a result; otherwise the commit does not describe the code,
-and the run says so.
+and the run says so. To put a result in the report, do not copy it: see below.
+
+## The report's numbers (D-08, ADR-014)
+
+The chapters of the report are generated: each is a template in `docs/report/templates/`, whose
+numbers are placeholders filled from `docs/report/numbers.json`.
+
+```bash
+npm run report               # after editing a template: rewrites the chapters (seconds)
+npm run report -- --update   # after a change to the code: commit, then this (about 1.5 minutes)
+```
+
+- `--update` runs `runExperiment(DEFAULT_CONFIG)` on the current commit (it refuses uncommitted
+  changes outside `docs/report/`) and saves its summary, the provenance, a few facts about the code
+  (`reportSetup`) and the fingerprint of the code.
+- **The fingerprint** (`src/fingerprint.js`) hashes every number of a small probe run of the same
+  experiment (two seeds, 20 bootstrap resamples, about a second). `npm test` compares it with the
+  saved one, and fails when the detector's results have changed but the report has not.
+- **The templates** (`src/template.js`): `{{key:modifiers}}` placeholders and
+  `<!-- claim: id -->` checks; the facts and claims of a chapter are in `src/chapters/`. The syntax
+  is in [`docs/report/README.md`](../../docs/report/README.md).
 
 ## What one seed does
 
