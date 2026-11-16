@@ -25,6 +25,7 @@
     "dev:server": "npm run start --workspace @anomaly-guard/server",
     "build": "npm run build --workspace @anomaly-guard/dashboard",
     "experiments": "node packages/experiments/src/cli.js",
+    "report": "node packages/experiments/src/report-cli.js",
     "team-setup": "node scripts/team-setup.js"
   },
   "devDependencies": {
