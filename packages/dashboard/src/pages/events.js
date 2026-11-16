@@ -286,6 +286,7 @@ function detailView(e) {
       ruleMatched: result.ruleMatched,
       hits: result.detail.hits,
       parts: result.detail.parts,
+      explanation: result.detail.explanation,
       reasons: result.reasons,
       level: e.level,
       truth: { label: sample.label, kind: sample.kind, variant: sample.variant },

@@ -104,4 +104,5 @@ configuration.
 - [ ] T3: decide whether the pipeline and the experiment use `calibrated`, and how to split the
       calibration split between calibrating the model and setting the threshold.
 - [ ] Repeat the comparison with the report's configuration (D-04) and put it in the report.
-- [ ] C-07: explain a verdict with `top`, the parameter and the feature of the signal.
+- [x] C-07: explain a verdict with `top`, the parameter and the feature of the signal
+      (`explanation` in `scoreRequest` and `detect().detail`, one line in `reasons`).

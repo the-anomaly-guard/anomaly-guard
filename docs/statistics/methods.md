@@ -344,6 +344,12 @@ mode is the best of the three on obfuscated attacks. It is not better on everyth
 legitimate-but-weird requests in the test set, Mahalanobis alone has the better AUC. Its scores
 have a ceiling, `log10(n + 1)`.
 
+**Explanations (C-07).** `scoreRequest` also returns `explanation` for the top part: the signal,
+the parameter, the feature (outlier signals), the statistic (`z`, `chi2` or `D2`, with its degrees
+of freedom) and `p = 10^-score`. `detect` puts it in `detail.explanation` and in one line of
+`reasons`, e.g. `length on "q": z = 12.10, p ≈ 6.3e-5`. The `p` is a measure of rarity, not a
+probability of attack: Chebyshev's bound and the per-request chi-square p are nominal (ADR-008).
+
 ## 6. Evaluation - `packages/evaluation`, `packages/experiments` (implemented)
 
 From a labelled test set and scores, at a threshold `t` (predict "attack" when `score ≥ t`):

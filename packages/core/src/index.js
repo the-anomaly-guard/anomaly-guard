@@ -62,4 +62,4 @@ export {
   COMBINE_MODES,
 } from './stats/anomaly.js';
 
-export { detect } from './detector/detect.js';
+export { detect, describeExplanation } from './detector/detect.js';

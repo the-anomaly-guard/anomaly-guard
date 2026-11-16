@@ -28,6 +28,22 @@ export const SIGNAL_PARTS = Object.freeze(['length', 'chiSquare', 'iqr', 'mad', 
 export const COMBINE_MODES = Object.freeze(['max', 'calibrated']);
 
 /**
+ * What every signal measured for one request: its own result object (score, parameter, feature,
+ * statistic), in the order of SIGNAL_PARTS.
+ * @param {import('./model.js').StatModel} model
+ * @param {import('../features/extract.js').AgRequest} request
+ */
+function scoreDetails(model, request) {
+  return {
+    length: lengthScore(model, request),
+    chiSquare: chiSquareScore(model, request),
+    iqr: iqrScore(model, request),
+    mad: madScore(model, request),
+    mahalanobis: mahalanobisScore(model, request),
+  };
+}
+
+/**
  * The score of every signal for one request, each on the -log10(p) scale.
  * @param {import('./model.js').StatModel} model
  * @param {import('../features/extract.js').AgRequest} request
@@ -36,13 +52,48 @@ export const COMBINE_MODES = Object.freeze(['max', 'calibrated']);
 export function scoreParts(model, request) {
   // Math.max(0, s) turns a -0 (a tail probability of exactly 1) into 0, so the parts survive a
   // JSON round trip unchanged.
-  const part = (s) => Math.max(0, s);
+  const details = scoreDetails(model, request);
+  return Object.fromEntries(SIGNAL_PARTS.map((name) => [name, Math.max(0, details[name].score)]));
+}
+
+/**
+ * Why a signal scored what it did (C-07): the signal, the parameter and the feature it looked at,
+ * the statistic it computed and the probability behind the score. Plain data, JSON-safe.
+ * @typedef {Object} Explanation
+ * @property {string} signal  one of SIGNAL_PARTS
+ * @property {string | null} param  the parameter whose value produced the score
+ * @property {string | null} feature  the feature of that value (outlier signals; else null)
+ * @property {string} statistic  name of the statistic: 'z', 'chi2' or 'D2'
+ * @property {number | null} value  the statistic's value (null for an unseen pair)
+ * @property {number | null} df  degrees of freedom (chi2, D2), else null
+ * @property {boolean} unseen  the (path, parameter) pair was never seen in training
+ * @property {number} score  the combined part that was used, -log10(p) (or the tail rank)
+ * @property {number} p  10^-score: the tail probability of the score. Chebyshev bounds and the
+ *   per-request chi-square p are nominal (ADR-008, methods.md), so read it as a measure of rarity
+ */
+
+/**
+ * Build the explanation of one signal from its own result.
+ * @param {string} signal
+ * @param {any} result  what the signal returned
+ * @param {number} score  the part's value as combined
+ * @returns {Explanation}
+ */
+function explain(signal, result, score) {
+  /** @type {Pick<Explanation, 'statistic' | 'value' | 'df'>} */
+  let stat = { statistic: 'z', value: result.z ?? null, df: null };
+  if (signal === 'chiSquare') stat = { statistic: 'chi2', value: result.chiSquare, df: result.df };
+  if (signal === 'mahalanobis') stat = { statistic: 'D2', value: result.d2, df: result.df };
+  const unseen = Boolean(result.unseen);
+  if (unseen) stat.value = null;
   return {
-    length: part(lengthScore(model, request).score),
-    chiSquare: part(chiSquareScore(model, request).score),
-    iqr: part(iqrScore(model, request).score),
-    mad: part(madScore(model, request).score),
-    mahalanobis: part(mahalanobisScore(model, request).score),
+    signal,
+    param: result.param ?? null,
+    feature: result.feature ?? null,
+    ...stat,
+    unseen,
+    score,
+    p: 10 ** -score,
   };
 }
 
@@ -101,14 +152,18 @@ export function calibrateModel(model, calibrationRequests) {
  * @param {import('./model.js').StatModel} model
  * @param {import('../features/extract.js').AgRequest} request
  * @param {{ combine?: CombineMode }} [options]  `calibrated` needs a model from `calibrateModel`
- * @returns {{ score: number, parts: Record<string, number>, top: string | null, raw: Record<string, number> }}
- *   `parts` are the values that were combined; `raw` the signals' own scores (the same in `max`)
+ * @returns {{ score: number, parts: Record<string, number>, top: string | null, raw: Record<string, number>, explanation: Explanation | null }}
+ *   `parts` are the values that were combined; `raw` the signals' own scores (the same in `max`);
+ *   `explanation` says what the top signal measured (null when every part is 0)
  * @throws {RangeError} for an unknown mode
  * @throws {TypeError} for `calibrated` on a model that was not calibrated
  */
 export function scoreRequest(model, request, { combine = 'max' } = {}) {
   if (!COMBINE_MODES.includes(combine)) throw new RangeError(`unknown combine mode: ${combine}`);
-  const raw = scoreParts(model, request);
+  const details = scoreDetails(model, request);
+  const raw = Object.fromEntries(
+    SIGNAL_PARTS.map((name) => [name, Math.max(0, details[name].score)]),
+  );
   let parts = raw;
   if (combine === 'calibrated') {
     const calibration = model.calibration;
@@ -126,5 +181,6 @@ export function scoreRequest(model, request, { combine = 'max' } = {}) {
       top = name;
     }
   }
-  return { score, parts, top, raw: { ...raw } };
+  const explanation = top === null ? null : explain(top, details[top], score);
+  return { score, parts, top, raw: { ...raw }, explanation };
 }

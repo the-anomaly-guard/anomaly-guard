@@ -1,15 +1,36 @@
 // Detector: combine rule hits and the statistical score into an explained verdict, with ONE
 // continuous score per mode so the ROC can sweep the threshold in every configuration (ADR-007).
-// Baseline for the pipeline (backlog C-07): refine the explanations once C-03/C-05/C-06 land.
+// A statistical reason names the signal, the parameter, the feature and the probability (C-07).
 // Pure, runtime-agnostic.
 
 import { scoreRequest } from '../stats/anomaly.js';
+
+/** @typedef {import('../stats/anomaly.js').Explanation} Explanation */
 
 /**
  * @typedef {'rules' | 'stats' | 'combined'} DetectMode
  */
 
 const MODES = ['rules', 'stats', 'combined'];
+
+/**
+ * One readable line for an explanation, e.g.
+ * `length on "q": z = 12.10, p ≈ 6.3e-5` or `iqr on "q" (logLength): z = 8.20, p ≈ 1.5e-2`.
+ * @param {Explanation} e
+ * @returns {string}
+ */
+export function describeExplanation(e) {
+  const where = e.param === null ? '' : ` on "${e.param}"${e.feature ? ` (${e.feature})` : ''}`;
+  if (e.unseen) return `${e.signal}${where}: parameter never seen in training, p ≈ ${fmtP(e.p)}`;
+  const df = e.df === null ? '' : ` (df ${e.df})`;
+  const value = e.value === null ? '' : `${e.statistic} = ${e.value.toFixed(2)}${df}, `;
+  return `${e.signal}${where}: ${value}p ≈ ${fmtP(e.p)}`;
+}
+
+/** @param {number} p  @returns {string} two significant digits, exponent for small values */
+function fmtP(p) {
+  return p >= 0.01 ? p.toFixed(2) : p.toExponential(1);
+}
 
 /**
  * Decide whether a request is an attack, and say why.
@@ -32,7 +53,7 @@ const MODES = ['rules', 'stats', 'combined'];
  *   statScore: number,
  *   ruleMatched: boolean,
  *   reasons: string[],
- *   detail: { hits: any[], parts: Record<string, number> }
+ *   detail: { hits: any[], parts: Record<string, number>, explanation: Explanation | null }
  * }}
  */
 export function detect(request, opts) {
@@ -62,14 +83,18 @@ export function detect(request, opts) {
   let statScore = 0;
   /** @type {Record<string, number>} */
   let parts = {};
+  /** @type {Explanation | null} */
+  let explanation = null;
   if (useStats) {
     const s = scoreRequest(model, request);
     statScore = s.score;
     parts = s.parts;
+    explanation = s.explanation;
     if (statScore >= threshold) {
       // Two decimals for both: a calibrated threshold has many digits (ADR-009).
       reasons.push(
-        `statistical score ${statScore.toFixed(2)} (${s.top ?? 'none'}) ≥ threshold ${threshold.toFixed(2)}`,
+        `statistical score ${statScore.toFixed(2)} ≥ threshold ${threshold.toFixed(2)}: ` +
+          (explanation ? describeExplanation(explanation) : 'no signal'),
       );
     }
   }
@@ -87,6 +112,6 @@ export function detect(request, opts) {
     statScore,
     ruleMatched,
     reasons,
-    detail: { hits, parts },
+    detail: { hits, parts, explanation },
   };
 }
