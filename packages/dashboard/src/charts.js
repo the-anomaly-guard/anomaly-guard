@@ -138,6 +138,131 @@ export function barChart(canvas, { labels, values, colors, label, horizontal = f
 }
 
 /**
+ * Draws a vertical line (the detector's threshold) on a category axis, at a fractional index: bin
+ * i is centred on i, so 1.5 is the border between bin 1 and bin 2. Set the position, and the
+ * text of the label, in `options.plugins.thresholdLine`; without a position nothing is drawn.
+ */
+const thresholdLinePlugin = {
+  id: 'thresholdLine',
+  afterDatasetsDraw(/** @type {Chart} */ chart, _args, /** @type {any} */ options) {
+    if (options?.position === null || options?.position === undefined) return;
+    const { ctx, chartArea, scales } = chart;
+    const x = scales.x.getPixelForValue(options.position);
+    if (x < chartArea.left || x > chartArea.right) return;
+    ctx.save();
+    ctx.strokeStyle = options.color;
+    ctx.fillStyle = options.color;
+    ctx.lineWidth = 2;
+    ctx.setLineDash([5, 4]);
+    ctx.beginPath();
+    ctx.moveTo(x, chartArea.top);
+    ctx.lineTo(x, chartArea.bottom);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.font = `${options.fontSize ?? 12}px ${Chart.defaults.font.family}`;
+    ctx.textAlign = x > chartArea.right - 90 ? 'right' : 'left';
+    ctx.fillText(options.label, x + (ctx.textAlign === 'right' ? -4 : 4), chartArea.top + 12);
+    ctx.restore();
+  },
+};
+
+/**
+ * Grouped bars: the share of two classes (legitimate, attack) in every bin of a distribution, and
+ * optionally the threshold (E-02, theme T2). The tooltip shows the share and the count.
+ * @param {HTMLCanvasElement} canvas
+ * @param {HistogramData} data
+ * @param {{ fontSize?: number, xTitle?: string }} [style]
+ */
+export function histogramChart(canvas, data, { fontSize, xTitle } = {}) {
+  const font = fontSize ? { size: fontSize } : undefined;
+  const percent = (value) => `${Math.round(Number(value) * 100)}%`;
+  return new Chart(canvas, {
+    type: 'bar',
+    plugins: [thresholdLinePlugin],
+    data: histogramDatasets(data),
+    options: {
+      scales: {
+        x: { grid: { display: false }, title: { display: !!xTitle, text: xTitle, font } },
+        y: {
+          beginAtZero: true,
+          max: 1,
+          ticks: { callback: percent, stepSize: 0.25, font },
+          title: { display: true, text: 'Share of its class', font },
+        },
+      },
+      plugins: {
+        legend: { position: 'bottom', labels: { font } },
+        thresholdLine: thresholdOptions(data, font),
+        tooltip: {
+          titleFont: font,
+          bodyFont: font,
+          callbacks: {
+            label: (item) => {
+              const counts = item.datasetIndex === 0 ? data.legitCount : data.attackCount;
+              return (
+                `${item.dataset.label}: ${(item.parsed.y * 100).toFixed(1)}% ` +
+                `(${counts[item.dataIndex]} requests)`
+              );
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
+/**
+ * @typedef {Object} HistogramData
+ * @property {string[]} labels  one per bin
+ * @property {number[]} legit   share of the legitimate requests per bin
+ * @property {number[]} attack  share of the attack requests per bin
+ * @property {number[]} legitCount
+ * @property {number[]} attackCount
+ * @property {{ position: number, label: string } | null} [threshold]  fractional bin index
+ */
+
+/** @param {HistogramData} data */
+function histogramDatasets({ labels, legit, attack }) {
+  return {
+    labels,
+    datasets: [
+      { label: 'Legitimate', data: legit, backgroundColor: token('--primary'), borderRadius: 2 },
+      { label: 'Attack', data: attack, backgroundColor: token('--danger'), borderRadius: 2 },
+    ],
+  };
+}
+
+/** @param {HistogramData} data @param {{ size: number } | undefined} font */
+function thresholdOptions(data, font) {
+  return {
+    position: data.threshold?.position ?? null,
+    label: data.threshold?.label ?? '',
+    color: token('--text'),
+    fontSize: font?.size,
+  };
+}
+
+/**
+ * New data for a chart made by histogramChart (the live replay keeps adding requests).
+ * @param {Chart} chart
+ * @param {HistogramData} data
+ */
+export function setHistogramData(chart, data) {
+  const next = histogramDatasets(data);
+  chart.data.labels = next.labels;
+  chart.data.datasets.forEach((dataset, i) => {
+    dataset.data = next.datasets[i].data;
+  });
+  const font = chart.options.scales?.y?.ticks?.font;
+  chart.options.plugins.thresholdLine = thresholdOptions(data, /** @type {any} */ (font));
+  chart.options.plugins.tooltip.callbacks.label = (item) => {
+    const counts = item.datasetIndex === 0 ? data.legitCount : data.attackCount;
+    return `${item.dataset.label}: ${(item.parsed.y * 100).toFixed(1)}% (${counts[item.dataIndex]} requests)`;
+  };
+  chart.update();
+}
+
+/**
  * A doughnut chart.
  * @param {HTMLCanvasElement} canvas
  * @param {{ labels: string[], values: number[], colors: string[] }} data
