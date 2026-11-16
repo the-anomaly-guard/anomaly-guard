@@ -110,7 +110,8 @@ export function invertSymmetric(a) {
       if (f !== 0) for (let j = 0; j < 2 * d; j++) m[r][j] -= f * m[col][j];
     }
   }
-  return m.map((row) => row.slice(d));
+  // `+ 0` turns a -0 left by the elimination into 0, so the model survives a JSON round trip
+  return m.map((row) => row.slice(d).map((v) => v + 0));
 }
 
 /**

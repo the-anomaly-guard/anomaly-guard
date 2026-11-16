@@ -2,15 +2,18 @@
 
 # T3 - Valutazione e incertezza
 
+> **Da riscrivere:** tre frasi non corrispondono più ai numeri; sono segnate più sotto.
+
 > **Bozza** del capitolo T3 della relazione finale (E-05). Autore: Nicholas Arcari.
 >
-> - **Origine dei numeri:** un'esecuzione di `npm run experiments` al commit `dcc2295`, seed 1-20,
+> - **Origine dei numeri:** un'esecuzione di `npm run experiments` al commit `ca7de71`, seed 1-20,
 >   albero di lavoro pulito, 16/11/2026. Nessun numero qui è scritto a mano: `npm run report`
 >   riempie [il modello di questo capitolo](templates/t3-evaluation-and-uncertainty.it.md) da
 >   [`numbers.json`](numbers.json), e un test fallisce quando il codice non dà più questi risultati
 >   ([README](README.md), ADR-014).
 > - **Il punteggio statistico è ancora il solo segnale sulla lunghezza**, in scala logaritmica da
->   C-04 (ADR-012). Il chi-quadro (C-03) e i segnali di outlier (C-05) sono implementati, ma entrano
+>   C-04 (ADR-012). **[Da riscrivere: i numeri non sostengono più questa frase (claim
+>   lengthOnly).]** Il chi-quadro (C-03) e i segnali di outlier (C-05) sono implementati, ma entrano
 >   nel punteggio solo con C-06.
 > - La prima bozza usava le regole di base (commit `c4ef25c`), e il §5 spiega che cosa è cambiato.
 >
@@ -176,8 +179,8 @@ Ogni valore è la media sui 20 seed, con l'intervallo t al 95% della media tra p
 | Rilevatore | AUC                 | DS tra i seed | Intervallo di variazione | Ampiezza media dell'intervallo bootstrap di un seed |
 | ---------- | ------------------- | ------------- | ------------------------ | --------------------------------------------------- |
 | regole     | 0,704 [0,700-0,709] | 0,010         | 0,687-0,727              | 0,043                                               |
-| statistica | 0,870 [0,865-0,874] | 0,009         | 0,858-0,889              | 0,042                                               |
-| combinato  | 0,921 [0,916-0,925] | 0,010         | 0,900-0,935              | 0,036                                               |
+| statistica | 0,993 [0,992-0,993] | 0,001         | 0,992-0,994              | 0,004                                               |
+| combinato  | 0,996 [0,996-0,997] | 0,000         | 0,995-0,997              | 0,002                                               |
 
 Guardando solo all'ordinamento, il combinato separa meglio gli attacchi dalle richieste legittime, e
 la statistica batte nettamente le regole.
@@ -186,11 +189,11 @@ la statistica batte nettamente le regole.
 
 **Tabella 2 - Punto operativo con obiettivo 1%.**
 
-| Rilevatore | Soglia              | FPR di calibrazione | FPR test, tipiche | FPR test, tutte le legittime | TPR               | Precisione          | Obiettivo rispettato |
-| ---------- | ------------------- | ------------------- | ----------------- | ---------------------------- | ----------------- | ------------------- | -------------------- |
-| regole     | - (una regola)      | 0% (in ogni seed)   | 0% (in ogni seed) | 0% (in ogni seed)            | 40,9% [39,9-41,8] | 100% (in ogni seed) | 20/20 seed           |
-| statistica | 0,900 [0,846-0,953] | 0,94% [0,86-1,02]   | 0,93% [0,80-1,05] | 2,04% [1,75-2,33]            | 62,0% [60,8-63,2] | 77,7% [74,7-80,6]   | 20/20                |
-| combinato  | 0,900 [0,846-0,953] | 0,94% [0,86-1,02]   | 0,93% [0,80-1,05] | 2,04% [1,75-2,33]            | 78,5% [77,5-79,4] | 81,4% [78,8-83,9]   | 20/20                |
+| Rilevatore | Soglia                 | FPR di calibrazione | FPR test, tipiche | FPR test, tutte le legittime | TPR               | Precisione          | Obiettivo rispettato |
+| ---------- | ---------------------- | ------------------- | ----------------- | ---------------------------- | ----------------- | ------------------- | -------------------- |
+| regole     | - (una regola)         | 0% (in ogni seed)   | 0% (in ogni seed) | 0% (in ogni seed)            | 40,9% [39,9-41,8] | 100% (in ogni seed) | 20/20 seed           |
+| statistica | 22,464 [20,899-24,029] | 0,99% [0,98-1,00]   | 0,94% [0,84-1,03] | 2,12% [2,01-2,23]            | 91,5% [90,3-92,7] | 82,8% [82,1-83,5]   | 20/20                |
+| combinato  | 22,464 [20,899-24,029] | 0,99% [0,98-1,00]   | 0,94% [0,84-1,03] | 2,12% [2,01-2,23]            | 96,3% [95,6-97,0] | 83,5% [82,8-84,2]   | 20/20                |
 
 Le regole non segnalano alcuna richiesta legittima, quindi il combinato mantiene la soglia della
 statistica: i due danno gli stessi falsi allarmi, e il combinato aggiunge le corrispondenze delle
@@ -201,11 +204,11 @@ rilevamento; per le richieste legittime, il tasso di falsi positivi.
 
 | Variante              | Richieste per seed | regole              | statistica        | combinato           |
 | --------------------- | ------------------ | ------------------- | ----------------- | ------------------- |
-| attacco · canonico    | 163-197            | 100% (in ogni seed) | 58,6% [57,0-60,1] | 100% (in ogni seed) |
-| attacco · offuscato   | 33-56              | 58,2% [54,8-61,6]   | 66,3% [62,7-69,9] | 84,7% [82,1-87,3]   |
-| attacco · nuovo       | 258-296            | 0% (in ogni seed)   | 63,6% [62,1-65,1] | 63,6% [62,1-65,1]   |
-| legittima · tipica    | 4.275              | 0% (in ogni seed)   | 0,93% [0,80-1,05] | 0,93% [0,80-1,05]   |
-| legittima · difficile | 225                | 0% (in ogni seed)   | 23,2% [19,3-27,0] | 23,2% [19,3-27,0]   |
+| attacco · canonico    | 163-197            | 100% (in ogni seed) | 86,5% [84,7-88,4] | 100% (in ogni seed) |
+| attacco · offuscato   | 33-56              | 58,2% [54,8-61,6]   | 97,0% [95,8-98,2] | 97,5% [96,3-98,7]   |
+| attacco · nuovo       | 258-296            | 0% (in ogni seed)   | 93,7% [92,5-95,0] | 93,7% [92,5-95,0]   |
+| legittima · tipica    | 4.275              | 0% (in ogni seed)   | 0,94% [0,84-1,03] | 0,94% [0,84-1,03]   |
+| legittima · difficile | 225                | 0% (in ogni seed)   | 24,6% [23,6-25,7] | 24,6% [23,6-25,7]   |
 
 Per famiglia:
 
@@ -213,22 +216,23 @@ Per famiglia:
   parte delle SQL injection (90,9%), degli XSS (89,4%) e dei path traversal (86,4%). Non individuano
   nessun attacco nuovo. Sono state scritte solo per i payload canonici, senza guardare quelli
   offuscati e nuovi (ADR-006, B-01): prendono ogni attacco canonico, ma solo il 58% degli offuscati.
-- **La statistica** individua fra il 43% (template injection) e l'88% (valori sovradimensionati) di
-  ogni famiglia.
+- **La statistica** individua fra il 77% (CRLF injection) e il 100% (LDAP injection) di ogni
+  famiglia.
 - **Richieste legittime:** le regole non danno alcun falso allarme, 0 su 90.000 richieste legittime
-  di test nei 20 seed. La maggior parte dei falsi allarmi della statistica (76%) viene dalle
-  richieste a `/search`, che ne danno uno nel 5,9% dei casi; le richieste a `/login` non ne danno
-  mai.
+  di test nei 20 seed. La maggior parte dei falsi allarmi della statistica (64%) viene dalle
+  richieste a `/profile`, che ne danno uno nel 12,7% dei casi; le richieste a `/login` e `/products`
+  non ne danno mai.
 
 ### 4.3 Con un obiettivo dello 0,1% di falsi positivi
 
 Tutti e tre i rilevatori rispettano questo obiettivo.
 
-- **Statistica:** soglia 1,378 [1,375-1,381]; FPR di calibrazione 0,03% [0,02-0,04], FPR di test
-  0,03% [0,02-0,05]; TPR in calo al 51,7% [50,6-52,9], precisione in salita al 99,4% [99,1-99,7]; il
-  50,8% [48,6-52,9] degli attacchi nuovi individuato, e nessun caso difficile segnalato.
-- **Combinato:** la stessa soglia e gli stessi falsi allarmi; TPR 71,2% [70,0-72,4], precisione
-  99,6% [99,4-99,8].
+- **Statistica:** soglia 58,722 [53,099-64,345]; FPR di calibrazione 0,08% [0,07-0,09], FPR di test
+  1,32% [1,26-1,38]; TPR in calo al 77,7% [76,5-78,9], precisione in salita all'86,8% [86,3-87,2];
+  l'80,7% [79,0-82,4] degli attacchi nuovi individuato, e nessun caso difficile segnalato. **[Da
+  riscrivere: i numeri non sostengono più questa frase (claim loNoHard).]**
+- **Combinato:** la stessa soglia e gli stessi falsi allarmi; TPR 88,6% [87,6-89,7], precisione
+  88,2% [87,8-88,6].
 - **Regole:** nessuna soglia, quindi la stessa riga dell'1%: nessun falso allarme, TPR 40,9%.
 
 ### 4.4 Confronti appaiati
@@ -237,53 +241,54 @@ Tutti e tre i rilevatori rispettano questo obiettivo.
 
 | A contro B              | Richieste      | Segnalate solo da A | Segnalate solo da B | p esatto | Seed con p < 0,05                  |
 | ----------------------- | -------------- | ------------------- | ------------------- | -------- | ---------------------------------- |
-| statistica vs combinato | attacchi       | 0                   | 1.643               | < 0,001  | combinato avanti in 20             |
+| statistica vs combinato | attacchi       | 0                   | 485                 | < 0,001  | combinato avanti in 20             |
 | statistica vs combinato | attacchi nuovi | 0                   | 0                   | 1,000    | nessuno                            |
 | statistica vs combinato | legittime      | 0                   | 0                   | 1,000    | nessuno                            |
-| regole vs statistica    | attacchi       | 1.643               | 3.759               | < 0,001  | statistica avanti in 20            |
-| regole vs statistica    | attacchi nuovi | 0                   | 3.523               | < 0,001  | statistica avanti in 20            |
-| regole vs statistica    | legittime      | 0                   | 1.833               | < 0,001  | più allarmi della statistica in 20 |
+| regole vs statistica    | attacchi       | 485                 | 5.544               | < 0,001  | statistica avanti in 20            |
+| regole vs statistica    | attacchi nuovi | 0                   | 5.193               | < 0,001  | statistica avanti in 20            |
+| regole vs statistica    | legittime      | 0                   | 1.909               | < 0,001  | più allarmi della statistica in 20 |
 
-La statistica e il combinato danno esattamente gli stessi 1.833 falsi allarmi e individuano gli
-stessi attacchi nuovi: lì non sono mai in disaccordo. Il combinato aggiunge 1.643 attacchi che la
+La statistica e il combinato danno esattamente gli stessi 1.909 falsi allarmi e individuano gli
+stessi attacchi nuovi: lì non sono mai in disaccordo. Il combinato aggiunge 485 attacchi che la
 statistica perde, tutti canonici o offuscati, quelli per cui le regole sono scritte. Regole e
-statistica perdono attacchi diversi (1.643 contro 3.759): per questo combinarle conviene.
+statistica perdono attacchi diversi (485 contro 5.544): per questo combinarle conviene.
 
-Con lo 0,1% il quadro è lo stesso: il combinato aggiunge 1.947 attacchi alla statistica, con gli
-stessi 30 falsi allarmi.
+Con lo 0,1% il quadro è lo stesso: il combinato aggiunge 1.094 attacchi alla statistica, con gli
+stessi 1.187 falsi allarmi.
 
 ### 4.5 Quanto si muovono i numeri?
 
 - **Regole:** la DS dell'AUC tra i seed (0,010) coincide con l'errore standard dato dal bootstrap di
   un singolo seed (≈ 0,043 / 3,92 = 0,011). Le regole non imparano nulla dai dati, quindi l'unico
   rumore è l'insieme di test.
-- **Statistica:** anche qui la DS tra i seed (0,009) è vicina all'errore standard del bootstrap (≈
-  0,011): la dispersione viene soprattutto dall'insieme di test, e i dati di addestramento vi
+- **Statistica:** anche qui la DS tra i seed (0,001) è vicina all'errore standard del bootstrap (≈
+  0,001): la dispersione viene soprattutto dall'insieme di test, e i dati di addestramento vi
   aggiungono poco. Nella prima bozza non era così. Sulla lunghezza grezza (commit `0ca4847`) la DS
   era 0,028 contro 0,013, e i dati di addestramento spiegavano circa quattro quinti della varianza.
   La scala logaritmica di C-04 ha reso il modello molto più stabile da un insieme di addestramento
   all'altro.
-- **L'FPR di test su tutte le richieste legittime** si muove molto: DS 0,62%, da 0,31% a 2,64%.
-  Quante delle quattro fixture dei casi difficili superano la soglia cambia da un seed all'altro.
+- **L'FPR di test su tutte le richieste legittime** si muove molto: DS 0,24%, da 1,67% a 2,60%.
+  **[Da riscrivere: i numeri non sostengono più questa frase (claim fprMoves).]** Quante delle
+  quattro fixture dei casi difficili superano la soglia cambia da un seed all'altro.
 
 Per questo l'esperimento usa 20 seed e non uno.
 
 ## 5. Discussione
 
 1. **La calibrazione funziona dove ha visto dati.** Sul traffico legittimo tipico, la statistica
-   rispetta gli obiettivi fuori campione: 0,93% [0,80-1,05] contro l'1%, e 0,04% contro lo 0,1%.
-2. **Non copre ciò che non ha visto.** Circa un caso difficile su quattro (23%) dà un falso allarme
+   rispetta gli obiettivi fuori campione: 0,94% [0,84-1,03] contro l'1%, e 0,09% contro lo 0,1%.
+2. **Non copre ciò che non ha visto.** Circa un caso difficile su quattro (25%) dà un falso allarme
    con l'obiettivo dell'1%. Né l'insieme di calibrazione né quello di addestramento contengono
    richieste simili: un modello del "normale" è largo quanto il traffico normale che ha ricevuto.
-3. **La statistica individua ciò che le firme non vedono.** Con l'obiettivo dell'1% individua il 64%
+3. **La statistica individua ciò che le firme non vedono.** Con l'obiettivo dell'1% individua il 94%
    degli attacchi nuovi, contro lo 0% delle regole: è la risposta centrale alla domanda di ricerca.
-   Però perde anche il 41% degli attacchi canonici che le regole individuano (59% contro 100%).
+   Però perde anche il 13% degli attacchi canonici che le regole individuano (87% contro 100%).
    Quindi affianca le regole, non le sostituisce.
 4. **Combinare è gratis, finché le regole non danno falsi allarmi.** Le firme di B-01 non segnalano
    alcuna richiesta legittima, quindi il combinato mantiene la soglia e i falsi allarmi della
    statistica, e aggiunge le corrispondenze delle regole: con l'obiettivo dell'1% il suo TPR sale
-   dal 62% al 78% con lo stesso 2,04% di falsi positivi (McNemar: 1.643 attacchi contro 0, in tutti
-   i 20 seed).
+   dal 91% al 96% con lo stesso 2,12% di falsi positivi (McNemar: 485 attacchi contro 0, in tutti i
+   20 seed).
    - Le regole di base della prima bozza (commit `c4ef25c`, con il segnale sulla lunghezza grezza di
      allora) mostravano il contrario. Corrispondevano al 20,6% delle richieste di login, le cui
      password generate contengono `#` e `--`, quindi le regole da sole segnalavano il 3,1% del
@@ -294,16 +299,16 @@ Per questo l'esperimento usa 20 seed e non uno.
      statistica. Una firma va verificata sul traffico legittimo prima di entrare nella combinazione.
 
 5. **Il tasso di base cambia tutto** (capitolo T4). Con la prevalenza del 10% dell'insieme di test,
-   circa il 78% degli allarmi della statistica sono attacchi, e l'81% di quelli del combinato. Con
+   circa l'83% degli allarmi della statistica sono attacchi, e l'83% di quelli del combinato. Con
    una prevalenza `π` dello 0,1%, Bayes dà:
 
    ```
    PPV = TPR·π / (TPR·π + FPR·(1 − π))
    ```
 
-   - con l'obiettivo dell'1%: 3,0% per la statistica e 3,7% per il combinato, cioè anche per il
+   - con l'obiettivo dell'1%: 4,1% per la statistica e 4,3% per il combinato, cioè anche per il
      combinato circa 96 allarmi su 100 sono falsi;
-   - con l'obiettivo dello 0,1%: 60,8% e 68,1%.
+   - con l'obiettivo dello 0,1%: 5,6% e 6,3%.
 
 ## 6. Limiti
 
@@ -311,8 +316,9 @@ Per questo l'esperimento usa 20 seed e non uno.
   conclusioni comparative: regole contro statistica, che cosa aggiunge la combinazione e quanto le
   costano i falsi allarmi di una regola, la calibrazione di fronte a richieste mai viste.
 - **Un modello di base.** Il punteggio è ancora il solo segnale sulla lunghezza, in scala
-  logaritmica (C-04). Il chi-quadro (C-03) e i segnali di outlier (C-05) sono implementati ma
-  entrano nel punteggio solo con C-06: cambieranno ogni numero delle Tabelle 1-4, e
+  logaritmica (C-04). **[Da riscrivere: i numeri non sostengono più questa frase (claim
+  lengthOnly).]** Il chi-quadro (C-03) e i segnali di outlier (C-05) sono implementati ma entrano
+  nel punteggio solo con C-06: cambieranno ogni numero delle Tabelle 1-4, e
   `npm run report -- --update` scriverà quelli nuovi.
 - **Quattro casi difficili, ripetuti.** Il loro tasso di falsi positivi dice soprattutto quali dei
   quattro superano la soglia. Non è un tasso su una popolazione di richieste insolite.
@@ -325,7 +331,7 @@ Per questo l'esperimento usa 20 seed e non uno.
 ## 7. Riprodurre i numeri
 
 ```bash
-git checkout dcc2295
+git checkout ca7de71
 npm ci
 npm run experiments          # circa 1,5 minuti; scrive results/<data>-<commit>/report.md
 npm run report -- --update   # la stessa esecuzione, salvata in numbers.json, e questo capitolo riscritto

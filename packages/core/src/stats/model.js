@@ -8,7 +8,7 @@
 //   length.js     length bound - Chebyshev, log scale, prediction interval (C-04)
 //   chisquare.js  character distribution — chi-square score       (C-03, C-08)
 //   outliers.js   IQR / MAD, Mahalanobis (robust.js: the numeric building blocks)  (C-05)
-//   anomaly.js    scoreRequest: combines the signals             (C-06)
+//   anomaly.js    scoreRequest: combines the signals, calibrateModel   (C-06)
 
 import { extractFeatures } from '../features/extract.js';
 import { CHAR_CLASSES } from './entropy.js';
@@ -32,6 +32,8 @@ import { fitOutlierStats, outlierVector } from './robust.js';
  * @property {Record<string, number>} classCounts  class counts pooled over every training value
  *   (fallback for sparse or unseen pairs)
  * @property {number} trainedOn  number of (legitimate) requests the model was fitted on
+ * @property {import('./anomaly.js').Calibration} [calibration]  only after `calibrateModel` (C-06,
+ *   ADR-014): the signals' scores on legitimate calibration traffic, for the `calibrated` mode
  */
 
 /**

@@ -101,5 +101,5 @@ mahalanobis)` has TPR 0.865 where Mahalanobis alone has 0.950, because a signal 
       `ParamStats.outlier` in `trainStatModel`.
 - [x] Tests with known answers (MAD of 1, 2, 3, 4, 100 is 1; `chi-square(2)` at 5.9915 gives
       p = 0.05), constant features, correlation 1, unseen and rare pairs, labels never read.
-- [ ] C-06: add the outlier parts to `scoreRequest` and test the combination (see Evidence).
+- [x] C-06: the outlier parts are in `scoreRequest`, and the combination was tested (ADR-015).
 - [ ] Repeat the comparison on the final dataset (A-02, A-04) and put it in the report.

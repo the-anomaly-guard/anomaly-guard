@@ -91,6 +91,16 @@ test('invertSymmetric: known inverses, and A times its inverse is the identity',
   }
 });
 
+test('invertSymmetric: no negative zero in the result (a model must survive JSON)', () => {
+  const inv = invertSymmetric([
+    [4, 1, 0],
+    [1, 3, 0],
+    [0, 0, 2],
+  ]);
+  assert.ok(inv.flat().every((v) => !Object.is(v, -0)));
+  assert.deepEqual(JSON.parse(JSON.stringify(inv)), inv);
+});
+
 test('invertSymmetric: a singular matrix throws', () => {
   assert.throws(
     () =>
