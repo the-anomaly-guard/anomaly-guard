@@ -14,6 +14,10 @@ export function initShell() {
   const state = parseState(location.search);
   const page = document.body.dataset.page;
   watchHeaders(); // hover explanations on every column, also of the tables drawn later
+  // ...and on every acronym or code (rule ids, tasks, ADRs) in any text. Loaded on its own: its
+  // dictionary is built from the docs when the dashboard is built, so this file stays importable
+  // in Node for the tests.
+  import('./term-help.js').then(({ watchTerms }) => watchTerms());
   // The live replay's position (E-08, ADR-011) goes on to the next page as it is; on
   // the pages with the run bar, src/live.js keeps it up to date while the replay runs.
   const at = new URLSearchParams(location.search).get('at');

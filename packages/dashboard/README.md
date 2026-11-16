@@ -12,7 +12,7 @@ detect, evaluate - with no backend, so it is hosted on **GitHub Pages** (ADR-003
 | Page               | File              | Shows                                                                                                                                                         | Theme panels still to add                             |
 | ------------------ | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
 | Overview           | `index.html`      | key figures, alerts by severity, every request (a box that scrolls, newest or oldest first; alerts in red), alerts by level, what raised them, top signatures | -                                                     |
-| Security events    | `events.html`     | every test request: verdict, level, reason, ground truth; filters and pages in the URL                                                                        | -                                                     |
+| Security events    | `events.html`     | every test request: verdict, level, reason, ground truth; filters, pages, rows per page and order in the URL                                                  | -                                                     |
 | Rules              | `rules.html`      | the signature rules and how often each matched                                                                                                                | - (the ruleset itself is B-01)                        |
 | Statistical models | `models.html`     | the signals in the score; the learned model per endpoint and parameter                                                                                        | E-02: character classes (T1), lengths and scores (T2) |
 | Detection quality  | `evaluation.html` | the calibrated operating point, confusion matrix, rates and variants with Wilson intervals, ROC (its title opens it large) and AUC, McNemar between the modes | -                                                     |
@@ -43,6 +43,10 @@ dashboard/
 │   ├── levels.js     alert level 0-15 and severity (pure, tested)
 │   ├── rows.js       the look of a row that shows one request, in every table (pure, tested)
 │   ├── team.js       the members' GitHub nicknames, listed on About (pure, tested)
+│   ├── terms.js      what every acronym and code means: rule ids, tasks, ADRs (pure, tested)
+│   ├── term-help.js  hover help on those terms in any text of any page
+│   ├── term-data.js  the dictionary: the ruleset, plus the backlog and the ADR index at build
+│   ├── listing.js    rows per page and order of a list (pure, tested)
 │   ├── dom.js        DOM helpers: data goes in as text, never as HTML
 │   ├── ui.js         KPI tile, level badge
 │   ├── charts.js     Chart.js setup and helpers (bar, doughnut, ROC)
@@ -51,7 +55,7 @@ dashboard/
 │   ├── assets/       icon
 │   └── pages/        one script per page
 ├── test/             node:test for state, shell, levels, pipeline, quality, replay, glossary,
-│                     lines, rows, team
+│                     lines, rows, team, terms, listing
 └── vite.config.js    page list, partials plugin, CSP
 ```
 
@@ -70,6 +74,12 @@ dashboard/
   started; `end`: finished), so it carries on from page to page, also in a sandboxed iframe.
   There is no shortcut to the result, and the line under the page title (seed, size, attack share)
   stays concealed until the replay is done.
+- **Acronyms and codes explain themselves** (`src/terms.js`): AUC, FPR, a rule id such as
+  CMDI-001, a task such as C-06, an ADR, wherever they appear - text, tables, chart legends,
+  axis labels and tooltips. Rule ids come from the ruleset, tasks and themes from the backlog,
+  ADRs from their index (read at build time), so new ones are covered with no change; a new
+  acronym goes in `ACRONYMS`. Cells that show a request as typed carry `data-raw` and are left
+  alone.
 - **No flash of the defaults**: the content stays hidden until `shell.js` has read the settings
   from the URL (`body[data-ready]`), and the page draws the rest in the same task. Without it,
   the default values written in the HTML (seed 42, 1,000 requests) would show for a moment on

@@ -7,7 +7,7 @@ import { initShell } from '../shell.js';
 import { runExperiment, countBy } from '../pipeline.js';
 import { SEVERITIES, SIGNATURE_LEVEL, severityOf } from '../levels.js';
 import { h, mount, fmt } from '../dom.js';
-import { kpi, levelBadge } from '../ui.js';
+import { kpi, levelBadge, sortToggle, setSortToggle } from '../ui.js';
 import { requestRowClass } from '../rows.js';
 import {
   setupCharts,
@@ -63,7 +63,13 @@ let flushing = 0; // the pending flush timer, 0 when none
 /** Rows drawn per task: a jump to thousands of requests must not freeze the page. */
 const CHUNK = 150;
 
-document.querySelector('[data-feed-sort]')?.addEventListener('click', () => {
+const sortButton = sortToggle(
+  'button',
+  { type: 'button', title: 'Change the order of the requests', 'data-feed-sort': true },
+  newestFirst,
+);
+document.querySelector('#feed-sort')?.replaceWith(sortButton);
+sortButton.addEventListener('click', () => {
   newestFirst = !newestFirst;
   const rows = [...feedBody.querySelectorAll('tr[data-id]')];
   rows.sort((a, b) => (Number(a.dataset.id) - Number(b.dataset.id)) * (newestFirst ? -1 : 1));
@@ -226,9 +232,7 @@ function flush(animate) {
 
 /** The sort button, the # column and the line above the table say which order is shown. */
 function showOrder() {
-  const label = document.querySelector('[data-feed-sort-label]');
-  if (label) label.textContent = newestFirst ? 'Newest first' : 'Oldest first';
-  document.querySelector('[data-feed-sort]')?.classList.toggle('is-ascending', !newestFirst);
+  setSortToggle(sortButton, newestFirst);
   document
     .querySelector('#feed-order')
     ?.setAttribute('aria-sort', newestFirst ? 'descending' : 'ascending');
@@ -251,8 +255,8 @@ function feedRow(e, animate) {
     'tr',
     { class: requestRowClass(e, 'feed-row', animate && 'is-new'), dataset: { id: String(e.id) } },
     h('td', { class: 'num' }, String(e.id)),
-    h('td', { class: 'mono nowrap' }, `${request.method} ${request.path}`),
-    h('td', { class: 'mono truncate', title: params }, params),
+    h('td', { class: 'mono nowrap', 'data-raw': true }, `${request.method} ${request.path}`),
+    h('td', { class: 'mono truncate', title: params, 'data-raw': true }, params),
     h('td', {}, levelBadge(e.level)),
     h(
       'td',
