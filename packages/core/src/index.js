@@ -53,6 +53,13 @@ export {
   fitOutlierStats,
 } from './stats/robust.js';
 export { chiSquareScore, chiSquareLogSurvival, chiSquareHomogeneity } from './stats/chisquare.js';
-export { scoreRequest } from './stats/anomaly.js';
+export {
+  scoreRequest,
+  scoreParts,
+  calibrateModel,
+  tailScore,
+  SIGNAL_PARTS,
+  COMBINE_MODES,
+} from './stats/anomaly.js';
 
 export { detect } from './detector/detect.js';

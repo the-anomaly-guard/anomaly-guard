@@ -26,7 +26,9 @@ import {
   DEFAULT_RULES,
   // statistical models
   trainStatModel,
-  scoreRequest,
+  scoreRequest, // max of the five signals (C-06); { combine: 'calibrated' } after calibrateModel
+  scoreParts, // the five scores of a request, on the -log10(p) scale
+  calibrateModel, // add the legit calibration scores for the 'calibrated' mode (ADR-015)
   paramKey, // '/search?q' - models are per (path, parameter) (ADR-007)
   pToScore, // s = −log10(p), the common score scale (ADR-007)
   lengthZScore,
@@ -78,9 +80,11 @@ no default threshold on purpose.
 Implemented: entropy + the seven character classes, feature extraction, canonical signature
 rules for SQL injection, XSS, path traversal and command injection (B-01), the per-(path,
 parameter) model, the length signal (C-04: Chebyshev bound on log-lengths -> −log10 p), a baseline detector
-with a continuous score per mode, the chi-square character-distribution score (C-03), and the
-dataset-level homogeneity test plus entropy summaries for the report (C-08). the outlier signals (C-05: IQR, MAD and a regularised Mahalanobis distance). Stub with a backlog
-id: adding the new signals to `scoreRequest` (C-06). The maths is in
+with a continuous score per mode, the chi-square character-distribution score (C-03), the
+dataset-level homogeneity test plus entropy summaries for the report (C-08), the outlier signals
+(C-05: IQR, MAD and a regularised Mahalanobis distance) and the combined score (C-06:
+`scoreRequest` takes the maximum of the five signals; `calibrateModel` adds the optional
+calibrated mode, ADR-015). The maths is in
 [`../../docs/statistics/methods.md`](../../docs/statistics/methods.md).
 
 ## Test

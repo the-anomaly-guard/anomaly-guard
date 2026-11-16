@@ -22,7 +22,11 @@ test('detect (stats): a very long parameter is flagged by the statistical score'
   const res = detect(samples[1], { model, threshold: 1, mode: 'stats' });
   assert.equal(res.verdict, 'attack');
   assert.ok(res.score >= 1);
-  assert.match(res.reasons.join(), /length/);
+  // the reason names the signal that produced the score (the largest of the five, C-06)
+  assert.match(
+    res.reasons.join(),
+    /statistical score \d+\.\d\d \((length|chiSquare|iqr|mad|mahalanobis)\)/,
+  );
 });
 
 test('detect (combined): a rule hit scores +Infinity, so every threshold flags it', () => {
@@ -57,5 +61,5 @@ test('detect: refuses to run without what the mode needs (no silent defaults)', 
 
 test('detect: the reason gives the threshold with two decimals, like the score', () => {
   const res = detect(samples[1], { model, threshold: 1 / 3, mode: 'stats' });
-  assert.match(res.reasons.join(), /statistical score \d+\.\d\d \(length\) ≥ threshold 0\.33$/);
+  assert.match(res.reasons.join(), /statistical score \d+\.\d\d \(\w+\) ≥ threshold 0\.33$/);
 });

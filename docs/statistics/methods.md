@@ -321,9 +321,28 @@ D^2)`, computed in log space. It is nominal, because the mean and the covariance
   is the length signal's (§3), and counting it twice would add nothing.
 
 On 20 seeds each outlier signal beats the length signal alone by 0.10-0.13 AUC, and Mahalanobis
-is the best single signal (AUC 0.995, TPR 0.95 at a 1 % FPR on this synthetic traffic). One
-caution for C-06: the maximum of signals that are not equally calibrated can be worse than its
-best member (ADR-013, Evidence).
+is the best single signal (AUC 0.995, TPR 0.95 at a 1 % FPR on this synthetic traffic).
+
+### Combining the signals - `stats/anomaly.js` (implemented, C-06)
+
+`scoreRequest` gives five parts, each `s = -log10(p)`: `length`, `chiSquare`, `iqr`, `mad`,
+`mahalanobis`. The score is their **maximum** (ADR-007) and `top` names the part that produced it.
+The maximum is a union bound in spirit: a request is anomalous if any signal finds it so. Its
+weakness is that the signals share a scale but not a calibration. On legitimate traffic the
+chi-square score runs higher than the Mahalanobis score, so a threshold set at a 1 % FPR on the
+maximum is set by the chi-square signal, and the maximum detects fewer attacks than Mahalanobis
+alone (TPR 0.873 against 0.951 on 20 seeds, ADR-015).
+
+The optional **calibrated** mode removes that effect. Each part is replaced by its tail rank on
+the scores of legitimate calibration requests: `s' = -log10((k + 1) / (n + 1))`, with `k` the
+number of calibration scores at least as high as `s`. It is the empirical p-value of the signal,
+so every part answers the same question, "how rare is this among legitimate requests?", and the
+maximum compares like with like. It needs `calibrateModel` on a legit-only calibration split that
+is neither the training split (its scores are optimistic) nor the test split; when the same split
+also sets the threshold, cut it in two. On 20 seeds the TPR rises to 0.948 at the same FPR, and the
+mode is the best of the three on obfuscated attacks. It is not better on everything: with
+legitimate-but-weird requests in the test set, Mahalanobis alone has the better AUC. Its scores
+have a ceiling, `log10(n + 1)`.
 
 ## 6. Evaluation - `packages/evaluation`, `packages/experiments` (implemented)
 

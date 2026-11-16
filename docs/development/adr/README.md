@@ -21,6 +21,7 @@ consequences. ADRs are not deleted; a superseded one is marked `Superseded by AD
 | [ADR-012](ADR-012-length-signal-log-scale-and-unseen-pairs.md)  | Length signal on the log scale; policy for unseen pairs                 | Accepted                      | 2026-11-15 |
 | [ADR-013](ADR-013-outlier-signals.md)                           | Outlier signals: robust scale, Mahalanobis, three features              | Accepted                      | 2026-11-16 |
 | [ADR-014](ADR-014-generated-report-numbers.md)                  | The numbers of the report are generated from the experiment             | Accepted                      | 2026-11-16 |
+| [ADR-015](ADR-015-combining-the-signals.md)                     | Combining the signals: the maximum, and an optional calibrated mode     | Accepted                      | 2026-11-16 |
 
 ## When to write an ADR
 

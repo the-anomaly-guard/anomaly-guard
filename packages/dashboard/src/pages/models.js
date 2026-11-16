@@ -7,6 +7,8 @@
 import {
   CHAR_CLASSES,
   chiSquareScore,
+  iqrScore,
+  madScore,
   mahalanobisScore,
   scoreRequest,
   trainStatModel,
@@ -20,8 +22,7 @@ import { initLive } from '../live.js';
 /**
  * The planned signals. `part` is the key a signal adds to `scoreRequest().parts` (C-06): a signal
  * shows as "in the score" as soon as that key appears. `probe` calls the signal's own function: if
- * it answers, the signal is implemented even before C-06 adds it to the score. The outliers have
- * their `probe` (C-05); their `part` is set when C-06 adds them to the score.
+ * it answers, the signal is implemented even when it is not in the score.
  */
 const SIGNALS = [
   {
@@ -38,9 +39,23 @@ const SIGNALS = [
     probe: chiSquareScore,
   },
   {
-    part: null,
-    name: 'Outliers',
-    method: 'IQR / MAD (Chebyshev tail); regularised Mahalanobis distance',
+    part: 'iqr',
+    name: 'Outliers: IQR',
+    method: 'Robust z from the IQR / 1.349, Chebyshev tail',
+    task: 'C-05 · T2',
+    probe: iqrScore,
+  },
+  {
+    part: 'mad',
+    name: 'Outliers: MAD',
+    method: 'Robust z from the MAD / 0.6745, Chebyshev tail',
+    task: 'C-05 · T2',
+    probe: madScore,
+  },
+  {
+    part: 'mahalanobis',
+    name: 'Outliers: Mahalanobis',
+    method: 'Regularised Mahalanobis distance, chi-square tail, df = 3',
     task: 'C-05 · T2',
     probe: mahalanobisScore,
   },
