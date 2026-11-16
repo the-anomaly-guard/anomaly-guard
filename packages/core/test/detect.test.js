@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { RuleEngine, trainStatModel, detect } from '../src/index.js';
+import { RuleEngine, trainStatModel, detect, describeExplanation } from '../src/index.js';
 
 const get = (path, params) => ({ method: 'GET', path, params });
 
@@ -22,11 +22,13 @@ test('detect (stats): a very long parameter is flagged by the statistical score'
   const res = detect(samples[1], { model, threshold: 1, mode: 'stats' });
   assert.equal(res.verdict, 'attack');
   assert.ok(res.score >= 1);
-  // the reason names the signal that produced the score (the largest of the five, C-06)
+  // the reason names the signal that produced the score (the largest of the five, C-06), the
+  // parameter and the probability (C-07)
   assert.match(
     res.reasons.join(),
-    /statistical score \d+\.\d\d \((length|chiSquare|iqr|mad|mahalanobis)\)/,
+    /statistical score \d+\.\d\d ≥ threshold 1\.00: (length|chiSquare|iqr|mad|mahalanobis) on "q"/,
   );
+  assert.match(res.reasons.join(), /p ≈ /);
 });
 
 test('detect (combined): a rule hit scores +Infinity, so every threshold flags it', () => {
@@ -61,5 +63,73 @@ test('detect: refuses to run without what the mode needs (no silent defaults)', 
 
 test('detect: the reason gives the threshold with two decimals, like the score', () => {
   const res = detect(samples[1], { model, threshold: 1 / 3, mode: 'stats' });
-  assert.match(res.reasons.join(), /statistical score \d+\.\d\d \(\w+\) ≥ threshold 0\.33$/);
+  assert.match(res.reasons.join(), /statistical score \d+\.\d\d ≥ threshold 0\.33: /);
+});
+
+test('detect: the explanation says which signal, which parameter and which probability', () => {
+  const res = detect(samples[1], { model, threshold: 1, mode: 'stats' });
+  const e = res.detail.explanation;
+  assert.equal(e.param, 'q');
+  assert.ok(['length', 'chiSquare', 'iqr', 'mad', 'mahalanobis'].includes(e.signal));
+  assert.equal(e.score, res.statScore);
+  assert.ok(Math.abs(e.p - 10 ** -res.statScore) < 1e-12);
+  assert.ok(e.p < 0.1);
+  // plain data: it survives a JSON round trip unchanged
+  assert.deepEqual(JSON.parse(JSON.stringify(e)), e);
+});
+
+test('detect: an unremarkable request has no explanation, and rules mode has none either', () => {
+  assert.equal(detect(samples[0], { model, threshold: 50, mode: 'stats' }).reasons.length, 0);
+  assert.equal(detect(samples[2], { ruleEngine: engine, mode: 'rules' }).detail.explanation, null);
+});
+
+test('describeExplanation: known answers for each kind of signal', () => {
+  const base = { param: 'q', feature: null, df: null, unseen: false };
+  assert.equal(
+    describeExplanation({
+      ...base,
+      signal: 'length',
+      statistic: 'z',
+      value: 12.1,
+      score: 2,
+      p: 0.01,
+    }),
+    'length on "q": z = 12.10, p ≈ 0.01',
+  );
+  assert.equal(
+    describeExplanation({
+      ...base,
+      signal: 'iqr',
+      feature: 'logLength',
+      statistic: 'z',
+      value: 8.2,
+      score: 4,
+      p: 1e-4,
+    }),
+    'iqr on "q" (logLength): z = 8.20, p ≈ 1.0e-4',
+  );
+  assert.equal(
+    describeExplanation({
+      ...base,
+      signal: 'mahalanobis',
+      statistic: 'D2',
+      value: 30,
+      df: 3,
+      score: 3,
+      p: 1e-3,
+    }),
+    'mahalanobis on "q": D2 = 30.00 (df 3), p ≈ 1.0e-3',
+  );
+  assert.equal(
+    describeExplanation({
+      ...base,
+      signal: 'length',
+      statistic: 'z',
+      value: null,
+      unseen: true,
+      score: 1,
+      p: 0.1,
+    }),
+    'length on "q": parameter never seen in training, p ≈ 0.10',
+  );
 });
