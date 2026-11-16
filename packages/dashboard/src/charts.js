@@ -13,6 +13,7 @@ import {
   LinearScale,
   LineController,
   LineElement,
+  LogarithmicScale,
   PointElement,
   Tooltip,
 } from 'chart.js';
@@ -78,6 +79,7 @@ Chart.register(
   LinearScale,
   LineController,
   LineElement,
+  LogarithmicScale,
   PointElement,
   Tooltip,
 );
@@ -260,6 +262,60 @@ export function setChartData(chart, { values, labels }) {
 export function setRocData(chart, data) {
   chart.data.datasets = /** @type {any} */ (rocDatasets(data));
   chart.update();
+}
+
+/** PPV against prevalence, with a logarithmic prevalence axis for rare attacks (E-03). */
+export function baseRateChart(canvas, points) {
+  return new Chart(canvas, {
+    type: 'line',
+    data: {
+      datasets: [
+        {
+          label: 'PPV',
+          data: points,
+          borderColor: token('--primary'),
+          borderWidth: 2,
+          pointRadius: 0,
+        },
+        {
+          label: 'Selected scenario',
+          data: [],
+          showLine: false,
+          backgroundColor: token('--primary'),
+          pointRadius: 5,
+        },
+      ],
+    },
+    options: {
+      scales: {
+        x: {
+          type: 'logarithmic',
+          min: 0.000001,
+          max: 1,
+          title: { display: true, text: 'Hypothetical attack share (%)' },
+          ticks: { callback: (value) => `${Number((Number(value) * 100).toPrecision(3))}%` },
+        },
+        y: {
+          type: 'linear',
+          min: 0,
+          max: 1,
+          title: { display: true, text: 'Alarms that are attacks (PPV)' },
+          ticks: { callback: (value) => `${Number(value) * 100}%` },
+        },
+      },
+      interaction: { mode: 'nearest', intersect: false },
+      plugins: {
+        legend: { position: 'bottom' },
+        tooltip: {
+          callbacks: {
+            title: () => '',
+            label: (item) =>
+              `Attack share ${(item.parsed.x * 100).toPrecision(3)}% · PPV ${(item.parsed.y * 100).toFixed(2)}%`,
+          },
+        },
+      },
+    },
+  });
 }
 
 /**
