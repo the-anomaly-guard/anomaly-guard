@@ -2,7 +2,9 @@
 // legitimate training split only (ADR-004, ADR-007), and which signals make up the score. With the
 // live replay (E-08, ADR-011) the table fills up during step 1, as the model learns
 // from more and more legitimate requests, and then stays as it is: the test traffic never changes
-// the model.
+// the model. The "Lengths and scores" chart (E-02, T2) fills up with the test requests as they
+// arrive: the share of legitimate and of attack requests per length and per score, and the
+// threshold.
 
 import {
   CHAR_CLASSES,
@@ -18,6 +20,14 @@ import { runExperiment } from '../pipeline.js';
 import { h, mount, fmt } from '../dom.js';
 import { kpi } from '../ui.js';
 import { initLive } from '../live.js';
+import { setupCharts, histogramChart, setHistogramData, chartMessage } from '../charts.js';
+import {
+  LENGTH_EDGES,
+  SCORE_EDGES,
+  histogram,
+  pointsOf,
+  thresholdPosition,
+} from '../distributions.js';
 
 /**
  * The planned signals. `part` is the key a signal adds to `scoreRequest().parts` (C-06): a signal
@@ -95,10 +105,62 @@ mount(
 
 let drawn = ''; // what the table was last drawn for: requests learned and stage
 
+// The statistical score of every test request, computed once; the replay cuts it to the first n.
+const points = pointsOf(run);
+setupCharts();
+const lengthChart = histogramChart(
+  /** @type {HTMLCanvasElement} */ (document.querySelector('#chart-lengths')),
+  histogram([], 'length', LENGTH_EDGES),
+  { xTitle: 'Length of the longest parameter value (characters)' },
+);
+const scoreChart = histogramChart(
+  /** @type {HTMLCanvasElement} */ (document.querySelector('#chart-scores')),
+  histogram([], 'score', SCORE_EDGES),
+  { xTitle: 'Statistical score, -log10 p (higher = more anomalous)' },
+);
+let drawnPoints = ''; // what the chart was last drawn for: requests arrived, threshold known
+
 initLive({ state, run, render });
+
+/**
+ * The two histograms of the test requests that have arrived. The threshold is drawn once the
+ * calibration step of the replay has set it, and never in rules mode (a rule has no threshold).
+ * @param {import('../replay.js').Frame} frame
+ */
+function drawDistributions(frame) {
+  const showThreshold = frame.calibrated && state.mode !== 'rules';
+  const key = `${frame.at}:${frame.stage}:${showThreshold}`;
+  if (key === drawnPoints) return;
+  drawnPoints = key;
+
+  const arrived = points.slice(0, frame.at);
+  if (arrived.length === 0) {
+    const text = frame.stage === 'idle' ? 'No traffic yet.' : 'Waiting for the first request...';
+    chartMessage(lengthChart, text);
+    chartMessage(scoreChart, text);
+    mount('#lengths-meta', 'legitimate vs attack');
+    return;
+  }
+  chartMessage(lengthChart, null);
+  chartMessage(scoreChart, null);
+  const t = run.operating.threshold;
+  setHistogramData(lengthChart, histogram(arrived, 'length', LENGTH_EDGES));
+  setHistogramData(scoreChart, {
+    ...histogram(arrived, 'score', SCORE_EDGES),
+    threshold: showThreshold
+      ? { position: thresholdPosition(SCORE_EDGES, t), label: `threshold ${t.toFixed(2)}` }
+      : null,
+  });
+  const attacks = arrived.filter((p) => p.attack).length;
+  mount(
+    '#lengths-meta',
+    `${fmt.int(arrived.length - attacks)} legitimate · ${fmt.int(attacks)} attack requests`,
+  );
+}
 
 /** @param {import('../replay.js').Frame} frame */
 function render(frame) {
+  drawDistributions(frame);
   const size = dataset.train.length;
   const learned = Math.round(frame.trained * size);
   let phase = 'running';

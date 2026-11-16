@@ -62,14 +62,34 @@
               the picture behind the chi-square score (C-03).</span
             >
           </div>
-          <div class="placeholder">
-            <span class="task">E-02 · T2</span>
-            <strong>Lengths and scores: legitimate vs attack</strong>
-            <span
-              >How value lengths and anomaly scores are distributed for legitimate and attack
-              requests, and where the threshold cuts them.</span
-            >
-          </div>
+          <section class="panel" aria-labelledby="lengths-title">
+            <div class="panel-head">
+              <h2 class="panel-title" id="lengths-title">Lengths and scores</h2>
+              <span class="panel-meta" id="lengths-meta">legitimate vs attack</span>
+            </div>
+            <div class="panel-body">
+              <div class="chart-box" id="lengths-box">
+                <canvas
+                  id="chart-lengths"
+                  role="img"
+                  aria-label="Share of legitimate and of attack requests by the length of their longest parameter value"
+                ></canvas>
+              </div>
+              <div class="chart-box" id="scores-box">
+                <canvas
+                  id="chart-scores"
+                  role="img"
+                  aria-label="Share of legitimate and of attack requests by statistical score, with the detector's threshold"
+                ></canvas>
+              </div>
+              <p class="note">
+                Each class adds up to 100%, so the few attacks are not hidden behind the many
+                legitimate requests. Lengths are those of the longest value of a request. The score
+                is the statistical score (the maximum of the signals); the dashed line is the
+                threshold the detector uses.
+              </p>
+            </div>
+          </section>
         </div>
 
         <section class="panel" aria-labelledby="pairs-title">
