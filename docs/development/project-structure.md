@@ -101,7 +101,8 @@ core/
 │   │   ├── model.js          # per-(path, param) model, paramKey, pToScore (−log10 p)
 │   │   ├── length.js         # length signal: Chebyshev on log-length (C-04)
 │   │   ├── chisquare.js      # character-distribution signal: chi-square (C-03, C-08)
-│   │   ├── outliers.js       # (to create, C-05) IQR / MAD, Mahalanobis
+│   │   ├── outliers.js       # outlier signals: IQR / MAD, Mahalanobis (C-05)
+│   │   ├── robust.js         # median, quantiles, MAD, covariance, matrix inverse (C-05)
 │   │   └── anomaly.js        # scoreRequest: the max of the signals (C-06)
 │   └── detector/
 │       └── detect.js         # combine rule hits + stat scores -> explained verdict

@@ -279,7 +279,7 @@ independent draws, and a long value contributes more characters than a short one
 describes this character-weighted corpus, not a probability about requests or values. The
 per-request test remains the nominal score of §4, not this p-value.
 
-## 5. Outlier detection - `stats/outliers.js` (to create, C-05)
+## 5. Outlier detection - `stats/outliers.js` (implemented, C-05)
 
 Per-feature, robust alternatives to §3. Each must end as a tail probability and a score on the
 §0 scale:
@@ -299,6 +299,31 @@ D²(x) = (x − μ)ᵀ · S⁻¹ · (x − μ)      p ≈ P(χ²(d) > D²)
 Use it when single features overlap but the _combination_ is unusual. Drop constant features or
 regularise (`S + λI`) before inverting: on legitimate traffic some features never vary, which
 makes `S` singular.
+
+**What C-05 decided** (ADR-013, evidence in the ADR). Three features are measured on every
+parameter value: `ln(1 + length)`, Shannon entropy and the share of `special` characters. For
+each (path, parameter) pair the model keeps median, quartiles, MAD, mean and covariance, from
+legitimate values only.
+
+- **IQR and MAD signals** (`iqrScore`, `madScore`): `z = |x - median| / sigma_hat`, with
+  `sigma_hat = IQR / 1.349` or `MAD / 0.6745` (the sigma of a normal distribution with that IQR or
+  MAD), floored per feature (0.1 on the log length, 0.1 bit of entropy, 2 % of special
+  characters) so a constant feature does not give `z = infinity`. The tail is Chebyshev's,
+  `p = min(1, 1/z^2)`, as in §3. Tukey's fence is reported as an explanation (`beyondFence`), not
+  used as the score: it is 0 for everything inside the fences.
+- **Mahalanobis signal** (`mahalanobisScore`): `D^2` against the pair's mean, with `S` made
+  invertible in two steps. Each variance is raised to at least its floor squared, which keeps `S`
+  positive semi-definite, and then a ridge of 10 % of each variance is added, which makes it
+  positive definite even with few values or perfectly correlated features. `p ~ P(chi-square(3) >
+D^2)`, computed in log space. It is nominal, because the mean and the covariance are estimated
+  and the features are not normal, so it is only a score (ADR-008).
+- A pair never seen in training, or seen fewer than 5 times, scores 0 here: the unseen-pair policy
+  is the length signal's (§3), and counting it twice would add nothing.
+
+On 20 seeds each outlier signal beats the length signal alone by 0.10-0.13 AUC, and Mahalanobis
+is the best single signal (AUC 0.995, TPR 0.95 at a 1 % FPR on this synthetic traffic). One
+caution for C-06: the maximum of signals that are not equally calibrated can be worse than its
+best member (ADR-013, Evidence).
 
 ## 6. Evaluation - `packages/evaluation`, `packages/experiments` (implemented)
 
@@ -349,7 +374,6 @@ confusion matrix:            metrics:
   ```
 
   Example: 0 false positives out of 900 legitimate requests gives FPR ∈ [0, 0.43%], not "zero".
-
   - **Why Wilson, not the textbook Wald interval** `p̂ ± z·√(p̂(1−p̂)/n)`: Wald collapses to
     [0, 0] when `x = 0` and can leave [0, 1]. Error rates near 0 are exactly where this project
     lives.
@@ -399,6 +423,7 @@ confusion matrix:            metrics:
   - **Provenance:** `results/<date>-<commit>/results.json` records the seeds, the git commit
     (and whether the tree had uncommitted changes), the split sizes, prevalence, hard-case share,
     targets and resamples; `report.md` holds the tables.
+
 - **Paired comparison of two modes (D-07, `mcnemarTest`).** Two detectors scored on the same
   requests are not independent samples, so two separate intervals would waste the pairing.
   McNemar's test uses only the requests where they disagree: `b` flagged by A only, `c` by B only.

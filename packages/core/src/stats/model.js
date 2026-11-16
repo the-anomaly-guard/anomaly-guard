@@ -7,11 +7,12 @@
 // One file per signal, so the people working on different signals rarely edit the same file:
 //   length.js     length bound - Chebyshev, log scale, prediction interval (C-04)
 //   chisquare.js  character distribution — chi-square score       (C-03, C-08)
-//   outliers.js   IQR / MAD, Mahalanobis — to be created         (C-05)
+//   outliers.js   IQR / MAD, Mahalanobis (robust.js: the numeric building blocks)  (C-05)
 //   anomaly.js    scoreRequest: combines the signals             (C-06)
 
 import { extractFeatures } from '../features/extract.js';
 import { CHAR_CLASSES } from './entropy.js';
+import { fitOutlierStats, outlierVector } from './robust.js';
 
 /**
  * Statistics of one (path, parameter) pair, learned from legitimate values only.
@@ -21,6 +22,8 @@ import { CHAR_CLASSES } from './entropy.js';
  * @property {{ mean: number, std: number }} logLength  the same on ln(1 + length) (C-04): lengths
  *   are right-skewed, the log scale is closer to symmetric
  * @property {Record<string, number>} classCounts  character-class counts summed over the values
+ * @property {import('./robust.js').OutlierStats} outlier  robust and multivariate statistics of
+ *   three features of the value (C-05): median, quartiles, MAD, mean and covariance
  */
 
 /**
@@ -77,15 +80,20 @@ function meanStd(xs) {
  * @returns {StatModel}
  */
 export function trainStatModel(normalRequests) {
-  /** @type {Record<string, { lengths: number[], classCounts: Record<string, number> }>} */
+  /** @type {Record<string, { lengths: number[], rows: number[][], classCounts: Record<string, number> }>} */
   const byPair = {};
   const pooled = zeroCounts();
 
   for (const req of normalRequests) {
     const f = extractFeatures(req);
     for (const p of f.params) {
-      const acc = (byPair[paramKey(f.path, p.name)] ??= { lengths: [], classCounts: zeroCounts() });
+      const acc = (byPair[paramKey(f.path, p.name)] ??= {
+        lengths: [],
+        rows: [],
+        classCounts: zeroCounts(),
+      });
       acc.lengths.push(p.length);
+      acc.rows.push(outlierVector(p));
       for (const cls of CHAR_CLASSES) {
         acc.classCounts[cls] += p.classCounts[cls];
         pooled[cls] += p.classCounts[cls];
@@ -101,6 +109,7 @@ export function trainStatModel(normalRequests) {
       length: meanStd(acc.lengths),
       logLength: meanStd(acc.lengths.map((len) => Math.log1p(len))),
       classCounts: acc.classCounts,
+      outlier: fitOutlierStats(acc.rows),
     };
   }
   return { params, classCounts: pooled, trainedOn: normalRequests.length };
