@@ -167,13 +167,18 @@ const thresholdLinePlugin = {
 };
 
 /**
- * Grouped bars: the share of two classes (legitimate, attack) in every bin of a distribution, and
- * optionally the threshold (E-02, theme T2). The tooltip shows the share and the count.
+ * Grouped bars: the share of two classes (legitimate, attack) in every bin of a distribution or
+ * category, and optionally the threshold (E-02, themes T1 and T2). The tooltip shows the share and
+ * the count, in the unit of the data (`requests` by default, `characters` for class shares).
  * @param {HTMLCanvasElement} canvas
  * @param {HistogramData} data
- * @param {{ fontSize?: number, xTitle?: string }} [style]
+ * @param {{ fontSize?: number, xTitle?: string, yTitle?: string, unit?: string }} [style]
  */
-export function histogramChart(canvas, data, { fontSize, xTitle } = {}) {
+export function histogramChart(
+  canvas,
+  data,
+  { fontSize, xTitle, yTitle = 'Share of its class', unit = 'requests' } = {},
+) {
   const font = fontSize ? { size: fontSize } : undefined;
   const percent = (value) => `${Math.round(Number(value) * 100)}%`;
   return new Chart(canvas, {
@@ -187,7 +192,7 @@ export function histogramChart(canvas, data, { fontSize, xTitle } = {}) {
           beginAtZero: true,
           max: 1,
           ticks: { callback: percent, stepSize: 0.25, font },
-          title: { display: true, text: 'Share of its class', font },
+          title: { display: true, text: yTitle, font },
         },
       },
       plugins: {
@@ -201,7 +206,7 @@ export function histogramChart(canvas, data, { fontSize, xTitle } = {}) {
               const counts = item.datasetIndex === 0 ? data.legitCount : data.attackCount;
               return (
                 `${item.dataset.label}: ${(item.parsed.y * 100).toFixed(1)}% ` +
-                `(${counts[item.dataIndex]} requests)`
+                `(${counts[item.dataIndex]} ${unit})`
               );
             },
           },
@@ -213,11 +218,12 @@ export function histogramChart(canvas, data, { fontSize, xTitle } = {}) {
 
 /**
  * @typedef {Object} HistogramData
- * @property {string[]} labels  one per bin
- * @property {number[]} legit   share of the legitimate requests per bin
- * @property {number[]} attack  share of the attack requests per bin
+ * @property {string[]} labels  one per bin or category
+ * @property {number[]} legit   share of the legitimate group per bin or category
+ * @property {number[]} attack  share of the attack group per bin or category
  * @property {number[]} legitCount
  * @property {number[]} attackCount
+ * @property {string} [unit]  what one count is: 'requests' (default) or 'characters'
  * @property {{ position: number, label: string } | null} [threshold]  fractional bin index
  */
 
@@ -254,10 +260,11 @@ export function setHistogramData(chart, data) {
     dataset.data = next.datasets[i].data;
   });
   const font = chart.options.scales?.y?.ticks?.font;
+  const unit = data.unit ?? 'requests';
   chart.options.plugins.thresholdLine = thresholdOptions(data, /** @type {any} */ (font));
   chart.options.plugins.tooltip.callbacks.label = (item) => {
     const counts = item.datasetIndex === 0 ? data.legitCount : data.attackCount;
-    return `${item.dataset.label}: ${(item.parsed.y * 100).toFixed(1)}% (${counts[item.dataIndex]} requests)`;
+    return `${item.dataset.label}: ${(item.parsed.y * 100).toFixed(1)}% (${counts[item.dataIndex]} ${unit})`;
   };
   chart.update();
 }

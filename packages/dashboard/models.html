@@ -54,14 +54,28 @@
         </section>
 
         <div class="grid grid-2">
-          <div class="placeholder">
-            <span class="task">E-02 · T1</span>
-            <strong>Character classes: legitimate vs attack values</strong>
-            <span
-              >The share of each of the seven character classes in legitimate and in attack values -
-              the picture behind the chi-square score (C-03).</span
-            >
-          </div>
+          <section class="panel" aria-labelledby="classes-title">
+            <div class="panel-head">
+              <h2 class="panel-title" id="classes-title">Character classes</h2>
+              <span class="panel-meta" id="classes-meta">legitimate vs attack</span>
+            </div>
+            <div class="panel-body">
+              <div class="chart-box">
+                <canvas
+                  id="chart-classes"
+                  role="img"
+                  aria-label="Share of each of the seven character classes among the characters of legitimate and of attack test values"
+                ></canvas>
+              </div>
+              <p class="note">
+                Each group adds up to 100%, so the few attacks are not hidden behind the legitimate
+                majority. Every parameter value of the test requests is pooled and each character
+                counts once (methods §4b), so long values weigh more. The attack group also contains
+                the legitimate filler values of an attack request: this describes the corpus, not a
+                probability about one request.
+              </p>
+            </div>
+          </section>
           <section class="panel" aria-labelledby="lengths-title">
             <div class="panel-head">
               <h2 class="panel-title" id="lengths-title">Lengths and scores</h2>
