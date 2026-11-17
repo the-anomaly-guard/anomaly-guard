@@ -2,8 +2,9 @@
 // legitimate training split only (ADR-004, ADR-007), and which signals make up the score. With the
 // live replay (E-08, ADR-011) the table fills up during step 1, as the model learns
 // from more and more legitimate requests, and then stays as it is: the test traffic never changes
-// the model. The "Lengths and scores" chart (E-02, T2) fills up with the test requests as they
-// arrive: the share of legitimate and of attack requests per length and per score, and the
+// the model. The "Character classes" chart (E-02, T1) and the "Lengths and scores" chart (E-02,
+// T2) fill up with the test requests as they arrive: the share of each character class in the
+// legitimate and in the attack values, and the share of requests per length and per score with the
 // threshold.
 
 import {
@@ -28,6 +29,7 @@ import {
   pointsOf,
   thresholdPosition,
 } from '../distributions.js';
+import { characterClassShares } from '../character-classes.js';
 
 /**
  * The planned signals. `part` is the key a signal adds to `scoreRequest().parts` (C-06): a signal
@@ -118,7 +120,17 @@ const scoreChart = histogramChart(
   histogram([], 'score', SCORE_EDGES),
   { xTitle: 'Statistical score, -log10 p (higher = more anomalous)' },
 );
+const classChart = histogramChart(
+  /** @type {HTMLCanvasElement} */ (document.querySelector('#chart-classes')),
+  characterClassShares([]),
+  {
+    xTitle: 'Character class',
+    yTitle: "Share of the group's characters",
+    unit: 'characters',
+  },
+);
 let drawnPoints = ''; // what the chart was last drawn for: requests arrived, threshold known
+let drawnClasses = ''; // what the class chart was last drawn for: requests arrived, stage
 
 initLive({ state, run, render });
 
@@ -158,9 +170,37 @@ function drawDistributions(frame) {
   );
 }
 
+/**
+ * The seven character-class shares of the test requests that have arrived, pooled by ground-truth
+ * label (methods.md §4b). Each group adds up to 100%; the attack group includes the legitimate
+ * filler values of an attack request, so the picture describes this corpus, not one request.
+ * @param {import('../replay.js').Frame} frame
+ */
+function drawClasses(frame) {
+  const key = `${frame.at}:${frame.stage}`;
+  if (key === drawnClasses) return;
+  drawnClasses = key;
+
+  const arrived = dataset.test.slice(0, frame.at);
+  if (arrived.length === 0) {
+    const text = frame.stage === 'idle' ? 'No traffic yet.' : 'Waiting for the first request...';
+    chartMessage(classChart, text);
+    mount('#classes-meta', 'legitimate vs attack');
+    return;
+  }
+  chartMessage(classChart, null);
+  const data = characterClassShares(arrived);
+  setHistogramData(classChart, { ...data, unit: 'characters' });
+  mount(
+    '#classes-meta',
+    `${fmt.int(data.legitChars)} legitimate · ${fmt.int(data.attackChars)} attack characters`,
+  );
+}
+
 /** @param {import('../replay.js').Frame} frame */
 function render(frame) {
   drawDistributions(frame);
+  drawClasses(frame);
   const size = dataset.train.length;
   const learned = Math.round(frame.trained * size);
   let phase = 'running';

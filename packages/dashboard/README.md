@@ -9,15 +9,15 @@ detect, evaluate - with no backend, so it is hosted on **GitHub Pages** (ADR-003
 
 ## Pages
 
-| Page               | File              | Shows                                                                                                                                                         | Theme panels still to add                                   |
-| ------------------ | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
-| Overview           | `index.html`      | key figures, alerts by severity, every request (a box that scrolls, newest or oldest first; alerts in red), alerts by level, what raised them, top signatures | -                                                           |
-| Security events    | `events.html`     | every test request: verdict, level, reason, ground truth; filters, pages, rows per page and order in the URL                                                  | -                                                           |
-| Rules              | `rules.html`      | the signature rules and how often each matched                                                                                                                | - (the ruleset itself is B-01)                              |
-| Statistical models | `models.html`     | the signals in the score; the learned model per endpoint and parameter                                                                                        | E-02: character classes (T1); lengths and scores (T2, done) |
-| Detection quality  | `evaluation.html` | the calibrated operating point, confusion matrix, rates and variants with Wilson intervals, ROC (its title opens it large) and AUC, McNemar between the modes | -                                                           |
-| Base rate          | `base-rate.html`  | Bayes, a worked example, and PPV against hypothetical prevalence using the measured test rates                                                                | -                                                           |
-| About              | `about.html`      | the project, the method, the themes, the team                                                                                                                 | -                                                           |
+| Page               | File              | Shows                                                                                                                                                         | Theme panels still to add      |
+| ------------------ | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| Overview           | `index.html`      | key figures, alerts by severity, every request (a box that scrolls, newest or oldest first; alerts in red), alerts by level, what raised them, top signatures | -                              |
+| Security events    | `events.html`     | every test request: verdict, level, reason, ground truth; filters, pages, rows per page and order in the URL                                                  | -                              |
+| Rules              | `rules.html`      | the signature rules and how often each matched                                                                                                                | - (the ruleset itself is B-01) |
+| Statistical models | `models.html`     | the signals in the score; character classes and lengths/scores, legitimate vs attack; the learned model per endpoint and parameter                            | -                              |
+| Detection quality  | `evaluation.html` | the calibrated operating point, confusion matrix, rates and variants with Wilson intervals, ROC (its title opens it large) and AUC, McNemar between the modes | -                              |
+| Base rate          | `base-rate.html`  | Bayes, a worked example, and PPV against hypothetical prevalence using the measured test rates                                                                | -                              |
+| About              | `about.html`      | the project, the method, the themes, the team                                                                                                                 | -                              |
 
 Every page except Base rate and About opens empty and waits for **Start monitoring** (live replay,
 E-08, [ADR-011](../../docs/development/adr/ADR-011-live-replay.md)); add `at=end` to a
@@ -50,13 +50,14 @@ dashboard/
 │   ├── listing.js    rows per page and order of a list (pure, tested)
 │   ├── dom.js        DOM helpers: data goes in as text, never as HTML
 │   ├── ui.js         KPI tile, level badge
+│   ├── character-classes.js  character-class shares, legitimate vs attack (pure, tested)
 │   ├── charts.js     Chart.js setup and helpers (bar, doughnut, ROC, base rate)
 │   ├── chart-modal.js  a chart opened large over the dimmed page (the ROC title opens one)
 │   ├── lines.js      hover points along the straight parts of a line (pure, tested)
 │   ├── assets/       icon
 │   └── pages/        one script per page
 ├── test/             node:test for state, shell, levels, pipeline, quality, replay, glossary,
-│                     lines, rows, team, terms, listing
+│                     character-classes, lines, rows, team, terms, listing
 └── vite.config.js    page list, partials plugin, CSP
 ```
 
