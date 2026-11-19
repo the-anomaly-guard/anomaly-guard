@@ -118,6 +118,7 @@
 | E-06 | On `evaluation.html`: target-FPR control (threshold from the calibration split via D-06), confusion matrix and per-variant results table                                                                                                  | T3         | D-06             | Done            |
 | E-07 | Multi-page, SIEM-style console (ADR-010): seven pages, settings in the URL, alert levels, CSP, placeholders for the theme charts; team guide for access and portfolios (`docs/guides/team-guide.md`)                                      | shared     | E-01             | Done            |
 | E-08 | Live replay (ADR-011): the pages open empty; "Start monitoring" shows the training, then the threshold on the calibration split, then the test requests arriving (pause, speed, skip); the position travels in the URL (`at`)             | shared     | E-07             | Done            |
+| E-09 | Team contribution pages: per-theme methods, completed tasks and experiment visualizations in the sidebar                                                                                                                                  | shared     | E-02, E-03       | Done            |
 
 ## 8. Work split by statistical theme
 

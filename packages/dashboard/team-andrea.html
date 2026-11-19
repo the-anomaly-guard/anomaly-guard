@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Andrea Sangiovanni: Character distributions and chi-square contributions to The Anomaly Guard."
+    />
+    <title>Andrea Sangiovanni · The Anomaly Guard</title>
+    <link rel="icon" type="image/svg+xml" href="./src/assets/shield.svg" />
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body data-page="team-andrea">
+    <!-- include: partials/header.html -->
+    <div class="layout">
+      <!-- include: partials/sidebar.html -->
+      <main id="main" class="content">
+        <!-- include: partials/querybar.html -->
+        <div class="page-head">
+          <p class="crumbs">Team · T1</p>
+          <h1>Andrea Sangiovanni</h1>
+          <p class="page-sub">
+            Character distributions and chi-square ·
+            <a href="https://github.com/Sangioo" target="_blank" rel="noopener noreferrer"
+              >@Sangioo ↗</a
+            >
+          </p>
+        </div>
+        <div class="callout">
+          Andrea’s theme asks whether a parameter’s character mix resembles the legitimate traffic
+          learned for that endpoint.
+        </div>
+        <div class="grid grid-2">
+          <section class="panel" aria-labelledby="implementation-title">
+            <div class="panel-head">
+              <h2 class="panel-title" id="implementation-title">Methods and implementation</h2>
+            </div>
+            <div class="panel-body prose">
+              <h3>Character-distribution scoring</h3>
+              <p>
+                <code>core/src/stats/chisquare.js</code> compares observed counts across seven fixed
+                character classes with Laplace-smoothed expectations. The per-request chi-square
+                tail is converted to a continuous −log₁₀(p) score; the worst parameter contributes
+                to the detector. Small expected counts make its p-value nominal, not a probability
+                that a request is an attack.
+              </p>
+              <h3>Signatures and dataset analysis</h3>
+              <p>
+                <code>core/src/rules/engine.js</code> matches canonical attack families and
+                preserves rule hits. The dataset-level homogeneity test in
+                <code>core/src/stats/chisquare.js</code> and entropy analysis in
+                <code>core/src/stats/entropy.js</code> compare legitimate and attack groups; they
+                address a different question from the per-request score.
+              </p>
+            </div>
+          </section>
+          <section class="panel" aria-labelledby="chart-title">
+            <div class="panel-head">
+              <h2 class="panel-title" id="chart-title">Character classes</h2>
+              <span class="panel-meta">held-out experiment</span>
+            </div>
+            <div class="panel-body">
+              <p class="note" data-experiment></p>
+              <div class="chart-box is-tall" id="contribution-chart-box">
+                <canvas
+                  id="contribution-chart"
+                  role="img"
+                  aria-label="Share of seven character classes in legitimate and attack test values"
+                ></canvas>
+              </div>
+              <p class="note" id="chart-message">
+                Each group is normalized separately. All parameter values are pooled, including
+                legitimate filler in attack requests; long values contribute more characters.
+              </p>
+              <a href="./models.html" data-keep-state>Explore statistical models →</a>
+            </div>
+          </section>
+        </div>
+        <section class="panel" aria-labelledby="tasks-title">
+          <div class="panel-head">
+            <h2 class="panel-title" id="tasks-title">Key deliverables</h2>
+            <span class="panel-meta">backlog · T1</span>
+          </div>
+          <div class="panel-body prose">
+            <ul>
+              <li>
+                <strong>C-03</strong> · Chi-square character score
+                <span class="badge is-clean">Done</span>
+              </li>
+              <li>
+                <strong>B-01</strong> · Canonical signature rules
+                <span class="badge is-clean">Done</span>
+              </li>
+              <li>
+                <strong>C-08</strong> · Homogeneity and entropy analysis
+                <span class="badge is-clean">Done</span>
+              </li>
+              <li>
+                <strong>E-02</strong> · Character-class chart
+                <span class="badge is-clean">Done</span>
+              </li>
+            </ul>
+            <p>
+              Theme assignments and task status:
+              <a
+                href="https://github.com/the-anomaly-guard/anomaly-guard/blob/main/docs/planning/backlog.md"
+                target="_blank"
+                rel="noopener noreferrer"
+                >project backlog ↗</a
+              >.
+            </p>
+          </div>
+        </section>
+        <!-- include: partials/footer.html -->
+      </main>
+    </div>
+    <script type="module" src="./src/pages/contribution.js"></script>
+  </body>
+</html>

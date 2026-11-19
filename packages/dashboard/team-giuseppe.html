@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Giuseppe: Probability and simulation contributions to The Anomaly Guard."
+    />
+    <title>Giuseppe · The Anomaly Guard</title>
+    <link rel="icon" type="image/svg+xml" href="./src/assets/shield.svg" />
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body data-page="team-giuseppe">
+    <!-- include: partials/header.html -->
+    <div class="layout">
+      <!-- include: partials/sidebar.html -->
+      <main id="main" class="content">
+        <!-- include: partials/querybar.html -->
+        <div class="page-head">
+          <p class="crumbs">Team · T4</p>
+          <h1>Giuseppe</h1>
+          <p class="page-sub">
+            Probability and simulation ·
+            <a href="https://github.com/giuseppe1-1" target="_blank" rel="noopener noreferrer"
+              >@giuseppe1-1 ↗</a
+            >
+          </p>
+        </div>
+        <div class="callout">
+          Giuseppe’s probability and simulation work defines the traffic used to train and test the
+          detector, then uses Bayes’ theorem to investigate how often an alert represents a real
+          attack when attacks are rare.
+        </div>
+        <div class="grid grid-2">
+          <section class="panel" aria-labelledby="implementation-title">
+            <div class="panel-head">
+              <h2 class="panel-title" id="implementation-title">Methods and implementation</h2>
+            </div>
+            <div class="panel-body prose">
+              <h3>Seeded traffic model</h3>
+              <p>
+                <code>traffic/src/generators.js</code> builds synthetic requests for six endpoint
+                shapes. A categorical draw selects the endpoint: for example, search has a 25%
+                weight and products 20%. Parameters are sampled for that endpoint, so a search has a
+                query and page number while a cart has a product ID and quantity.
+              </p>
+              <p>
+                The sampling functions in <code>traffic/src/distributions.js</code> give the data
+                varied, skewed shapes. Search and text words follow a finite Zipf-style ranking, so
+                common words recur while rare ones remain possible. Page numbers and quantities use
+                geometric distributions; comment and biography lengths use a bounded log-normal
+                distribution, producing many shorter values and a long tail. A Box–Muller draw
+                supplies the normal variable behind those lengths.
+              </p>
+              <h3>Reproducible splits</h3>
+              <p>
+                <code>traffic/src/rng.js</code> supplies the seeded random stream, and
+                <code>traffic/src/dataset.js</code> uses it to generate and shuffle the samples. The
+                model is trained on legitimate requests only; a separate legitimate calibration
+                split selects the operating threshold. The held-out test split contains both
+                legitimate requests and attacks, with labels and variants used for evaluation only.
+                The same seed and code produce the same dataset.
+              </p>
+              <h3>Attack variants and legitimate hard cases</h3>
+              <p>
+                Each attack starts as a legitimate request with one parameter replaced by a payload
+                string. Canonical examples cover known signature families; obfuscated examples
+                transform those families, while novel families are fixed before evaluation and have
+                no dedicated signature. Short mimicry examples challenge the detector with inputs
+                that resemble ordinary values. These strings are measured as data.
+              </p>
+              <p>
+                <code>traffic/src/hard-cases.js</code> supplies unusual but legitimate test
+                examples, including punctuation, non-Latin text and long input. They expose false
+                alarms that typical inputs may miss. The dashboard sets the hard-case share to 5% of
+                legitimate test requests; this is an experimental choice, not a measured share of
+                real traffic.
+              </p>
+              <h3>From simulation to Bayes</h3>
+              <p>
+                <code>dashboard/src/base-rate-data.js</code> combines the test split’s measured
+                detection and false-positive rates with a hypothetical attack share. Bayes’ theorem
+                then estimates the positive predictive value: the fraction of alerts expected to
+                correspond to attacks. This makes the cost of false alarms visible even when the
+                detector catches a high proportion of attacks.
+              </p>
+              <p>
+                The traffic distributions and attack mix are assumed models, not measurements of a
+                particular website. Results depend on the selected seed, sample size and mixture, so
+                they illustrate the experiment rather than establish real-world performance.
+              </p>
+            </div>
+          </section>
+          <section class="panel" aria-labelledby="chart-title">
+            <div class="panel-head">
+              <h2 class="panel-title" id="chart-title">Base rate and alarms</h2>
+              <span class="panel-meta">held-out experiment</span>
+            </div>
+            <div class="panel-body">
+              <p class="note" data-experiment></p>
+              <div class="chart-box is-tall" id="contribution-chart-box">
+                <canvas
+                  id="contribution-chart"
+                  role="img"
+                  aria-label="Positive predictive value versus hypothetical attack prevalence"
+                ></canvas>
+              </div>
+              <p class="note" id="chart-message">
+                The curve uses the measured true-positive and false-positive rates from this
+                held-out test split, then varies hypothetical prevalence. It is a scenario, not a
+                new experiment.
+              </p>
+              <div class="prose">
+                <h3>Reading the curve</h3>
+                <p>
+                  The horizontal axis is the hypothetical percentage of requests that are attacks;
+                  its logarithmic scale makes rare attack shares visible. The vertical axis is
+                  positive predictive value (PPV): the percentage of alerts expected to be actual
+                  attacks. Hover over the curve to inspect a point. The test split provides the
+                  true-positive rate (TPR, attacks caught) and false-positive rate (FPR, legitimate
+                  requests flagged); the curve holds both rates fixed as prevalence changes.
+                </p>
+                <section aria-labelledby="ppv-formula-title">
+                  <h3 id="ppv-formula-title">How the PPV formula works</h3>
+                  <p>
+                    The formula estimates the probability that an alert is an actual attack. Its
+                    numerator represents attacks caught; its denominator includes both attacks
+                    caught and legitimate requests incorrectly flagged. The graph applies this
+                    calculation at each hypothetical prevalence, keeping the measured rates fixed.
+                  </p>
+                  <p class="formula">
+                    PPV = (TPR · prevalence) / (TPR · prevalence + FPR · (1 − prevalence))
+                  </p>
+                  <ul>
+                    <li>
+                      <strong>PPV (positive predictive value):</strong> the probability that an
+                      alert corresponds to an attack, or the expected share of alerts that are true
+                      positives.
+                    </li>
+                    <li>
+                      <strong>TPR (true-positive rate or sensitivity):</strong> the share of attacks
+                      detected. Together with prevalence, it determines the fraction of all requests
+                      that are true-positive alerts.
+                    </li>
+                    <li>
+                      <strong>FPR (false-positive rate):</strong> the share of legitimate requests
+                      flagged. False alarms increase the denominator and reduce PPV when attacks are
+                      caught.
+                    </li>
+                    <li>
+                      <strong>Prevalence:</strong> the share of all requests that are attacks. At
+                      lower prevalence, legitimate requests make up more of the population, so false
+                      alarms can account for a larger share of alerts.
+                    </li>
+                  </ul>
+                </section>
+                <div id="base-rate-insights" hidden>
+                  <h3>Results for this run</h3>
+                  <p id="base-rate-rates"></p>
+                  <p id="base-rate-examples"></p>
+                  <p id="base-rate-trend"></p>
+                </div>
+                <h3>What the result means</h3>
+                <p>
+                  When both measured rates are positive, the curve rises with prevalence: if attacks
+                  are rare, false alarms among the much larger legitimate population can outnumber
+                  the attacks caught. A higher PPV means a larger share of alerts are useful, but it
+                  does not tell us how many attacks were missed; recall and the false-negative rate
+                  matter too.
+                </p>
+                <p>
+                  The curve assumes the measured rates stay the same at every hypothetical attack
+                  share. They come from one synthetic test split, and a different mix or seed can
+                  change them. In particular, observing zero false positives in a finite sample does
+                  not prove that the true false-positive rate is zero. Change the settings above to
+                  run another experiment, or use the base-rate page to explore a specific share.
+                </p>
+              </div>
+              <a href="./base-rate.html" data-keep-state>Explore the base-rate scenario →</a>
+            </div>
+          </section>
+        </div>
+        <section class="panel" aria-labelledby="tasks-title">
+          <div class="panel-head">
+            <h2 class="panel-title" id="tasks-title">Key deliverables</h2>
+            <span class="panel-meta">backlog · T4</span>
+          </div>
+          <div class="panel-body prose">
+            <ul>
+              <li>
+                <strong>A-02</strong> · Legitimate probability model
+                <span class="badge is-clean">Done</span>
+              </li>
+              <li>
+                <strong>A-03</strong> · Canonical attack examples
+                <span class="badge is-clean">Done</span>
+              </li>
+              <li>
+                <strong>A-04</strong> · Obfuscated and novel attacks
+                <span class="badge is-clean">Done</span>
+              </li>
+              <li>
+                <strong>A-05</strong> · Legitimate hard cases
+                <span class="badge is-clean">Done</span>
+              </li>
+              <li>
+                <strong>E-03</strong> · Base-rate explainer <span class="badge is-clean">Done</span>
+              </li>
+            </ul>
+            <p>
+              Theme assignments and task status:
+              <a
+                href="https://github.com/the-anomaly-guard/anomaly-guard/blob/main/docs/planning/backlog.md"
+                target="_blank"
+                rel="noopener noreferrer"
+                >project backlog ↗</a
+              >.
+            </p>
+          </div>
+        </section>
+        <!-- include: partials/footer.html -->
+      </main>
+    </div>
+    <script type="module" src="./src/pages/contribution.js"></script>
+  </body>
+</html>

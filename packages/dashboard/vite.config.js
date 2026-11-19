@@ -13,7 +13,19 @@ const root = dirname(fileURLToPath(import.meta.url));
 const partialsDir = resolve(root, 'partials');
 
 // The pages, in sidebar order. A new page needs its HTML file here and a link in partials/sidebar.html.
-const PAGES = ['index', 'events', 'rules', 'models', 'evaluation', 'base-rate', 'about'];
+const PAGES = [
+  'index',
+  'events',
+  'rules',
+  'models',
+  'evaluation',
+  'base-rate',
+  'about',
+  'team-andrea',
+  'team-marcello',
+  'team-nicholas',
+  'team-giuseppe',
+];
 
 // `<!-- include: partials/header.html -->` -> that file's contents, in dev and in the build, so the
 // shared header, settings bar, sidebar and footer are written once and every page stays plain HTML.

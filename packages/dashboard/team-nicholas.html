@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Nicholas Arcari: Evaluation and uncertainty contributions to The Anomaly Guard."
+    />
+    <title>Nicholas Arcari · The Anomaly Guard</title>
+    <link rel="icon" type="image/svg+xml" href="./src/assets/shield.svg" />
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body data-page="team-nicholas">
+    <!-- include: partials/header.html -->
+    <div class="layout">
+      <!-- include: partials/sidebar.html -->
+      <main id="main" class="content">
+        <!-- include: partials/querybar.html -->
+        <div class="page-head">
+          <p class="crumbs">Team · T3</p>
+          <h1>Nicholas Arcari</h1>
+          <p class="page-sub">
+            Evaluation and uncertainty ·
+            <a href="https://github.com/Nicholas-Arcari" target="_blank" rel="noopener noreferrer"
+              >@Nicholas-Arcari ↗</a
+            >
+          </p>
+        </div>
+        <div class="callout">
+          Nicholas’s theme measures detector errors and the uncertainty around those estimates.
+        </div>
+        <div class="grid grid-2">
+          <section class="panel" aria-labelledby="implementation-title">
+            <div class="panel-head">
+              <h2 class="panel-title" id="implementation-title">Methods and implementation</h2>
+            </div>
+            <div class="panel-body prose">
+              <h3>Thresholds and comparisons</h3>
+              <p>
+                <code>evaluation/src/index.js</code> calibrates the operating threshold on
+                legitimate calibration scores, calculates confusion matrices, ROC and AUC, and
+                compares paired predictions with McNemar’s test. Test labels are reserved for
+                evaluation, never calibration or training.
+              </p>
+              <h3>Uncertainty and reproducibility</h3>
+              <p>
+                Wilson intervals describe rate uncertainty and a seeded bootstrap estimates AUC
+                uncertainty. <code>experiments/src/run.js</code> runs multiple seeds and records
+                results; <code>experiments/src/report.js</code> supports generated report numbers.
+                The dashboard displays errors by attack variant and includes a calibrated threshold
+                control.
+              </p>
+            </div>
+          </section>
+          <section class="panel" aria-labelledby="chart-title">
+            <div class="panel-head">
+              <h2 class="panel-title" id="chart-title">ROC by detector</h2>
+              <span class="panel-meta">held-out experiment</span>
+            </div>
+            <div class="panel-body">
+              <p class="note" data-experiment></p>
+              <div class="chart-box is-tall" id="contribution-chart-box">
+                <canvas
+                  id="contribution-chart"
+                  role="img"
+                  aria-label="ROC curves for rules, statistical and combined detectors"
+                ></canvas>
+              </div>
+              <p class="note" id="chart-message">
+                The same held-out requests are scored in each mode. Curves sweep thresholds; the
+                diagonal is chance. Results depend on the seed and dataset.
+              </p>
+              <a href="./evaluation.html" data-keep-state>Explore detection quality →</a>
+            </div>
+          </section>
+        </div>
+        <section class="panel" aria-labelledby="tasks-title">
+          <div class="panel-head">
+            <h2 class="panel-title" id="tasks-title">Key deliverables</h2>
+            <span class="panel-meta">backlog · T3</span>
+          </div>
+          <div class="panel-body prose">
+            <ul>
+              <li><strong>D-03</strong> · ROC and AUC <span class="badge is-clean">Done</span></li>
+              <li>
+                <strong>D-04</strong> · Multi-seed experiments
+                <span class="badge is-clean">Done</span>
+              </li>
+              <li>
+                <strong>D-05</strong> · Wilson and bootstrap intervals
+                <span class="badge is-clean">Done</span>
+              </li>
+              <li>
+                <strong>D-06</strong> · Calibration at target FPR
+                <span class="badge is-clean">Done</span>
+              </li>
+              <li>
+                <strong>D-07</strong> · Paired McNemar comparison
+                <span class="badge is-clean">Done</span>
+              </li>
+              <li>
+                <strong>D-08</strong> · Generated report numbers
+                <span class="badge is-clean">Done</span>
+              </li>
+              <li>
+                <strong>B-02</strong> · Calibrated server monitor
+                <span class="badge is-clean">Done</span>
+              </li>
+              <li>
+                <strong>E-02 / E-06</strong> · ROC and evaluation dashboard
+                <span class="badge is-clean">Done</span>
+              </li>
+            </ul>
+            <p>
+              Theme assignments and task status:
+              <a
+                href="https://github.com/the-anomaly-guard/anomaly-guard/blob/main/docs/planning/backlog.md"
+                target="_blank"
+                rel="noopener noreferrer"
+                >project backlog ↗</a
+              >.
+            </p>
+          </div>
+        </section>
+        <!-- include: partials/footer.html -->
+      </main>
+    </div>
+    <script type="module" src="./src/pages/contribution.js"></script>
+  </body>
+</html>

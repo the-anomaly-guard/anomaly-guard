@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="marcelloNapoletano: Lengths and outliers contributions to The Anomaly Guard."
+    />
+    <title>marcelloNapoletano · The Anomaly Guard</title>
+    <link rel="icon" type="image/svg+xml" href="./src/assets/shield.svg" />
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body data-page="team-marcello">
+    <!-- include: partials/header.html -->
+    <div class="layout">
+      <!-- include: partials/sidebar.html -->
+      <main id="main" class="content">
+        <!-- include: partials/querybar.html -->
+        <div class="page-head">
+          <p class="crumbs">Team · T2</p>
+          <h1>marcelloNapoletano</h1>
+          <p class="page-sub">
+            Lengths and outliers ·
+            <a
+              href="https://github.com/marcelloNapoletano"
+              target="_blank"
+              rel="noopener noreferrer"
+              >@marcelloNapoletano ↗</a
+            >
+          </p>
+        </div>
+        <div class="callout">
+          Marcello’s work asks whether a value is unusually long, or whether its features are
+          unusual in combination.
+        </div>
+        <div class="grid grid-2">
+          <section class="panel" aria-labelledby="implementation-title">
+            <div class="panel-head">
+              <h2 class="panel-title" id="implementation-title">Methods and implementation</h2>
+            </div>
+            <div class="panel-body prose">
+              <h3>Length and robust outliers</h3>
+              <p>
+                <code>core/src/stats/length.js</code> models log-transformed lengths per endpoint
+                and parameter and defines the policy for unseen pairs (ADR-012).
+                <code>core/src/stats/outliers.js</code> provides IQR, MAD and regularized
+                Mahalanobis signals (ADR-013), translating tail values to scores.
+              </p>
+              <h3>Combining and explaining signals</h3>
+              <p>
+                <code>core/src/stats/anomaly.js</code> combines the five continuous signals; the
+                calibrated mode accounts for their different distributions (ADR-015).
+                <code>core/src/detector/detect.js</code> reports the signal and parameter behind a
+                verdict. The score threshold remains outside each signal.
+              </p>
+            </div>
+          </section>
+          <section class="panel" aria-labelledby="chart-title">
+            <div class="panel-head">
+              <h2 class="panel-title" id="chart-title">Length distributions</h2>
+              <span class="panel-meta">held-out experiment</span>
+            </div>
+            <div class="panel-body">
+              <p class="note" data-experiment></p>
+              <div class="chart-box is-tall" id="contribution-chart-box">
+                <canvas
+                  id="contribution-chart"
+                  role="img"
+                  aria-label="Share of legitimate and attack requests by longest parameter length"
+                ></canvas>
+              </div>
+              <p class="note" id="chart-message">
+                Each group is normalized separately. Length is the longest parameter value in a
+                request; the chart summarizes the held-out test split.
+              </p>
+              <a href="./models.html" data-keep-state>Explore lengths and scores →</a>
+            </div>
+          </section>
+        </div>
+        <section class="panel" aria-labelledby="tasks-title">
+          <div class="panel-head">
+            <h2 class="panel-title" id="tasks-title">Key deliverables</h2>
+            <span class="panel-meta">backlog · T2</span>
+          </div>
+          <div class="panel-body prose">
+            <ul>
+              <li>
+                <strong>C-04</strong> · Length model and unseen pairs
+                <span class="badge is-clean">Done</span>
+              </li>
+              <li>
+                <strong>C-05</strong> · IQR, MAD and Mahalanobis signals
+                <span class="badge is-clean">Done</span>
+              </li>
+              <li>
+                <strong>C-06</strong> · Combine statistical signals
+                <span class="badge is-clean">Done</span>
+              </li>
+              <li>
+                <strong>C-07</strong> · Detector explanations
+                <span class="badge is-clean">Done</span>
+              </li>
+              <li>
+                <strong>E-02</strong> · Lengths and scores chart
+                <span class="badge is-clean">Done</span>
+              </li>
+            </ul>
+            <p>
+              Theme assignments and task status:
+              <a
+                href="https://github.com/the-anomaly-guard/anomaly-guard/blob/main/docs/planning/backlog.md"
+                target="_blank"
+                rel="noopener noreferrer"
+                >project backlog ↗</a
+              >.
+            </p>
+          </div>
+        </section>
+        <!-- include: partials/footer.html -->
+      </main>
+    </div>
+    <script type="module" src="./src/pages/contribution.js"></script>
+  </body>
+</html>
