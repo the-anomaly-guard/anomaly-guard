@@ -17,6 +17,7 @@ const PAGES = [
   'index',
   'events',
   'rules',
+  'logs',
   'models',
   'evaluation',
   'base-rate',

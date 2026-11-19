@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Analyse the access log of any web server (Apache, Nginx, AWS, JSON) with the detector of The Anomaly Guard, entirely in your browser."
+    />
+    <title>Import logs · The Anomaly Guard</title>
+    <link rel="icon" type="image/svg+xml" href="./src/assets/shield.svg" />
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body data-page="logs">
+    <!-- include: partials/header.html -->
+    <div class="layout">
+      <!-- include: partials/sidebar.html -->
+      <main id="main" class="content">
+        <div class="page-head">
+          <p class="crumbs">Threat detection</p>
+          <h1>Import logs</h1>
+          <p class="page-sub">
+            The access log of a real web server, read by the same rules and statistics as the
+            simulated traffic.
+          </p>
+        </div>
+
+        <div class="callout">
+          The log stays in this browser: it is read here, never uploaded or saved, and closing the
+          page forgets it. A real log holds personal data, such as client addresses and user agents:
+          show it only to people allowed to see it.
+        </div>
+
+        <section class="panel" aria-labelledby="log-input-title">
+          <div class="panel-head">
+            <h2 class="panel-title" id="log-input-title">1 · The log</h2>
+            <span class="panel-meta">Apache, Nginx, AWS, JSON or any text log with requests</span>
+          </div>
+          <div class="panel-body log-input">
+            <div class="log-drop" id="log-drop">
+              <p><strong>Drop log files here</strong></p>
+              <label class="btn">
+                Choose files
+                <input
+                  id="log-files"
+                  class="visually-hidden"
+                  type="file"
+                  multiple
+                  accept=".log,.txt,.gz,.json,.jsonl,text/plain,application/gzip"
+                />
+              </label>
+              <p class="log-hint">
+                Plain text or .gz. Several files are read in name order, as one log.
+              </p>
+              <p class="log-chosen" id="log-chosen"></p>
+            </div>
+            <div class="log-paste">
+              <label for="log-text">Or paste lines</label>
+              <textarea id="log-text" rows="9" spellcheck="false" wrap="off"></textarea>
+              <div class="log-examples">
+                <label>
+                  Example
+                  <select id="log-example"></select>
+                </label>
+                <button type="button" class="btn btn-small" id="log-example-load">
+                  Paste the example
+                </button>
+                <button type="button" class="btn btn-small" id="log-sample">
+                  Generate a sample log
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="log-settings-title">
+          <div class="panel-head">
+            <h2 class="panel-title" id="log-settings-title">2 · How to read it</h2>
+            <span class="panel-meta"
+              >the model learns normal traffic from a baseline you trust</span
+            >
+          </div>
+          <div class="panel-body">
+            <div class="log-settings">
+              <label>
+                Format
+                <select id="log-format"></select>
+              </label>
+              <fieldset class="log-baseline">
+                <legend>What counts as normal</legend>
+                <label class="log-choice">
+                  <input type="radio" name="log-baseline" value="share" checked />
+                  The first
+                  <select id="log-share" aria-label="Share of the log taken as normal"></select>
+                  of this log
+                </label>
+                <label class="log-choice">
+                  <input type="radio" name="log-baseline" value="file" />
+                  A separate log:
+                  <input
+                    id="log-baseline-files"
+                    type="file"
+                    multiple
+                    accept=".log,.txt,.gz,.json,.jsonl,text/plain,application/gzip"
+                  />
+                </label>
+              </fieldset>
+              <label>
+                Detector
+                <select id="log-mode">
+                  <option value="combined">Rules + statistics</option>
+                  <option value="stats">Statistics only</option>
+                  <option value="rules">Rules only</option>
+                </select>
+              </label>
+              <label>
+                False positives
+                <select id="log-fpr"></select>
+              </label>
+              <label>
+                Threshold (−log₁₀ p)
+                <input id="log-threshold" type="number" min="0" step="0.1" value="20" readonly />
+              </label>
+              <button type="button" class="btn btn-primary" id="log-analyse">Analyse</button>
+            </div>
+            <p class="log-explain">
+              The first 70% of the baseline trains the statistical model; the last 30% sets the
+              threshold, so that only the chosen share of it would raise an alert. Every other
+              request is then scored once. The rules learn nothing, so with the rules alone the
+              whole log is inspected. The path is inspected too, as the value
+              <code>(path)</code>: access logs record no request body.
+            </p>
+            <p class="log-status" id="log-status" role="status" aria-live="polite"></p>
+          </div>
+        </section>
+
+        <div id="log-results" hidden>
+          <section class="kpis" id="log-kpis" aria-label="Key figures"></section>
+          <div id="log-warnings"></div>
+          <section class="panel" aria-labelledby="log-table-title">
+            <div class="panel-head">
+              <h2 class="panel-title" id="log-table-title">Inspected requests</h2>
+              <div class="panel-tools">
+                <span class="panel-meta" id="log-meta"></span>
+                <span class="list-controls" id="log-controls"></span>
+              </div>
+            </div>
+            <nav class="tabs" id="log-tabs" aria-label="Which requests"></nav>
+            <div class="table-wrap">
+              <table class="data">
+                <thead>
+                  <tr>
+                    <th scope="col"><span class="visually-hidden">Details</span></th>
+                    <th scope="col" class="num">Line</th>
+                    <th scope="col">Time</th>
+                    <th scope="col" title="HTTP method and path of the logged request.">Request</th>
+                    <th scope="col">Parameters</th>
+                    <th scope="col" class="num">HTTP status</th>
+                    <th scope="col">Level</th>
+                    <th scope="col">Detected by</th>
+                    <th scope="col">Verdict</th>
+                  </tr>
+                </thead>
+                <tbody id="log-body"></tbody>
+              </table>
+            </div>
+            <div class="pager" id="log-pager"></div>
+          </section>
+        </div>
+
+        <!-- include: partials/footer.html -->
+      </main>
+    </div>
+    <script type="module" src="./src/pages/logs.js"></script>
+  </body>
+</html>
