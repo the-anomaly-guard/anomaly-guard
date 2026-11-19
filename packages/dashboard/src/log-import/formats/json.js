@@ -60,6 +60,9 @@ const NAMES = {
     'httprequest.status',
     'res.statuscode',
     'sc-status',
+    'response',
+    'response_code',
+    'http_status',
   ],
   time: [
     'time',
