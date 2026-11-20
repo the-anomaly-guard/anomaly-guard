@@ -9,7 +9,7 @@ import {
   splitTarget,
   toRequest,
 } from '../src/log-import/request.js';
-import { MAX_FILE_BYTES, isGzip, readFiles, readText } from '../src/log-import/text.js';
+import { MAX_TEXT_CHARS, isGzip, readFiles, readText } from '../src/log-import/text.js';
 
 const DIR = new URL('../src/log-import/formats/', import.meta.url);
 const FORMATS = [];
@@ -93,20 +93,47 @@ test('toRequest: the detector sees the parameters and the decoded path', () => {
   assert.equal(toRequest({ method: 'OPTIONS', target: '*' }).path, '*');
 });
 
-test('files: plain and gzip, several in name order, with a size limit', async () => {
+const gzip = (text) =>
+  new Response(new Blob([text]).stream().pipeThrough(new CompressionStream('gzip'))).blob();
+
+test('files: plain and gzip, several in name order', async () => {
   const plain = new Blob([`${line('/plain')}\n`]);
   assert.equal(await isGzip(plain), false);
-  assert.equal(await readText(plain), `${line('/plain')}\n`);
-  const zipped = await new Response(
-    new Blob([`${line('/zipped')}\n`]).stream().pipeThrough(new CompressionStream('gzip')),
-  ).blob();
+  assert.deepEqual(await readText(plain), { text: `${line('/plain')}\n`, cut: false });
+  const zipped = await gzip(`${line('/zipped')}\n`);
   assert.equal(await isGzip(zipped), true);
-  assert.equal(await readText(zipped), `${line('/zipped')}\n`);
+  assert.deepEqual(await readText(zipped), { text: `${line('/zipped')}\n`, cut: false });
   const joined = await readFiles([
     new File([line('/second')], 'b.log'),
     new File([line('/first')], 'a.log'),
   ]);
-  assert.equal(joined, `${line('/first')}\n${line('/second')}\n`);
-  const huge = { size: MAX_FILE_BYTES + 1, name: 'huge.log' };
-  await assert.rejects(readText(/** @type {any} */ (huge)), /reads files up to/);
+  assert.deepEqual(joined, { text: `${line('/first')}\n${line('/second')}\n`, cut: [] });
+  assert.equal(MAX_TEXT_CHARS, 100 * 1024 * 1024);
+});
+
+test('files: only the start of a large log is kept, cut at the end of a line', async () => {
+  assert.deepEqual(await readText(new Blob(['a\nbb\nccc\n']), { maxChars: 5 }), {
+    text: 'a\nbb\n',
+    cut: true,
+  });
+  assert.deepEqual(await readText(new Blob(['a\nbb\n']), { maxChars: 5 }), {
+    text: 'a\nbb\n',
+    cut: false,
+  });
+  // a gzip file expands: the budget is on the text, not on the file
+  const zipped = await gzip(`${'x'.repeat(5000)}\n`.repeat(200));
+  assert.ok(zipped.size < 5000);
+  const kept = await readText(zipped, { maxChars: 12000 });
+  assert.equal(kept.cut, true);
+  assert.equal(kept.text, `${'x'.repeat(5000)}\n`.repeat(2));
+  // several files share the budget: once one is cut, the later ones are left out
+  const files = [
+    new File(['1234\n'], 'a.log'),
+    new File(['5678\n9\n'], 'b.log'),
+    new File(['0\n'], 'c.log'),
+  ];
+  assert.deepEqual(await readFiles(files, { maxChars: 8 }), {
+    text: '1234\n',
+    cut: ['b.log', 'c.log'],
+  });
 });

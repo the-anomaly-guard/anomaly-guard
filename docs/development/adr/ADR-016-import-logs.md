@@ -72,8 +72,10 @@
 - The baseline is an assumption: an attack inside it lowers the model's guard, and the warning
   on the rules (they fire on the baseline) is the only hint.
 - POST bodies are not in access logs: attacks in a body are invisible here.
-- Large logs: the page reads up to 200 MB per file and analyses up to 100,000 requests; scoring
-  runs in slices to keep the page responsive, but training and calibration block it for a moment.
+- Large logs: the page keeps the first 100 MB of text of a log, read as a stream (a gzip file
+  expands about ten times: a real 20 MB .gz held 205 MB of text and took the tab to 721 MB), and
+  analyses up to 100,000 requests; it says when it cut. Scoring runs in slices to keep the page
+  responsive, but training and calibration block it for a moment.
 
 ### Actions
 

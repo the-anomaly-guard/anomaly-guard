@@ -14,7 +14,7 @@ import { topPart } from '../pipeline.js';
 import { FPR_TARGETS } from '../state.js';
 import { DEFAULT_PAGE_SIZE, PAGE_SIZES, pageOf } from '../listing.js';
 import { readLog } from '../log-import/read.js';
-import { readFiles } from '../log-import/text.js';
+import { MAX_TEXT_CHARS, readFiles } from '../log-import/text.js';
 import { PATH_PARAM } from '../log-import/request.js';
 import { sampleLog } from '../log-import/sample.js';
 import {
@@ -179,7 +179,9 @@ analyseButton.addEventListener('click', () => {
 
 async function run() {
   say('Reading the log...');
-  const text = files.length ? await readFiles(files) : textArea.value;
+  const { text, cut } = files.length
+    ? await readFiles(files)
+    : { text: textArea.value, cut: /** @type {string[]} */ ([]) };
   if (!text.trim()) throw new Error('There is nothing to read: choose a file or paste some lines.');
   const read = readLog(text, FORMATS, { formatId: formatSelect.value });
   if (!read.format) {
@@ -200,7 +202,9 @@ async function run() {
     const chosen = [...(baselineInput.files ?? [])];
     if (!chosen.length)
       throw new Error('Choose the log that counts as normal, or use the first part of this one.');
-    const base = readLog(await readFiles(chosen), FORMATS, { formatId: formatSelect.value });
+    const base = readLog((await readFiles(chosen)).text, FORMATS, {
+      formatId: formatSelect.value,
+    });
     if (!base.format) throw new Error('No format reads the baseline log.');
     baseline = base.entries;
     inspected = read.entries;
@@ -232,7 +236,7 @@ async function run() {
   analysed = { rows: outcome.rows, mode: settings.mode, threshold: outcome.operating.threshold };
   Object.assign(view, { show: 'all', page: 1 });
   open.clear();
-  drawSummary(read, baseline.length, outcome, settings);
+  drawSummary(read, baseline.length, outcome, settings, cut);
   drawTable();
   results.hidden = false;
   say(
@@ -248,8 +252,9 @@ async function run() {
  * @param {number} baselineSize
  * @param {Awaited<ReturnType<typeof analyseLog>>} outcome
  * @param {{ mode: string }} settings
+ * @param {string[]} cut  the files read in part or not at all
  */
-function drawSummary(read, baselineSize, outcome, settings) {
+function drawSummary(read, baselineSize, outcome, settings, cut) {
   const inspected = outcome.rows.length;
   const share = inspected ? fmt.pct(outcome.alerts / inspected) : '-';
   mount(
@@ -283,6 +288,14 @@ function drawSummary(read, baselineSize, outcome, settings) {
     ),
   );
   const notes = [...outcome.warnings];
+  if (cut.length) {
+    const named =
+      cut.length > 3 ? `${cut.slice(0, 3).join(', ')} and ${cut.length - 3} more` : cut.join(', ');
+    notes.push(
+      `The page keeps the first ${MAX_TEXT_CHARS / 1048576} MB of text of a log, decompressed: ` +
+        `${named} ${cut.length === 1 ? 'was' : 'were'} read in part or not at all.`,
+    );
+  }
   if (read.truncated)
     notes.push(
       `The log holds more requests than the page reads: only the first ${fmt.int(read.entries.length)} are analysed.`,
@@ -429,10 +442,13 @@ function rowsOf(row) {
     h('td', {}, toggle),
     h('td', { class: 'num' }, String(row.entry.line)),
     // The clock time only, so nine columns fit; the whole time is on hover and in the details.
+    // Not preceded by a digit: in Apache's 10/Nov/2026:19:12:31 the year ends in "26:".
     h(
       'td',
       { class: 'mono nowrap', title: row.entry.time ?? null, 'data-raw': true },
-      (row.entry.time && /\d{2}:\d{2}:\d{2}/.exec(row.entry.time)?.[0]) ?? row.entry.time ?? '-',
+      (row.entry.time && /(?:^|\D)(\d{2}:\d{2}:\d{2})/.exec(row.entry.time)?.[1]) ??
+        row.entry.time ??
+        '-',
     ),
     h(
       'td',
