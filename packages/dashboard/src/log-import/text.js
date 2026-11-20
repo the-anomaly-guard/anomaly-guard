@@ -169,7 +169,8 @@ export async function readFiles(files, { maxChars = MAX_TEXT_CHARS } = {}) {
     const part = await readText(file, { maxChars: maxChars - text.length });
     if (part.damaged && !part.text) {
       throw new Error(
-        `${file.name} could not be read: it looks like a damaged or incomplete compressed file.`,
+        `${file.name} could not be read: it is damaged or incomplete, or it changed after it was ` +
+          'chosen (choose it again).',
       );
     }
     text += part.text && !part.text.endsWith('\n') ? `${part.text}\n` : part.text;

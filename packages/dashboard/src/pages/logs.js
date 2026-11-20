@@ -103,9 +103,15 @@ syncThreshold();
 /** @type {File[]} */
 let files = [];
 
-/** @param {File[]} chosen */
-function useFiles(chosen) {
+/**
+ * @param {File[]} chosen
+ * @param {boolean} [picked]  they come from the file input
+ */
+function useFiles(chosen, picked = false) {
   files = chosen;
+  // The file input shows only what will be read: emptied when the log comes from elsewhere, so
+  // that picking the same file again is a new choice.
+  if (!picked) fileInput.value = '';
   const total = chosen.reduce((sum, file) => sum + file.size, 0);
   setText(
     byId('log-chosen'),
@@ -115,7 +121,7 @@ function useFiles(chosen) {
       : '',
   );
 }
-fileInput.addEventListener('change', () => useFiles([...(fileInput.files ?? [])]));
+fileInput.addEventListener('change', () => useFiles([...(fileInput.files ?? [])], true));
 textArea.addEventListener('input', () => {
   if (files.length) useFiles([]); // typing means: read the text box
 });
@@ -178,6 +184,12 @@ analyseButton.addEventListener('click', () => {
 });
 
 async function run() {
+  // The results of an earlier log must not stay under a new log's error.
+  results.hidden = true;
+  const threshold = Number(thresholdInput.value);
+  if (fprSelect.value === 'manual' && (thresholdInput.value.trim() === '' || !(threshold >= 0))) {
+    throw new Error('Enter a threshold of 0 or more, or choose a calibrated false-positive rate.');
+  }
   say('Reading the log...');
   const { text, cut, damaged } = files.length
     ? await readFiles(files)
@@ -226,7 +238,7 @@ async function run() {
     mode: /** @type {'combined' | 'stats' | 'rules'} */ (modeSelect.value),
     fpr:
       fprSelect.value === 'manual' ? /** @type {'manual'} */ ('manual') : Number(fprSelect.value),
-    threshold: Number(thresholdInput.value),
+    threshold,
   };
   say(`Learning normal traffic from ${fmt.count(baseline.length, 'request')}...`);
   await new Promise((resolve) => setTimeout(resolve, 0)); // let the message show
