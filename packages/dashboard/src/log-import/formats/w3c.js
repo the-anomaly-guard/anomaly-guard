@@ -1,6 +1,7 @@
 // The W3C extended log format: AWS CloudFront (fields separated by tabs) and Microsoft IIS
 // (separated by spaces, with "+" for the spaces inside a value). The `#Fields:` header names the
-// columns; a CloudFront file without it is read with CloudFront's standard columns.
+// columns. Lines without it, as when a few are copied out of a file, are read too: CloudFront's
+// standard columns, and IIS by the fixed order in which it writes its fields.
 
 import { SKIP, orNull, statusOf } from '../format.js';
 
@@ -42,6 +43,44 @@ const CLOUDFRONT_FIELDS = [
 ];
 
 const METHOD = /^[A-Z][A-Z-]{1,15}$/;
+const DATE = /^\d{4}-\d{2}-\d{2}$/;
+const CLOCK = /^\d{2}:\d{2}:\d{2}/;
+const NUMBER = /^\d+$/;
+/** A path, or the absolute URL a proxy logs as `cs-uri`. */
+const TARGET = /^(?:\/|[a-z][a-z0-9+.-]*:\/\/)/i;
+
+/**
+ * Column names for an IIS line without its header. IIS writes the fields it logs in a fixed
+ * order: date time [s-sitename s-computername s-ip] cs-method cs-uri-stem cs-uri-query
+ * [s-port cs-username c-ip ...] sc-status sc-substatus sc-win32-status [sc-bytes cs-bytes
+ * time-taken]. The request and the three status codes are found by their shape; the rest keep
+ * their position as a name. Null when the line does not have that shape.
+ * @param {string[]} values
+ */
+function iisColumns(values) {
+  if (!DATE.test(values[0]) || !CLOCK.test(values[1] ?? '')) return null;
+  const method = values.findIndex(
+    (value, i) => i >= 2 && METHOD.test(value) && (values[i + 1] ?? '').startsWith('/'),
+  );
+  if (method === -1 || /^HTTP\//.test(values[method + 2] ?? '')) return null;
+  const status = values.findIndex(
+    (value, i) =>
+      i > method + 2 &&
+      /^\d{3}$/.test(value) &&
+      NUMBER.test(values[i + 1] ?? '') &&
+      NUMBER.test(values[i + 2] ?? ''),
+  );
+  if (status === -1) return null;
+  const names = values.map((_, i) => `field_${i + 1}`);
+  names[0] = 'date';
+  names[1] = 'time';
+  names.splice(method, 3, 'cs-method', 'cs-uri-stem', 'cs-uri-query');
+  names.splice(status, 3, 'sc-status', 'sc-substatus', 'sc-win32-status');
+  if (NUMBER.test(values[method + 3] ?? '') && status > method + 5) {
+    names.splice(method + 3, 3, 's-port', 'cs-username', 'c-ip');
+  }
+  return names;
+}
 
 /** @type {import('../format.js').LogFormat} */
 export default {
@@ -65,9 +104,16 @@ export default {
         if (header) names = header[1].trim().split(/\s+/);
         return /^#[A-Za-z-]+:/.test(line) ? SKIP : null;
       }
-      const values = line.includes('\t') ? line.split('\t') : line.split(' ');
-      let columns = names;
-      if (!columns && values.length >= 26 && METHOD.test(values[5])) columns = CLOUDFRONT_FIELDS;
+      const tabs = line.includes('\t');
+      const values = tabs ? line.split('\t') : line.trim().split(/ +/);
+      // The header names the columns of the lines it heads. An IIS line that does not fit it
+      // (copied without its own header) is read by its shape, as a line with no header at all.
+      let columns = names?.length === values.length ? names : null;
+      if (!columns && !tabs) columns = iisColumns(values);
+      if (!columns && !names && tabs && values.length >= 26 && DATE.test(values[0])) {
+        columns = CLOUDFRONT_FIELDS;
+      }
+      columns ??= names;
       if (!columns || values.length < Math.min(columns.length, 3)) return null;
       /** @type {Record<string, string>} */
       const fields = {};
@@ -75,9 +121,9 @@ export default {
         fields[columns?.[i] ?? `field_${i + 1}`] = value;
       });
       const method = fields['cs-method'];
-      const stem = fields['cs-uri-stem'];
-      if (!method || !METHOD.test(method) || !stem) return null;
-      const query = orNull(fields['cs-uri-query']);
+      const stem = orNull(fields['cs-uri-stem']) ?? orNull(fields['cs-uri']);
+      if (!method || !METHOD.test(method) || !stem || !TARGET.test(stem)) return null;
+      const query = fields['cs-uri-stem'] ? orNull(fields['cs-uri-query']) : null;
       const time = [orNull(fields.date), orNull(fields.time)].filter(Boolean).join(' ');
       return {
         method,

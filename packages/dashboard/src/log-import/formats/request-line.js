@@ -1,19 +1,21 @@
 // The last resort for any other text log: a line that contains an HTTP request line,
-// "METHOD /path?query HTTP/x", wherever it is (HAProxy, Squid, custom formats...). The client
-// address, the time and the status are taken when the line makes them easy to find; the whole
-// line is kept as a field.
+// "METHOD /path?query HTTP/x", wherever it is (HAProxy, Squid, custom formats, a line that Docker
+// wrapped in JSON...). The client address, the time and the status are taken when the line makes
+// them easy to find; the whole line is kept as a field.
 
 import { statusOf } from '../format.js';
 
 const METHODS =
   'GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE|PROPFIND|PROPPATCH|MKCOL|COPY|MOVE|LOCK|UNLOCK|SEARCH';
 const REQUEST = new RegExp(
-  `(?:^|[\\s"'\\[(|,;{])(${METHODS}) ((?:/|https?://|\\*)[^\\s"]*) (HTTP/\\d(?:\\.\\d)?)(?=["'\\s\\]),|;}]|$)`,
+  `(?:^|[\\s"'\\[(|,;{])(${METHODS}) ((?:/|https?://|\\*)[^\\s"]*) (HTTP/\\d(?:\\.\\d)?)(?=["'\\s\\]),|;}\\\\]|$)`,
 );
 const IPV4 = /\b(?:\d{1,3}\.){3}\d{1,3}\b/;
 const BRACKETED_TIME = /\[(\d{2}\/\w{3}\/\d{4}:[^\]]+)\]/;
 const ISO_TIME = /\b\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?/;
-const STATUS_AFTER = /^["']?\s+(\d{3})\b/;
+const STATUS_AFTER = /^\\?["']?\s+(\d{3})\b/;
+/** HAProxy writes the status before the request, after its five timers: 0/0/1/12/13 200. */
+const STATUS_BEFORE = /\s-?\d+\/-?\d+\/-?\d+\/-?\d+\/\+?-?\d+ (\d{3}) /;
 
 /** @type {import('../format.js').LogFormat} */
 export default {
@@ -38,7 +40,9 @@ export default {
         method: m[1],
         target: m[2],
         time,
-        status: statusOf(STATUS_AFTER.exec(after)?.[1]),
+        status: statusOf(
+          STATUS_AFTER.exec(after)?.[1] ?? STATUS_BEFORE.exec(line.slice(0, m.index))?.[1],
+        ),
         fields,
       };
     };

@@ -1,10 +1,18 @@
 // Generic JSON logs, one object per line: the fields are found by their usual names, nested or
 // not. That covers, among others, Caddy (request.method, request.uri), Traefik (RequestMethod,
-// RequestPath), AWS API Gateway (httpMethod, path), Google Cloud load balancing
-// (httpRequest.requestMethod, requestUrl), Elastic Common Schema (http.request.method,
-// url.original) and Nginx with a JSON log_format.
+// RequestPath), AWS API Gateway (httpMethod, path; routeKey for HTTP APIs), AWS WAF
+// (httpRequest.httpMethod, uri, args), Google Cloud load balancing (httpRequest.requestMethod,
+// requestUrl), Cloudflare (ClientRequestMethod, ClientRequestURI), Azure (properties.httpMethod,
+// requestUri), Elastic Common Schema (http.request.method, url.original) and Nginx with a JSON
+// log_format. A name is looked for as the whole path first ("request.method"), then as its last
+// parts ("properties.httpMethod" for "httpmethod"). Text before the object, as Docker Compose and
+// Kubernetes write ("web  | {...}", "2026-11-01T09:00:00Z stdout F {...}"), is kept as a field.
 
-import { orNull, parseRequestLine, statusOf } from '../format.js';
+import { SKIP, orNull, parseRequestLine, statusOf } from '../format.js';
+
+const METHOD = /^[A-Z][A-Z-]{1,15}$/;
+/** A path, "*", or an absolute URL. */
+const TARGET = /^(?:\/|\*$|[a-z][a-z0-9+.-]*:\/\/)/i;
 
 /** Candidate names, lowercase, nested ones with dots: the first that is present wins. */
 const NAMES = {
@@ -20,6 +28,7 @@ const NAMES = {
     'http.request.method',
     'httprequest.requestmethod',
     'req.method',
+    'clientrequestmethod',
   ],
   target: [
     'request_uri',
@@ -38,6 +47,8 @@ const NAMES = {
     'url.path',
     'request.path',
     'cs-uri-stem',
+    'clientrequesturi',
+    'clientrequestpath',
   ],
   query: [
     'query',
@@ -47,8 +58,10 @@ const NAMES = {
     'url.query',
     'request.query',
     'cs-uri-query',
+    'requestquery',
+    'clientrequestquery',
   ],
-  requestLine: ['request', 'request_line', 'requestline'],
+  requestLine: ['request', 'request_line', 'requestline', 'routekey'],
   status: [
     'status',
     'status_code',
@@ -63,6 +76,9 @@ const NAMES = {
     'response',
     'response_code',
     'http_status',
+    'httpstatus',
+    'httpstatuscode',
+    'edgeresponsestatus',
   ],
   time: [
     'time',
@@ -75,11 +91,14 @@ const NAMES = {
     'time_local',
     'time_iso8601',
     'starttime',
+    'start_time',
+    'edgestarttimestamp',
   ],
 };
 
 /**
- * Every leaf of an object as "a.b.c" -> text, and a lookup by lowercase name.
+ * Every leaf of an object as "a.b.c" -> text. A list of plain values is joined; a list of
+ * objects (AWS WAF writes the headers so) is kept as JSON.
  * @param {unknown} value
  * @param {string} prefix
  * @param {Record<string, string>} out
@@ -90,7 +109,12 @@ function flatten(value, prefix, out) {
       flatten(inner, prefix ? `${prefix}.${key}` : key, out);
     }
   } else if (prefix) {
-    out[prefix] = Array.isArray(value) ? value.join(', ') : String(value);
+    const plain = (/** @type {unknown} */ item) => item === null || typeof item !== 'object';
+    out[prefix] = !Array.isArray(value)
+      ? String(value)
+      : value.every(plain)
+        ? value.join(', ')
+        : JSON.stringify(value);
   }
   return out;
 }
@@ -108,22 +132,30 @@ export default {
   ],
   reader() {
     return (line) => {
-      const text = line.trim();
-      if (!text.startsWith('{')) return null;
+      const brace = line.indexOf('{');
+      if (brace === -1) return null;
       let object;
       try {
-        object = JSON.parse(text);
+        object = JSON.parse(line.slice(brace));
       } catch {
         return null;
       }
+      if (object === null || typeof object !== 'object' || Array.isArray(object)) return null;
       const fields = flatten(object, '', {});
+      const prefix = line.slice(0, brace).trim();
+      if (prefix) fields.prefix = prefix;
       /** @type {Record<string, string>} */
       const byName = {};
-      for (const [key, value] of Object.entries(fields)) byName[key.toLowerCase()] ??= value;
-      const first = (/** @type {string[]} */ names) =>
-        names
-          .map((name) => orNull(byName[name]))
-          .find((value) => value !== null && value !== undefined) ?? null;
+      /** @type {Record<string, string>} */
+      const byEnd = {};
+      for (const [key, value] of Object.entries(fields)) {
+        const parts = key.toLowerCase().split('.');
+        byName[parts.join('.')] ??= value;
+        for (let i = 1; i < parts.length; i++) byEnd[parts.slice(i).join('.')] ??= value;
+      }
+      const found = (/** @type {Record<string, string>} */ map, /** @type {string[]} */ names) =>
+        names.map((name) => orNull(map[name])).find((value) => value !== null) ?? null;
+      const first = (/** @type {string[]} */ names) => found(byName, names) ?? found(byEnd, names);
 
       let method = first(NAMES.method);
       let target = first(NAMES.target);
@@ -133,7 +165,11 @@ export default {
         method ??= parsed.method;
         target ??= parsed.target;
       }
-      if (!method || !target) return null;
+      // A JSON line without a request (a server message, a firewall record) is a line of the
+      // format that holds none.
+      if (!method || !METHOD.test(method.toUpperCase()) || !target || !TARGET.test(target)) {
+        return SKIP;
+      }
       const query = first(NAMES.query);
       if (query && !target.includes('?')) target = `${target}?${query.replace(/^\?/, '')}`;
       return {
