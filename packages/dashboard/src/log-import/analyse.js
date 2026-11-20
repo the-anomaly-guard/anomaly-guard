@@ -68,10 +68,30 @@ export function prepareDetector(baseline, settings) {
   const calibration = requests.slice(trainCount).map((request) => ({ request }));
   const ruleEngine = new RuleEngine();
   const model = trainStatModel(settings.mode === 'rules' ? [] : requests.slice(0, trainCount));
-  const operating = operatingPoint(settings, calibration, { ruleEngine, model });
+  let operating = operatingPoint(settings, calibration, { ruleEngine, model });
   /** @type {string[]} */
   const warnings = [];
   const calibrated = settings.mode !== 'rules' && operating.target !== null;
+  // A request is never flagged while its own p-value is above the target (s < −log10 α). On a
+  // baseline that repeats a few identical requests almost every score is about 0, and the
+  // calibrated threshold falls to rounding noise: a real public log with three URLs gave 5e-13,
+  // and requests with p = 0.99995 raised alerts. The floor is the classic test at level α; on
+  // ordinary traffic the calibrated threshold is far above it and nothing changes.
+  const floor = calibrated ? -Math.log10(operating.target) : null;
+  if (floor !== null && operating.threshold < floor) {
+    const before = operating.threshold;
+    const raised = operatingPoint({ ...settings, fpr: 'manual', threshold: floor }, calibration, {
+      ruleEngine,
+      model,
+    });
+    operating = { ...operating, threshold: floor, calibrationFpr: raised.calibrationFpr };
+    warnings.push(
+      'Almost every baseline request scores close to 0, as when a log repeats a few requests: ' +
+        `the calibrated threshold, ${before < 0.01 ? before.toExponential(1) : before.toFixed(2)}, ` +
+        `would flag requests that are not rare at all. It is raised to −log₁₀ α = ${floor.toFixed(2)}: ` +
+        'a request is flagged only when its own p-value is below the false-positive target too.',
+    );
+  }
   if (calibrated && calibration.length < 10 / operating.target) {
     warnings.push(
       `The threshold rests on ${calibration.length} baseline requests: with fewer than ` +

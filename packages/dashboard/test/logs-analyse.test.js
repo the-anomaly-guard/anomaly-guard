@@ -8,6 +8,7 @@ import {
   CALIBRATION_SHARE,
   MIN_BASELINE,
   analyseLog,
+  inspectEntry,
   prepareDetector,
   splitBaseline,
 } from '../src/log-import/analyse.js';
@@ -119,4 +120,34 @@ test('a small calibration part is reported, not hidden', () => {
     threshold: 1,
   });
   assert.match(detector.warnings.join(' '), /n ≥ 10\/α/);
+});
+
+test('a baseline that repeats a few requests does not drag the threshold to 0', () => {
+  // As in a real public log with three URLs: almost every score is about 0, the calibrated
+  // threshold falls to rounding noise, and requests with p close to 1 would raise alerts.
+  const entry = (line, target) => ({
+    line,
+    method: 'GET',
+    target,
+    time: null,
+    status: 200,
+    fields: {},
+  });
+  const product = (i) => (i === 40 || i === 90 ? 3 : i % 7 === 0 ? 2 : 1);
+  const baseline = Array.from({ length: 400 }, (_, i) =>
+    entry(i + 1, `/downloads/product_${product(i)}`),
+  );
+  const settings = { mode: 'combined', fpr: 0.01, threshold: 1 };
+  const detector = prepareDetector(baseline, settings);
+  assert.equal(detector.operating.threshold, 2, 'raised to −log10 α');
+  assert.equal(detector.operating.source, 'calibrated');
+  assert.match(detector.warnings[0], /raised to −log₁₀ α = 2\.00/);
+  for (const n of [1, 2, 3]) {
+    const row = inspectEntry(entry(401, `/downloads/product_${n}`), detector, settings, 0);
+    assert.ok(row.result.statScore < 2, `product_${n} scores ${row.result.statScore}`);
+    assert.equal(row.alert, false);
+  }
+  // A manual threshold is the user's choice: no floor.
+  const manual = prepareDetector(baseline, { mode: 'combined', fpr: 'manual', threshold: 0.5 });
+  assert.equal(manual.operating.threshold, 0.5);
 });
