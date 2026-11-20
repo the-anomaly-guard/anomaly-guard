@@ -14,6 +14,7 @@ detect, evaluate - with no backend, so it is hosted on **GitHub Pages** (ADR-003
 | Overview           | `index.html`      | key figures, alerts by severity, every request (a box that scrolls, newest or oldest first; alerts in red), alerts by level, what raised them, top signatures | -                              |
 | Security events    | `events.html`     | every test request: verdict, level, reason, ground truth; filters, pages, rows per page and order in the URL                                                  | -                              |
 | Rules              | `rules.html`      | the signature rules and how often each matched                                                                                                                | - (the ruleset itself is B-01) |
+| Import logs        | `logs.html`       | a real access log (Apache, Nginx, AWS, JSON, any text log), read in the browser and analysed against a baseline taken as normal                               | -                              |
 | Statistical models | `models.html`     | the signals in the score; character classes and lengths/scores, legitimate vs attack; the learned model per endpoint and parameter                            | -                              |
 | Detection quality  | `evaluation.html` | the calibrated operating point, confusion matrix, rates and variants with Wilson intervals, ROC (its title opens it large) and AUC, McNemar between the modes | -                              |
 | Base rate          | `base-rate.html`  | Bayes, a worked example, and PPV against hypothetical prevalence using the measured test rates                                                                | -                              |
@@ -48,6 +49,11 @@ dashboard/
 │   ├── term-help.js  hover help on those terms in any text of any page
 │   ├── term-data.js  the dictionary: the ruleset, plus the ADR index at build
 │   ├── listing.js    rows per page and order of a list (pure, tested)
+│   ├── log-import/   Import logs: read.js finds the format and reads the lines, request.js turns
+│   │                 a logged request into the detector's input, analyse.js scores it against a
+│   │                 baseline, text.js reads plain and .gz files, sample.js writes a sample log
+│   │                 (all pure, tested); formats/ holds one file per log format
+│   ├── logs.css      the styles only Import logs has
 │   ├── dom.js        DOM helpers: data goes in as text, never as HTML
 │   ├── ui.js         KPI tile, level badge
 │   ├── character-classes.js  character-class shares, legitimate vs attack (pure, tested)
@@ -89,6 +95,17 @@ dashboard/
   low 0-1, medium 2-3, high 4-14, critical 15. For display only: the threshold decides the verdict.
 - **Security**: a strict Content Security Policy is added to every page at build time (no inline
   scripts or styles), and payloads are inserted as text only.
+
+## Adding a log format (Import logs, ADR-016)
+
+A format is one file in `src/log-import/formats/` whose default export follows `LogFormat`
+(`src/log-import/format.js`): an `id`, a `label`, a `priority` (specific formats above generic ones), a
+few synthetic `examples` and `reader()`, which returns a line reader. The reader gives a request
+(`method`, `target`, `time`, `status` and every field of the line), `SKIP` for a line of the
+format without a request, or `null` for a line it does not read. The page and the tests find the
+file by themselves: nothing else changes. The tests then check the contract, that the format
+reads its own examples and that it is the one recognised for them; examples use documentation
+addresses (RFC 5737) and `example.com`, never real traffic.
 
 ## Run, test, build
 

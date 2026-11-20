@@ -69,6 +69,11 @@ export const COLUMN_HELP = Object.freeze({
   p:
     'Exact two-sided McNemar p-value: how surprising the split of the disagreements is if both ' +
     'detectors were equally good. Bold below 0.05.',
+
+  // Import logs
+  line: 'Line of the log file the request was read from.',
+  time: 'When the request arrived, as the log writes it: the clock time here, all of it on hover.',
+  'http status': 'Status code the server answered with, as logged.',
 });
 
 /**

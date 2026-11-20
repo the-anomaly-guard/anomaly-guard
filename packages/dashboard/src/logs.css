@@ -1,0 +1,190 @@
+/* Import logs (E-10): the pieces only this page has. Everything else (panels, tables, badges,
+   KPIs) comes from styles.css, unchanged; the theme tokens make these follow dark mode too. */
+
+.log-input {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(0, 2fr);
+  gap: 16px;
+}
+
+.log-drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 180px;
+  padding: 16px;
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--radius);
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.log-drop.is-over {
+  border-color: var(--primary);
+  background: var(--primary-weak);
+}
+
+.log-drop p {
+  margin: 0;
+}
+
+.log-drop label.btn {
+  cursor: pointer;
+}
+
+.log-drop label.btn:focus-within {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.log-hint,
+.log-chosen {
+  font-size: 12px;
+  color: var(--text-subtle);
+}
+
+.log-chosen {
+  word-break: break-all;
+}
+
+.log-paste {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.log-paste > label,
+.log-settings label,
+.log-baseline legend,
+.log-examples label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--text-subtle);
+}
+
+.log-paste textarea {
+  width: 100%;
+  min-height: 160px;
+  padding: 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  background: var(--panel-bg);
+  color: var(--text);
+  font: 12px var(--mono);
+  resize: vertical;
+}
+
+.log-examples {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px 12px;
+}
+
+.log-settings {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 16px;
+}
+
+.log-settings > label,
+.log-examples label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-width: 100%;
+}
+
+/* The format names are long: on a phone the menus shrink to the screen. */
+.log-settings select,
+.log-examples select {
+  max-width: 100%;
+}
+
+.log-settings select,
+.log-settings input[type='number'],
+.log-examples select {
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  background: var(--panel-bg);
+  color: var(--text);
+  font: 13px var(--font);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.log-settings input[readonly] {
+  background: var(--page-bg);
+  color: var(--text-subtle);
+}
+
+.log-baseline {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.log-baseline .log-choice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text);
+}
+
+.log-baseline select {
+  height: 26px;
+}
+
+.log-explain {
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.log-status {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.log-status.is-error {
+  color: var(--danger);
+}
+
+#log-warnings .callout {
+  margin-bottom: 12px;
+  word-break: break-word;
+}
+
+/* Nine columns: the request and its parameters give way first, the verdict stays in view. */
+#log-body .truncate {
+  max-width: 220px;
+}
+
+.page-size .btn[aria-pressed='true'] {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+@media (max-width: 720px) {
+  .log-input {
+    grid-template-columns: 1fr;
+  }
+}

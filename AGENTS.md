@@ -41,6 +41,9 @@ executing, running, or "detonating" any payload; attacking, scanning, or fuzzing
 persisting real personal data. All traffic is **synthetic and local**. If a task seems to need
 any of the above, stop and ask - the answer is almost always "simulate it instead".
 
+The one exception is the **Import logs** page (ADR-016): it reads a log the user loads, only in
+the browser, never storing or sending it. Tests and examples stay synthetic.
+
 ---
 
 ## 3. Tech stack (LOCKED - new tech needs an ADR)
