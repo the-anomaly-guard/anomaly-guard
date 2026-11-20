@@ -15,7 +15,7 @@ import { FPR_TARGETS } from '../state.js';
 import { DEFAULT_PAGE_SIZE, PAGE_SIZES, pageOf } from '../listing.js';
 import { readLog } from '../log-import/read.js';
 import { MAX_TEXT_CHARS, readFiles } from '../log-import/text.js';
-import { PATH_PARAM } from '../log-import/request.js';
+import { PATH_PARAM, QUERY_PARAM } from '../log-import/request.js';
 import { sampleLog } from '../log-import/sample.js';
 import {
   BASELINE_SHARES,
@@ -179,9 +179,13 @@ analyseButton.addEventListener('click', () => {
 
 async function run() {
   say('Reading the log...');
-  const { text, cut } = files.length
+  const { text, cut, damaged } = files.length
     ? await readFiles(files)
-    : { text: textArea.value, cut: /** @type {string[]} */ ([]) };
+    : {
+        text: textArea.value,
+        cut: /** @type {string[]} */ ([]),
+        damaged: /** @type {string[]} */ ([]),
+      };
   if (!text.trim()) throw new Error('There is nothing to read: choose a file or paste some lines.');
   const read = readLog(text, FORMATS, { formatId: formatSelect.value });
   if (!read.format) {
@@ -202,9 +206,10 @@ async function run() {
     const chosen = [...(baselineInput.files ?? [])];
     if (!chosen.length)
       throw new Error('Choose the log that counts as normal, or use the first part of this one.');
-    const base = readLog((await readFiles(chosen)).text, FORMATS, {
-      formatId: formatSelect.value,
-    });
+    const baseText = await readFiles(chosen);
+    cut.push(...baseText.cut);
+    damaged.push(...baseText.damaged);
+    const base = readLog(baseText.text, FORMATS, { formatId: formatSelect.value });
     if (!base.format) throw new Error('No format reads the baseline log.');
     baseline = base.entries;
     inspected = read.entries;
@@ -236,7 +241,7 @@ async function run() {
   analysed = { rows: outcome.rows, mode: settings.mode, threshold: outcome.operating.threshold };
   Object.assign(view, { show: 'all', page: 1 });
   open.clear();
-  drawSummary(read, baseline.length, outcome, settings, cut);
+  drawSummary(read, baseline.length, outcome, settings, { cut, damaged });
   drawTable();
   results.hidden = false;
   say(
@@ -252,9 +257,10 @@ async function run() {
  * @param {number} baselineSize
  * @param {Awaited<ReturnType<typeof analyseLog>>} outcome
  * @param {{ mode: string }} settings
- * @param {string[]} cut  the files read in part or not at all
+ * @param {{ cut: string[], damaged: string[] }} files  read in part or not at all, read up to
+ *   some damage
  */
-function drawSummary(read, baselineSize, outcome, settings, cut) {
+function drawSummary(read, baselineSize, outcome, settings, { cut, damaged }) {
   const inspected = outcome.rows.length;
   const share = inspected ? fmt.pct(outcome.alerts / inspected) : '-';
   mount(
@@ -289,11 +295,15 @@ function drawSummary(read, baselineSize, outcome, settings, cut) {
   );
   const notes = [...outcome.warnings];
   if (cut.length) {
-    const named =
-      cut.length > 3 ? `${cut.slice(0, 3).join(', ')} and ${cut.length - 3} more` : cut.join(', ');
     notes.push(
       `The page keeps the first ${MAX_TEXT_CHARS / 1048576} MB of text of a log, decompressed: ` +
-        `${named} ${cut.length === 1 ? 'was' : 'were'} read in part or not at all.`,
+        `${named(cut)} ${cut.length === 1 ? 'was' : 'were'} read in part or not at all.`,
+    );
+  }
+  if (damaged.length) {
+    notes.push(
+      `${named(damaged)} ${damaged.length === 1 ? 'is' : 'are'} damaged or incomplete, as a ` +
+        'compressed file copied while the log was written: only the lines before the damage are read.',
     );
   }
   if (read.truncated)
@@ -310,6 +320,13 @@ function drawSummary(read, baselineSize, outcome, settings, cut) {
     '#log-warnings',
     notes.map((note) => h('div', { class: 'callout is-warning', 'data-raw': true }, note)),
   );
+}
+
+/** File names for a note: the first three, and how many more. @param {string[]} names */
+function named(names) {
+  return names.length > 3
+    ? `${names.slice(0, 3).join(', ')} and ${names.length - 3} more`
+    : names.join(', ');
 }
 
 // --- The table of inspected requests ----------------------------------------------------------
@@ -413,8 +430,15 @@ function drawTable() {
 function paramsText(row) {
   return Object.entries(row.request.params)
     .filter(([name]) => !name.startsWith(PATH_PARAM))
-    .map(([name, value]) => `${name}=${value}`)
+    .map(([name, value]) => (name.startsWith(QUERY_PARAM) ? value : `${name}=${value}`))
     .join('  ');
+}
+
+/** How the detail of a request names one of its values. @param {string} name */
+function valueLabel(name) {
+  if (name.startsWith(PATH_PARAM)) return 'Path, decoded';
+  if (name.startsWith(QUERY_PARAM)) return 'Query without a name';
+  return `Parameter ${name}`;
 }
 
 /** The summary row and its detail row. @param {LogRow} row */
@@ -522,12 +546,7 @@ function detailView(row) {
       ? [/** @type {[string, string, boolean]} */ (['Host', request.host, true])]
       : []),
     ...Object.entries(request.params).map(
-      ([name, value]) =>
-        /** @type {[string, string, boolean]} */ ([
-          name.startsWith(PATH_PARAM) ? 'Path, decoded' : `Parameter ${name}`,
-          value,
-          true,
-        ]),
+      ([name, value]) => /** @type {[string, string, boolean]} */ ([valueLabel(name), value, true]),
     ),
     ['Detector score', fmt.score(result.score)],
     ['Statistical score', `${fmt.score(result.statScore)} (−log₁₀ p)`],

@@ -28,16 +28,22 @@
    with the same contract (`LogFormat`: an id, a label, a priority, synthetic examples and a line
    reader). The page finds them with `import.meta.glob` and the tests by listing the folder, so a
    new format is a new file and nothing else changes; the engine (`read.js`) receives the list and
-   knows no format. First formats: Apache and Nginx (common, combined, vhost_combined), AWS load
-   balancers (ALB, Classic ELB), W3C extended (CloudFront, IIS), AWS S3 server access, JSON lines
-   (Caddy, Traefik, API Gateway, Google Cloud, ECS) and, last, any line with an HTTP request line.
+   knows no format. First formats: Apache and Nginx (common, combined, vhost_combined, also behind
+   a proxy that logs a list of clients), AWS load balancers (ALB, Classic ELB), W3C extended
+   (CloudFront, IIS, also lines copied without their `#Fields` header), AWS S3 server access, JSON
+   lines (Caddy, Traefik, AWS API Gateway and WAF, Google Cloud, Cloudflare, Azure, ECS, also after
+   a Docker or Kubernetes prefix) and, last, any line with an HTTP request line (HAProxy, a line
+   that Docker wrapped in JSON...).
    The format is recognised on the first 200 lines: the one that reads the largest share wins, a
    specific one over a generic one on a tie; it can also be chosen by hand.
 4. **The detector is reused as it is.** A logged request becomes the detector's input
    (`request.js`): the query string decoded once (ADR-006), the path kept exactly as logged (no
    `/a/../b` clean-up, which would erase a traversal). Access logs record no body, so the decoded
    path is also inspected as one more value, the pseudo-parameter `(path)`: real attacks often sit
-   in the path, which the rules and the statistics would otherwise never see.
+   in the path, which the rules and the statistics would otherwise never see. A query text
+   without `=` names no parameter: it is inspected as the value of the pseudo-parameter `(query)`.
+   Real scans send commands that way (`/shell?cd+/tmp;wget+...`): as a parameter name the payload
+   would reach neither the rules nor the statistics, which inspect values.
 5. **What counts as normal is an explicit assumption.** With no labels, the statistics learn from
    a baseline the user trusts: a separate log, or the first 25, 50 or 75% of the same one. Its
    first 70% trains the model (ADR-004); its last 30% sets the threshold at the chosen target FPR
@@ -71,11 +77,18 @@
 - Real personal data appears on screen; the page warns, and nothing is stored or sent.
 - The baseline is an assumption: an attack inside it lowers the model's guard, and the warning
   on the rules (they fire on the baseline) is the only hint.
-- POST bodies are not in access logs: attacks in a body are invisible here.
+- POST bodies are not in access logs: attacks in a body are invisible here. Parameter names are
+  not inspected either: a payload written as a name with a value (`?<script>=1`) is not seen. A
+  request line that is not one (a TLS handshake sent to the HTTP port) is counted as a line
+  without a request.
 - Large logs: the page keeps the first 100 MB of text of a log, read as a stream (a gzip file
   expands about ten times: a real 20 MB .gz held 205 MB of text and took the tab to 721 MB), and
   analyses up to 100,000 requests; it says when it cut. Scoring runs in slices to keep the page
   responsive, but training and calibration block it for a moment.
+- Files as they come: a gzip file of several members (Nginx writes one per buffer, `cat a.gz b.gz`
+  joins two) is read whole, member by member, since the browser's decompressor stops after the
+  first; a file cut short keeps the lines before the damage, and the page says so; UTF-16 files
+  with a byte order mark (Windows tools) are read too.
 
 ### Actions
 

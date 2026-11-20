@@ -6,10 +6,16 @@
 // - The path is kept exactly as logged: no "/a/../b" -> "/b" clean-up, which would erase a path
 //   traversal. Access logs record no request body, so the path, decoded, is also inspected as one
 //   more value, the pseudo-parameter PATH_PARAM: the attacks of real traffic often sit there.
+// - A query text without "=" names no parameter: "/shell?cd+/tmp;wget+..." is how real scans
+//   send a command. It is a value too, of the pseudo-parameter QUERY_PARAM; as a parameter name it
+//   would be seen by neither the rules nor the statistics, which inspect values.
 // Pure: no DOM, tested in Node.
 
 /** The name under which the decoded path is inspected like a parameter value. */
 export const PATH_PARAM = '(path)';
+
+/** The name under which a query text without "=" (no parameter name) is inspected. */
+export const QUERY_PARAM = '(query)';
 
 /**
  * One URL-decoding pass: %XX is a byte, and in a query string "+" is a space; a malformed escape
@@ -55,7 +61,7 @@ export function splitTarget(target) {
 
 /**
  * The query string as name -> value, each decoded once. A name seen again gets "#2", "#3"...
- * so no value is lost; a pair without "=" has an empty value.
+ * so no value is lost; a text without "=" is a value of QUERY_PARAM.
  * @param {string} query
  * @returns {Record<string, string>}
  */
@@ -66,8 +72,8 @@ export function parseQuery(query) {
   for (const pair of query.split('&')) {
     if (pair === '') continue;
     const eq = pair.indexOf('=');
-    const name = decodeOnce(eq === -1 ? pair : pair.slice(0, eq));
-    const value = eq === -1 ? '' : decodeOnce(pair.slice(eq + 1));
+    const name = eq === -1 ? QUERY_PARAM : decodeOnce(pair.slice(0, eq));
+    const value = decodeOnce(eq === -1 ? pair : pair.slice(eq + 1));
     let key = name;
     for (let n = 2; Object.hasOwn(params, key); n++) key = `${name}#${n}`;
     params[key] = value;
