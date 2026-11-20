@@ -1,0 +1,1 @@
+import{i as r}from"./shell-D_s5Iqyw.js";import{m as t,h as o}from"./dom-BegDkVkW.js";const i=Object.freeze(["giuseppe1-1","marcelloNapoletano","Nicholas-Arcari","Sangioo"]);function n(e){return`https://github.com/${encodeURIComponent(e)}`}t("#team-list",i.map(e=>o("li",{},o("a",{href:n(e),target:"_blank",rel:"noopener noreferrer"},`${e} ↗`))));r();

@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Analyse the access log of any web server (Apache, Nginx, AWS, JSON) with the detector of The Anomaly Guard, entirely in your browser."
+    />
+    <title>Import logs · The Anomaly Guard</title>
+    <link rel="icon" type="image/svg+xml" href="./assets/shield-B_ZBkaUY.svg" />
+    <script type="module" crossorigin src="./assets/logs-DzpB9ydu.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/shell-D_s5Iqyw.js">
+    <link rel="modulepreload" crossorigin href="./assets/dom-BegDkVkW.js">
+    <link rel="modulepreload" crossorigin href="./assets/chisquare-B1X7rmRj.js">
+    <link rel="modulepreload" crossorigin href="./assets/pipeline-hjfP0xJa.js">
+    <link rel="modulepreload" crossorigin href="./assets/ui-BiHo8U3K.js">
+    <link rel="modulepreload" crossorigin href="./assets/rows-mGp7wd9s.js">
+    <link rel="stylesheet" crossorigin href="./assets/shell-WEZC2p25.css">
+    <link rel="stylesheet" crossorigin href="./assets/logs-BwEYpews.css">
+  </head>
+  <body data-page="logs">
+    <a class="skip-link" href="#main">Skip to content</a>
+<header class="topbar">
+  <button
+    class="nav-toggle"
+    type="button"
+    aria-label="Show the navigation"
+    aria-controls="sidebar"
+    aria-expanded="false"
+    data-nav-toggle
+  >
+    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h12" /></svg>
+  </button>
+  <a class="brand" href="./index.html" data-keep-state>
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+      <path
+        class="brand-shield"
+        d="M16 2 4 6.5v8.7c0 7.3 5.1 13.1 12 14.8 6.9-1.7 12-7.5 12-14.8V6.5L16 2z"
+      />
+      <path class="brand-pulse" d="M8.5 16.5h4l2-4.5 3 9 2.2-4.5h3.8" />
+    </svg>
+    <span>The Anomaly Guard</span>
+  </a>
+  <span class="topbar-tag">IDS lab · simulated traffic</span>
+  <span class="topbar-spacer"></span>
+  <a
+    class="topbar-link"
+    href="https://github.com/the-anomaly-guard/anomaly-guard"
+    target="_blank"
+    rel="noopener noreferrer"
+    >Source code ↗</a
+  >
+</header>
+
+    <div class="layout">
+      <nav id="sidebar" class="sidebar" aria-label="Sections">
+  <a class="nav-item" href="./index.html" data-nav="overview">
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <rect x="2" y="2" width="5" height="5" rx="1" />
+      <rect x="9" y="2" width="5" height="5" rx="1" />
+      <rect x="2" y="9" width="5" height="5" rx="1" />
+      <rect x="9" y="9" width="5" height="5" rx="1" />
+    </svg>
+    Overview
+  </a>
+
+  <p class="nav-heading">Threat detection</p>
+  <a class="nav-item" href="./events.html" data-nav="events">
+    <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3.5h12M2 8h12M2 12.5h8" /></svg>
+    Security events
+  </a>
+  <a class="nav-item" href="./rules.html" data-nav="rules">
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <path d="M8 1.8 2.8 3.8v3.9c0 3.2 2.2 5.7 5.2 6.5 3-.8 5.2-3.3 5.2-6.5V3.8z" />
+      <path d="m5.8 8 1.6 1.6 2.9-3.1" />
+    </svg>
+    Rules
+  </a>
+  <a class="nav-item" href="./logs.html" data-nav="logs">
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <path d="M8 10.5V2.5M5 5.5l3-3 3 3" />
+      <path d="M2.5 10.5v2.5h11v-2.5" />
+    </svg>
+    Import logs
+  </a>
+
+  <p class="nav-heading">Anomaly detection</p>
+  <a class="nav-item" href="./models.html" data-nav="models">
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <path d="M1.5 13.5h13" />
+      <path d="M2.5 12.5c2-.2 2.6-8.5 5.5-8.5s3.5 8.3 5.5 8.5" />
+    </svg>
+    Statistical models
+  </a>
+
+  <p class="nav-heading">Evaluation</p>
+  <a class="nav-item" href="./evaluation.html" data-nav="evaluation">
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <circle cx="8" cy="8" r="6" />
+      <circle cx="8" cy="8" r="3" />
+      <circle cx="8" cy="8" r="0.6" />
+    </svg>
+    Detection quality
+  </a>
+  <a class="nav-item" href="./base-rate.html" data-nav="base-rate">
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <path d="M3 13 13 3" />
+      <circle cx="4.5" cy="4.5" r="1.8" />
+      <circle cx="11.5" cy="11.5" r="1.8" />
+    </svg>
+    Base rate
+  </a>
+
+  <p class="nav-heading">Team contributions</p>
+  <a class="nav-item" href="./team-andrea.html" data-nav="team-andrea">
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <circle cx="8" cy="5" r="2.5" />
+      <path d="M3 14c0-3 2-4.5 5-4.5s5 1.5 5 4.5" />
+    </svg>
+    Andrea Sangiovanni
+  </a>
+  <a class="nav-item" href="./team-marcello.html" data-nav="team-marcello">
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <circle cx="8" cy="5" r="2.5" />
+      <path d="M3 14c0-3 2-4.5 5-4.5s5 1.5 5 4.5" />
+    </svg>
+    marcelloNapoletano
+  </a>
+  <a class="nav-item" href="./team-nicholas.html" data-nav="team-nicholas">
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <circle cx="8" cy="5" r="2.5" />
+      <path d="M3 14c0-3 2-4.5 5-4.5s5 1.5 5 4.5" />
+    </svg>
+    Nicholas Arcari
+  </a>
+  <a class="nav-item" href="./team-giuseppe.html" data-nav="team-giuseppe">
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <circle cx="8" cy="5" r="2.5" />
+      <path d="M3 14c0-3 2-4.5 5-4.5s5 1.5 5 4.5" />
+    </svg>
+    Giuseppe
+  </a>
+
+  <p class="nav-heading">Project</p>
+  <a class="nav-item" href="./about.html" data-nav="about">
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <circle cx="8" cy="8" r="6.2" />
+      <path d="M8 7.2v4M8 4.8v.01" />
+    </svg>
+    About
+  </a>
+  <a
+    class="nav-item"
+    href="https://github.com/the-anomaly-guard/anomaly-guard"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <svg viewBox="0 0 16 16" aria-hidden="true">
+      <path d="M6.5 3.5h-3v9h9v-3M9 2.5h4.5V7M13.5 2.5l-6 6" />
+    </svg>
+    Source code ↗
+  </a>
+
+  <p class="nav-note">
+    All traffic is simulated in your browser. No payload is ever executed or sent anywhere.
+  </p>
+</nav>
+
+      <main id="main" class="content">
+        <div class="page-head">
+          <p class="crumbs">Threat detection</p>
+          <h1>Import logs</h1>
+          <p class="page-sub">
+            The access log of a real web server, read by the same rules and statistics as the
+            simulated traffic.
+          </p>
+        </div>
+
+        <div class="callout">
+          The log stays in this browser: it is read here, never uploaded or saved, and closing the
+          page forgets it. A real log holds personal data, such as client addresses and user agents:
+          show it only to people allowed to see it.
+        </div>
+
+        <section class="panel" aria-labelledby="log-input-title">
+          <div class="panel-head">
+            <h2 class="panel-title" id="log-input-title">1 · The log</h2>
+            <span class="panel-meta">Apache, Nginx, AWS, JSON or any text log with requests</span>
+          </div>
+          <div class="panel-body log-input">
+            <div class="log-drop" id="log-drop">
+              <p><strong>Drop log files here</strong></p>
+              <label class="btn">
+                Choose files
+                <input
+                  id="log-files"
+                  class="visually-hidden"
+                  type="file"
+                  multiple
+                  accept=".log,.txt,.gz,.json,.jsonl,text/plain,application/gzip"
+                />
+              </label>
+              <p class="log-hint">
+                Plain text or .gz. Several files are read in name order, as one log.
+              </p>
+              <p class="log-chosen" id="log-chosen"></p>
+            </div>
+            <div class="log-paste">
+              <label for="log-text">Or paste lines</label>
+              <textarea id="log-text" rows="9" spellcheck="false" wrap="off"></textarea>
+              <div class="log-examples">
+                <label>
+                  Example
+                  <select id="log-example"></select>
+                </label>
+                <button type="button" class="btn btn-small" id="log-example-load">
+                  Paste the example
+                </button>
+                <button type="button" class="btn btn-small" id="log-sample">
+                  Generate a sample log
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="log-settings-title">
+          <div class="panel-head">
+            <h2 class="panel-title" id="log-settings-title">2 · How to read it</h2>
+            <span class="panel-meta"
+              >the model learns normal traffic from a baseline you trust</span
+            >
+          </div>
+          <div class="panel-body">
+            <div class="log-settings">
+              <label>
+                Format
+                <select id="log-format"></select>
+              </label>
+              <fieldset class="log-baseline">
+                <legend>What counts as normal</legend>
+                <label class="log-choice">
+                  <input type="radio" name="log-baseline" value="share" checked />
+                  The first
+                  <select id="log-share" aria-label="Share of the log taken as normal"></select>
+                  of this log
+                </label>
+                <label class="log-choice">
+                  <input type="radio" name="log-baseline" value="file" />
+                  A separate log:
+                  <input
+                    id="log-baseline-files"
+                    type="file"
+                    multiple
+                    accept=".log,.txt,.gz,.json,.jsonl,text/plain,application/gzip"
+                  />
+                </label>
+              </fieldset>
+              <label>
+                Detector
+                <select id="log-mode">
+                  <option value="combined">Rules + statistics</option>
+                  <option value="stats">Statistics only</option>
+                  <option value="rules">Rules only</option>
+                </select>
+              </label>
+              <label>
+                False positives
+                <select id="log-fpr"></select>
+              </label>
+              <label>
+                Threshold (−log₁₀ p)
+                <input id="log-threshold" type="number" min="0" step="0.1" value="20" readonly />
+              </label>
+              <button type="button" class="btn btn-primary" id="log-analyse">Analyse</button>
+            </div>
+            <p class="log-explain">
+              The first 70% of the baseline trains the statistical model; the last 30% sets the
+              threshold, so that only the chosen share of it would raise an alert. Every other
+              request is then scored once. The rules learn nothing, so with the rules alone the
+              whole log is inspected. The path is inspected too, as the value
+              <code>(path)</code>: access logs record no request body. So is a query without a name,
+              such as <code>?cd+/tmp;wget+...</code>, as the value <code>(query)</code>.
+            </p>
+            <p class="log-status" id="log-status" role="status" aria-live="polite"></p>
+          </div>
+        </section>
+
+        <div id="log-results" hidden>
+          <section class="kpis" id="log-kpis" aria-label="Key figures"></section>
+          <div id="log-warnings"></div>
+          <section class="panel" aria-labelledby="log-table-title">
+            <div class="panel-head">
+              <h2 class="panel-title" id="log-table-title">Inspected requests</h2>
+              <div class="panel-tools">
+                <span class="panel-meta" id="log-meta"></span>
+                <span class="list-controls" id="log-controls"></span>
+              </div>
+            </div>
+            <nav class="tabs" id="log-tabs" aria-label="Which requests"></nav>
+            <div class="table-wrap">
+              <table class="data">
+                <thead>
+                  <tr>
+                    <th scope="col"><span class="visually-hidden">Details</span></th>
+                    <th scope="col" class="num">Line</th>
+                    <th scope="col">Time</th>
+                    <th scope="col" title="HTTP method and path of the logged request.">Request</th>
+                    <th scope="col">Parameters</th>
+                    <th scope="col" class="num">HTTP status</th>
+                    <th scope="col">Level</th>
+                    <th scope="col">Detected by</th>
+                    <th scope="col">Verdict</th>
+                  </tr>
+                </thead>
+                <tbody id="log-body"></tbody>
+              </table>
+            </div>
+            <div class="pager" id="log-pager"></div>
+          </section>
+        </div>
+
+        <footer class="site-footer">
+  <p>
+    The Anomaly Guard - an educational intrusion detection system (master's course project). Traffic
+    is generated in your browser from a seed; the attack strings are public textbook examples, shown
+    as text and never executed.
+    <a
+      href="https://github.com/the-anomaly-guard/anomaly-guard"
+      target="_blank"
+      rel="noopener noreferrer"
+      >Source code</a
+    >
+    · MIT licence.
+  </p>
+</footer>
+
+      </main>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,1 @@
+import{p as i}from"./pipeline-hjfP0xJa.js";function l({tp:t,fp:r,tn:n,fn:u}){const e=t+u,a=r+n;return{attacks:e,legitimate:a,tpr:e?t/e:null,fpr:a?r/a:null}}function o(t,r,n){return t*n+r*(1-n)===0?null:i(t,r,n)}function c(t,r){return Array.from({length:301},(n,u)=>{const e=10**(-6+6*u/300);return{x:e,y:o(t,r,e)}})}export{o as a,l as m,c as p};
