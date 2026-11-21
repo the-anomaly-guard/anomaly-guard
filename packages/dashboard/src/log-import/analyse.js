@@ -1,19 +1,15 @@
 // Analyse a log with the console's detector (E-10, ADR-016), the way the experiment does it on
-// simulated traffic. With no labels, what counts as normal is an assumption: a baseline the user
-// trusts. The known attacks in it, the requests that match a signature, are left out first
-// (ADR-017); then its first part trains the statistical model (legitimate only, ADR-004) and its
-// last part sets the threshold at the chosen false-positive rate (ADR-009), and every other
-// request is scored once. The rules, the model, the threshold and the detector are reused as they
+// simulated traffic. With no labels, what counts as normal is an assumption: a baseline, a
+// separate log of the same site that the user trusts (ADR-017). The known attacks in it, the
+// requests that match a signature, are left out first; then its first part trains the
+// statistical model (legitimate only, ADR-004) and its last part sets the threshold at the chosen
+// false-positive rate (ADR-009), and every request of the log is scored once. The rules, the model, the threshold and the detector are reused as they
 // are. Pure: no DOM, tested in Node.
 
 import { RuleEngine, detect, trainStatModel } from '@anomaly-guard/core';
 import { operatingPoint, sourceOf } from '../pipeline.js';
 import { levelOf } from '../levels.js';
 import { toRequest } from './request.js';
-
-/** The share of a single log taken as its baseline, when there is no separate baseline file. */
-export const BASELINE_SHARES = Object.freeze([0.25, 0.5, 0.75]);
-export const DEFAULT_BASELINE_SHARE = 0.5;
 
 /** Share of the baseline that sets the threshold; the rest trains the model. */
 export const CALIBRATION_SHARE = 0.3;
@@ -40,17 +36,6 @@ export const MIN_BASELINE = 50;
  */
 
 /**
- * One log as baseline and requests to inspect: the first `share` of its requests, in log order,
- * and the rest.
- * @param {import('./format.js').LogEntry[]} entries
- * @param {number} share  in (0, 1)
- */
-export function splitBaseline(entries, share) {
-  const cut = Math.round(entries.length * share);
-  return { baseline: entries.slice(0, cut), inspected: entries.slice(cut) };
-}
-
-/**
  * The detector, from the baseline only. Its requests that match a signature are known attacks,
  * not normal traffic: they are left out. Of the rest, the model learns from the first part and
  * the threshold is set on the last part, so the threshold never sees the requests it trained on.
@@ -74,7 +59,7 @@ export function prepareDetector(baseline, settings) {
       `The baseline has ${requests.length} requests` +
         (known.length ? ` once the ${known.length} that match a signature are left out` : '') +
         `: the statistics need at least ${MIN_BASELINE}. ` +
-        'Use a longer log, a larger baseline share, or the rules alone.',
+        'Use a longer baseline log, or the rules alone, which need none.',
     );
   }
   const trainCount = Math.round(requests.length * (1 - CALIBRATION_SHARE));

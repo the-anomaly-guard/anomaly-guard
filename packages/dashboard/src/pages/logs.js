@@ -17,12 +17,7 @@ import { readLog } from '../log-import/read.js';
 import { MAX_TEXT_CHARS, readFiles } from '../log-import/text.js';
 import { PATH_PARAM, QUERY_PARAM } from '../log-import/request.js';
 import { sampleLog } from '../log-import/sample.js';
-import {
-  BASELINE_SHARES,
-  DEFAULT_BASELINE_SHARE,
-  analyseLog,
-  splitBaseline,
-} from '../log-import/analyse.js';
+import { analyseLog } from '../log-import/analyse.js';
 
 /** @typedef {import('../log-import/format.js').LogFormat} LogFormat */
 /** @typedef {import('../log-import/analyse.js').LogRow} LogRow */
@@ -48,8 +43,6 @@ const formatSelect = byId('log-format');
 /** @type {HTMLSelectElement} */
 const exampleSelect = byId('log-example');
 /** @type {HTMLSelectElement} */
-const shareSelect = byId('log-share');
-/** @type {HTMLSelectElement} */
 const modeSelect = byId('log-mode');
 /** @type {HTMLSelectElement} */
 const fprSelect = byId('log-fpr');
@@ -72,16 +65,6 @@ mount(
   FORMATS.map((format) => h('option', { value: format.id }, format.label)),
 );
 mount(
-  '#log-share',
-  BASELINE_SHARES.map((share) =>
-    h(
-      'option',
-      { value: String(share), selected: share === DEFAULT_BASELINE_SHARE },
-      `${share * 100}%`,
-    ),
-  ),
-);
-mount(
   '#log-fpr',
   FPR_TARGETS.map((target) =>
     h(
@@ -102,6 +85,17 @@ syncThreshold();
 
 /** @type {File[]} */
 let files = [];
+/** Whether the baseline input holds the baseline the sample generated. */
+let sampleBaseline = false;
+/** The first line of the sample: when the text box no longer holds it, another log is there. */
+let sampleFirstLine = '';
+
+/** The sample's baseline is for the sample only: another log needs its own. */
+function forgetSampleBaseline() {
+  if (!sampleBaseline) return;
+  baselineInput.value = '';
+  sampleBaseline = false;
+}
 
 /**
  * @param {File[]} chosen
@@ -112,6 +106,7 @@ function useFiles(chosen, picked = false) {
   // The file input shows only what will be read: emptied when the log comes from elsewhere, so
   // that picking the same file again is a new choice.
   if (!picked) fileInput.value = '';
+  if (chosen.length) forgetSampleBaseline();
   const total = chosen.reduce((sum, file) => sum + file.size, 0);
   setText(
     byId('log-chosen'),
@@ -122,8 +117,12 @@ function useFiles(chosen, picked = false) {
   );
 }
 fileInput.addEventListener('change', () => useFiles([...(fileInput.files ?? [])], true));
+baselineInput.addEventListener('change', () => {
+  sampleBaseline = false;
+});
 textArea.addEventListener('input', () => {
   if (files.length) useFiles([]); // typing means: read the text box
+  if (!textArea.value.includes(sampleFirstLine)) forgetSampleBaseline();
 });
 
 const drop = byId('log-drop');
@@ -142,6 +141,7 @@ byId('log-example-load').addEventListener('click', () => {
   const format = FORMATS.find((f) => f.id === exampleSelect.value);
   if (!format) return;
   useFiles([]);
+  forgetSampleBaseline();
   textArea.value = `${format.examples.join('\n')}\n`;
   say(`Pasted the ${format.label} example: ${fmt.count(format.examples.length, 'line')}.`);
 });
@@ -150,13 +150,19 @@ byId('log-sample').addEventListener('click', () => {
   const sample = sampleLog({ seed: state.seed });
   useFiles([]);
   textArea.value = sample.text;
-  // The largest baseline share that stays within the attack-free start of the sample.
-  const fits = BASELINE_SHARES.filter((share) => share <= sample.baselineShare);
-  shareSelect.value = String(fits.length ? Math.max(...fits) : DEFAULT_BASELINE_SHARE);
+  // As with a real log, the baseline is a separate log: the sample's goes in its own input.
+  const baseline = new DataTransfer();
+  baseline.items.add(
+    new File([sample.baseline], `sample-baseline-seed-${state.seed}.log`, { type: 'text/plain' }),
+  );
+  baselineInput.files = baseline.files;
+  sampleBaseline = true;
+  sampleFirstLine = sample.text.slice(0, sample.text.indexOf('\n'));
   say(
-    `Generated a sample log from the simulated traffic (seed ${state.seed}): ` +
-      `${fmt.int(sample.labels.length)} requests, legitimate first, then a stretch with 10% ` +
-      'attacks. Press Analyse.',
+    `Generated a sample from the simulated traffic (seed ${state.seed}): a baseline of ` +
+      `${fmt.int(sample.baseline.split('\n').length - 1)} legitimate requests, chosen as the ` +
+      `separate log, and ${fmt.int(sample.labels.length)} requests to inspect in the text box, ` +
+      'with 10% attacks. Press Analyse.',
   );
 });
 
@@ -209,30 +215,35 @@ async function run() {
   if (read.entries.length === 0)
     throw new Error(`The ${read.format.label} reader found no request in the log.`);
 
-  const fromFile =
-    /** @type {HTMLInputElement} */ (document.querySelector('input[name="log-baseline"]:checked'))
-      .value === 'file';
-  let baseline;
-  let inspected;
-  if (fromFile) {
+  // The statistics learn normal traffic from a separate log (ADR-017); the rules learn nothing
+  // and need none.
+  /** @type {import('../log-import/format.js').LogEntry[]} */
+  let baseline = [];
+  let sameLog = false;
+  if (modeSelect.value !== 'rules') {
     const chosen = [...(baselineInput.files ?? [])];
-    if (!chosen.length)
-      throw new Error('Choose the log that counts as normal, or use the first part of this one.');
+    if (!chosen.length) {
+      throw new Error(
+        'Choose the baseline: a separate log of normal traffic of the same site, which the ' +
+          'statistics learn from. The rules alone need none.',
+      );
+    }
+    sameLog = files.some((file) =>
+      chosen.some(
+        (base) =>
+          base.name === file.name &&
+          base.size === file.size &&
+          base.lastModified === file.lastModified,
+      ),
+    );
     const baseText = await readFiles(chosen);
     cut.push(...baseText.cut);
     damaged.push(...baseText.damaged);
     const base = readLog(baseText.text, FORMATS, { formatId: formatSelect.value });
     if (!base.format) throw new Error('No format reads the baseline log.');
     baseline = base.entries;
-    inspected = read.entries;
-  } else {
-    ({ baseline, inspected } = splitBaseline(read.entries, Number(shareSelect.value)));
-    // The rules learn nothing, so they inspect the whole log; the baseline only says how often
-    // they fire on traffic taken as normal.
-    if (modeSelect.value === 'rules') inspected = read.entries;
   }
-  if (inspected.length === 0)
-    throw new Error('Nothing is left to inspect after the baseline: use a smaller share.');
+  const inspected = read.entries;
 
   const settings = {
     mode: /** @type {'combined' | 'stats' | 'rules'} */ (modeSelect.value),
@@ -240,7 +251,11 @@ async function run() {
       fprSelect.value === 'manual' ? /** @type {'manual'} */ ('manual') : Number(fprSelect.value),
     threshold,
   };
-  say(`Learning normal traffic from ${fmt.count(baseline.length, 'request')}...`);
+  say(
+    settings.mode === 'rules'
+      ? 'Matching the signatures...'
+      : `Learning normal traffic from ${fmt.count(baseline.length, 'request')}...`,
+  );
   await new Promise((resolve) => setTimeout(resolve, 0)); // let the message show
   const outcome = await analyseLog(
     { baseline, inspected, settings },
@@ -253,7 +268,7 @@ async function run() {
   analysed = { rows: outcome.rows, mode: settings.mode, threshold: outcome.operating.threshold };
   Object.assign(view, { show: 'all', page: 1 });
   open.clear();
-  drawSummary(read, baseline.length, outcome, settings, { cut, damaged });
+  drawSummary(read, baseline.length, outcome, settings, { cut, damaged, sameLog });
   drawTable();
   results.hidden = false;
   say(
@@ -269,24 +284,24 @@ async function run() {
  * @param {number} baselineSize
  * @param {Awaited<ReturnType<typeof analyseLog>>} outcome
  * @param {{ mode: string }} settings
- * @param {{ cut: string[], damaged: string[] }} files  read in part or not at all, read up to
- *   some damage
+ * @param {{ cut: string[], damaged: string[], sameLog: boolean }} files  read in part or not at
+ *   all, read up to some damage; whether the baseline is a file of the log itself
  */
-function drawSummary(read, baselineSize, outcome, settings, { cut, damaged }) {
+function drawSummary(read, baselineSize, outcome, settings, { cut, damaged, sameLog }) {
   const inspected = outcome.rows.length;
   const share = inspected ? fmt.pct(outcome.alerts / inspected) : '-';
   mount(
     '#log-kpis',
     kpi('Requests read', read.entries.length, 'neutral', read.format?.label),
-    kpi(
-      'Baseline',
-      baselineSize,
-      'neutral',
-      settings.mode !== 'rules'
-        ? `model ${fmt.int(outcome.train)} · threshold ${fmt.int(outcome.calibration)}` +
-            (outcome.known ? ` · ${fmt.int(outcome.known)} known attacks left out` : '')
-        : `${fmt.int(outcome.known)} match a signature`,
-    ),
+    settings.mode === 'rules'
+      ? kpi('Baseline', '-', 'neutral', 'not needed: the rules learn nothing')
+      : kpi(
+          'Baseline',
+          baselineSize,
+          'neutral',
+          `model ${fmt.int(outcome.train)} · threshold ${fmt.int(outcome.calibration)}` +
+            (outcome.known ? ` · ${fmt.int(outcome.known)} known attacks left out` : ''),
+        ),
     kpi('Inspected', inspected),
     kpi(
       'Alerts',
@@ -305,6 +320,12 @@ function drawSummary(read, baselineSize, outcome, settings, { cut, damaged }) {
     ),
   );
   const notes = [...outcome.warnings];
+  if (sameLog) {
+    notes.push(
+      'The baseline is a file of the log itself: what is inspected was also learned as normal, ' +
+        'so an attack in it looks normal. Choose a log of another period as the baseline.',
+    );
+  }
   if (cut.length) {
     notes.push(
       `The page keeps the first ${MAX_TEXT_CHARS / 1048576} MB of text of a log, decompressed: ` +

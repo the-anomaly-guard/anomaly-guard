@@ -4,13 +4,11 @@ import { readdirSync } from 'node:fs';
 import { readLog } from '../src/log-import/read.js';
 import { sampleLog } from '../src/log-import/sample.js';
 import {
-  BASELINE_SHARES,
   CALIBRATION_SHARE,
   MIN_BASELINE,
   analyseLog,
   inspectEntry,
   prepareDetector,
-  splitBaseline,
 } from '../src/log-import/analyse.js';
 
 const DIR = new URL('../src/log-import/formats/', import.meta.url);
@@ -22,50 +20,51 @@ for (const file of readdirSync(DIR)
 }
 const noPause = async () => {};
 
-// A log whose answers are known: legitimate traffic first, then 10% attacks (seeded).
+// A log whose answers are known, with its baseline: legitimate traffic, then a log with 10%
+// attacks (seeded).
 const sample = sampleLog({ seed: 7, normal: 4000, inspected: 1000 });
+const base = readLog(sample.baseline, FORMATS);
 const read = readLog(sample.text, FORMATS);
 
-test('the sample log: Apache combined, one request per line, seeded', () => {
+test('the sample: a baseline and a log, Apache combined, one request per line, seeded', () => {
+  assert.equal(base.format.id, 'apache');
   assert.equal(read.format.id, 'apache');
-  assert.equal(read.entries.length, 5000);
-  assert.equal(read.unreadable, 0);
-  assert.equal(sample.baselineShare, 0.8);
-  assert.equal(
-    sampleLog({ seed: 7, normal: 4000, inspected: 1000 }).text,
-    sample.text,
-    'same seed, same log',
-  );
-  assert.equal(
-    sample.labels.slice(0, 4000).every((label) => label === 'legit'),
-    true,
-  );
+  assert.equal(base.entries.length, 4000);
+  assert.equal(read.entries.length, 1000);
+  assert.equal(base.unreadable + read.unreadable, 0);
+  const again = sampleLog({ seed: 7, normal: 4000, inspected: 1000 });
+  assert.equal(again.baseline, sample.baseline, 'same seed, same baseline');
+  assert.equal(again.text, sample.text, 'same seed, same log');
+  assert.equal(sample.labels.length, 1000);
+  assert.equal(sample.labels.filter((label) => label === 'attack').length, 100);
+  // the log follows its baseline in time
+  assert.equal(base.entries.at(-1).time, '01/Nov/2026:09:06:39 +0000');
+  assert.equal(read.entries[0].time, '01/Nov/2026:09:06:40 +0000');
 });
 
-test('the baseline is the start of the log; the model and the threshold split it', () => {
-  const { baseline, inspected } = splitBaseline(read.entries, 0.75);
-  assert.equal(baseline.length, 3750);
-  assert.equal(inspected.length, 1250);
-  assert.equal(inspected[0].line, 3751);
-  const detector = prepareDetector(baseline, { mode: 'combined', fpr: 0.01, threshold: 1 });
-  assert.equal(detector.train + detector.calibration, 3750);
-  assert.equal(detector.calibration, Math.round(3750 * CALIBRATION_SHARE));
+test('the baseline trains the model and sets the threshold, apart from the log', () => {
+  const detector = prepareDetector(base.entries, { mode: 'combined', fpr: 0.01, threshold: 1 });
+  assert.equal(detector.known, 0, 'the legitimate baseline matches no signature');
+  assert.equal(detector.train + detector.calibration, 4000);
+  assert.equal(detector.calibration, Math.round(4000 * CALIBRATION_SHARE));
   assert.equal(detector.operating.source, 'calibrated');
   // the threshold lets at most 1% of the calibration part through
   assert.ok(detector.operating.calibrationFpr <= 0.01, String(detector.operating.calibrationFpr));
-  assert.deepEqual(detector.warnings, []); // 1,125 calibration requests: n >= 10/α holds at 1%
-  assert.deepEqual([...BASELINE_SHARES], [0.25, 0.5, 0.75]);
+  assert.deepEqual(detector.warnings, []); // 1,200 calibration requests: n >= 10/α holds at 1%
 });
 
 test('analyseLog: most attacks of the sample raise an alert, few legitimate requests do', async () => {
-  const { baseline, inspected } = splitBaseline(read.entries, 0.75);
   const progress = [];
   const result = await analyseLog(
-    { baseline, inspected, settings: { mode: 'combined', fpr: 0.01, threshold: 1 } },
+    {
+      baseline: base.entries,
+      inspected: read.entries,
+      settings: { mode: 'combined', fpr: 0.01, threshold: 1 },
+    },
     { pause: noPause, slice: 400, onProgress: (done, total) => progress.push([done, total]) },
   );
-  assert.deepEqual(progress.at(-1), [1250, 1250]);
-  assert.equal(progress.length, 4);
+  assert.deepEqual(progress.at(-1), [1000, 1000]);
+  assert.equal(progress.length, 3);
   let tp = 0;
   let attacks = 0;
   let fp = 0;
@@ -91,7 +90,7 @@ test('analyseLog: most attacks of the sample raise an alert, few legitimate requ
 });
 
 test('rules alone need no baseline; the statistics refuse a tiny one', async () => {
-  const few = read.entries.slice(0, 10);
+  const few = base.entries.slice(0, 10);
   await assert.rejects(
     analyseLog({
       baseline: few,
@@ -102,19 +101,21 @@ test('rules alone need no baseline; the statistics refuse a tiny one', async () 
   );
   const rules = await analyseLog(
     {
-      baseline: few,
-      inspected: read.entries.slice(4000),
+      baseline: [],
+      inspected: read.entries,
       settings: { mode: 'rules', fpr: 0.01, threshold: 1 },
     },
     { pause: noPause },
   );
+  assert.equal(rules.rows.length, 1000, 'the whole log');
+  assert.ok(rules.signatures > 0);
   assert.equal(rules.statistical, 0);
   assert.equal(rules.alerts, rules.signatures);
   assert.deepEqual(rules.warnings, []);
 });
 
 test('a small calibration part is reported, not hidden', () => {
-  const detector = prepareDetector(read.entries.slice(0, 300), {
+  const detector = prepareDetector(base.entries.slice(0, 300), {
     mode: 'combined',
     fpr: 0.01,
     threshold: 1,

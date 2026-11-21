@@ -1,7 +1,7 @@
 # ADR-016: Import logs - real server logs, analysed in the browser
 
 **Date:** 2026-11-19
-**Status:** Accepted
+**Status:** Accepted - the choice of the baseline (decision 5) replaced by [ADR-017](ADR-017-import-logs-baseline.md)
 **Author:** Nicholas Arcari (task E-10)
 
 ## Context
