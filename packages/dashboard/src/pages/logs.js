@@ -283,10 +283,9 @@ function drawSummary(read, baselineSize, outcome, settings, { cut, damaged }) {
       baselineSize,
       'neutral',
       settings.mode !== 'rules'
-        ? `model ${fmt.int(outcome.train)} · threshold ${fmt.int(outcome.calibration)}`
-        : outcome.calibration > 0
-          ? `the rules match ${fmt.pct(outcome.operating.calibrationFpr)} of its last 30%`
-          : 'too short to try the rules on',
+        ? `model ${fmt.int(outcome.train)} · threshold ${fmt.int(outcome.calibration)}` +
+            (outcome.known ? ` · ${fmt.int(outcome.known)} known attacks left out` : '')
+        : `${fmt.int(outcome.known)} match a signature`,
     ),
     kpi('Inspected', inspected),
     kpi(
