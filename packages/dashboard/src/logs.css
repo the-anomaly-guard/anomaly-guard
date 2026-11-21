@@ -152,6 +152,10 @@
   height: 26px;
 }
 
+.log-baseline .log-hint {
+  margin: 0;
+}
+
 .log-explain {
   margin: 12px 0 0;
   font-size: 13px;
