@@ -81,9 +81,9 @@
   not inspected either: a payload written as a name with a value (`?<script>=1`) is not seen. A
   request line that is not one (a TLS handshake sent to the HTTP port) is counted as a line
   without a request.
-- Large logs: the page keeps the first 100 MB of text of a log, read as a stream (a gzip file
-  expands about ten times: a real 20 MB .gz held 205 MB of text and took the tab to 721 MB), and
-  analyses up to 100,000 requests; it says when it cut. Scoring runs in slices to keep the page
+- Large logs: the page keeps the first 200,000 lines of a log, and 100 MB of text at most, read
+  as a stream (a gzip file expands about ten times: a real 20 MB .gz held 205 MB of text and took
+  the tab to 721 MB), and analyses up to 100,000 requests; it says when it cut. Scoring runs in slices to keep the page
   responsive, but training and calibration block it for a moment.
 - Files as they come: a gzip file of several members (Nginx writes one per buffer, `cat a.gz b.gz`
   joins two) is read whole, member by member, since the browser's decompressor stops after the

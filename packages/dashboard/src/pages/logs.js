@@ -14,7 +14,7 @@ import { topPart } from '../pipeline.js';
 import { FPR_TARGETS } from '../state.js';
 import { DEFAULT_PAGE_SIZE, PAGE_SIZES, pageOf } from '../listing.js';
 import { readLog } from '../log-import/read.js';
-import { MAX_TEXT_CHARS, readFiles } from '../log-import/text.js';
+import { MAX_TEXT_CHARS, MAX_TEXT_LINES, readFiles } from '../log-import/text.js';
 import { PATH_PARAM, QUERY_PARAM } from '../log-import/request.js';
 import { sampleLog } from '../log-import/sample.js';
 import { analyseLog } from '../log-import/analyse.js';
@@ -328,7 +328,8 @@ function drawSummary(read, baselineSize, outcome, settings, { cut, damaged, same
   }
   if (cut.length) {
     notes.push(
-      `The page keeps the first ${MAX_TEXT_CHARS / 1048576} MB of text of a log, decompressed: ` +
+      `The page keeps the first ${fmt.int(MAX_TEXT_LINES)} lines of a log, decompressed ` +
+        `(${MAX_TEXT_CHARS / 1048576} MB of text at most): ` +
         `${named(cut)} ${cut.length === 1 ? 'was' : 'were'} read in part or not at all.`,
     );
   }
