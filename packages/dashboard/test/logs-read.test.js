@@ -12,7 +12,13 @@ import {
   splitTarget,
   toRequest,
 } from '../src/log-import/request.js';
-import { MAX_TEXT_CHARS, isGzip, readFiles, readText } from '../src/log-import/text.js';
+import {
+  MAX_TEXT_CHARS,
+  MAX_TEXT_LINES,
+  isGzip,
+  readFiles,
+  readText,
+} from '../src/log-import/text.js';
 
 const DIR = new URL('../src/log-import/formats/', import.meta.url);
 const FORMATS = [];
@@ -167,6 +173,24 @@ test('files: only the start of a large log is kept, cut at the end of a line', a
   ];
   assert.deepEqual(await readFiles(files, { maxChars: 8 }), {
     text: '1234\n',
+    cut: ['b.log', 'c.log'],
+    damaged: [],
+  });
+  // and the lines: the page analyses 100,000 requests, so it keeps twice as many lines
+  assert.equal(MAX_TEXT_LINES, 200_000);
+  assert.deepEqual(await readText(new Blob(['a\nb\nc\n']), { maxLines: 2 }), {
+    text: 'a\nb\n',
+    cut: true,
+    damaged: false,
+  });
+  assert.equal((await readText(new Blob(['a\nb\n']), { maxLines: 2 })).cut, false);
+  const lines = [
+    new File(['1\n2\n'], 'a.log'),
+    new File(['3\n4\n'], 'b.log'),
+    new File(['5\n'], 'c.log'),
+  ];
+  assert.deepEqual(await readFiles(lines, { maxLines: 3 }), {
+    text: '1\n2\n3\n',
     cut: ['b.log', 'c.log'],
     damaged: [],
   });

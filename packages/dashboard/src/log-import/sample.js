@@ -1,7 +1,8 @@
-// A sample access log, written from the simulated traffic (E-10, ADR-016): legitimate requests
-// first, then a stretch with 10% attacks, in the Apache combined format. It lets anyone try the
-// Import logs page without a real log, and it gives the tests a log whose answers are known.
-// Seeded, like everything else (no Math.random). Pure: no DOM, tested in Node.
+// A sample, written from the simulated traffic (E-10, ADR-016): a baseline of legitimate
+// requests, the separate log of normal traffic the statistics learn from (ADR-017), and the log
+// to inspect that follows it, with 10% attacks; both in the Apache combined format. It lets
+// anyone try the Import logs page without a real log, and it gives the tests a log whose answers
+// are known. Seeded, like everything else (no Math.random). Pure: no DOM, tested in Node.
 //
 // Access logs record no request body, so every parameter goes in the query string, also for the
 // POST endpoints of the simulation. Addresses are from the documentation ranges (RFC 5737).
@@ -29,9 +30,10 @@ function apacheTime(date) {
 
 /**
  * @param {{ seed?: number, normal?: number, inspected?: number, prevalence?: number }} [options]
- *   `normal` legitimate requests first, then `inspected` requests with `prevalence` attacks
- * @returns {{ text: string, labels: ('legit' | 'attack')[], baselineShare: number }}
- *   one label per line; `baselineShare` is the share of the log that is attack-free
+ *   `normal` legitimate requests in the baseline, then `inspected` requests with `prevalence`
+ *   attacks in the log
+ * @returns {{ baseline: string, text: string, labels: ('legit' | 'attack')[] }}  the baseline
+ *   log, the log to inspect, and one label per line of the log to inspect
  */
 export function sampleLog({ seed = 42, normal = 4000, inspected = 1000, prevalence = 0.1 } = {}) {
   const { train, test } = buildDataset({
@@ -62,5 +64,10 @@ export function sampleLog({ seed = 42, normal = 4000, inspected = 1000, prevalen
     );
     labels.push(sample.label);
   });
-  return { text: `${lines.join('\n')}\n`, labels, baselineShare: normal / (normal + inspected) };
+  const text = (/** @type {string[]} */ part) => `${part.join('\n')}\n`;
+  return {
+    baseline: text(lines.slice(0, normal)),
+    text: text(lines.slice(normal)),
+    labels: labels.slice(normal),
+  };
 }

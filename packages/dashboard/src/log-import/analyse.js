@@ -1,18 +1,15 @@
 // Analyse a log with the console's detector (E-10, ADR-016), the way the experiment does it on
-// simulated traffic. With no labels, what counts as normal is an assumption: a baseline the user
-// trusts. Its first part trains the statistical model (legitimate only, ADR-004) and its last
-// part sets the threshold at the chosen false-positive rate (ADR-009); then every other request
-// is scored once. The rules, the model, the threshold and the detector are reused as they are.
-// Pure: no DOM, tested in Node.
+// simulated traffic. With no labels, what counts as normal is an assumption: a baseline, a
+// separate log of the same site that the user trusts (ADR-017). The known attacks in it, the
+// requests that match a signature, are left out first; then its first part trains the
+// statistical model (legitimate only, ADR-004) and its last part sets the threshold at the chosen
+// false-positive rate (ADR-009), and every request of the log is scored once. The rules, the model, the threshold and the detector are reused as they
+// are. Pure: no DOM, tested in Node.
 
 import { RuleEngine, detect, trainStatModel } from '@anomaly-guard/core';
 import { operatingPoint, sourceOf } from '../pipeline.js';
 import { levelOf } from '../levels.js';
 import { toRequest } from './request.js';
-
-/** The share of a single log taken as its baseline, when there is no separate baseline file. */
-export const BASELINE_SHARES = Object.freeze([0.25, 0.5, 0.75]);
-export const DEFAULT_BASELINE_SHARE = 0.5;
 
 /** Share of the baseline that sets the threshold; the rest trains the model. */
 export const CALIBRATION_SHARE = 0.3;
@@ -39,38 +36,47 @@ export const MIN_BASELINE = 50;
  */
 
 /**
- * One log as baseline and requests to inspect: the first `share` of its requests, in log order,
- * and the rest.
- * @param {import('./format.js').LogEntry[]} entries
- * @param {number} share  in (0, 1)
- */
-export function splitBaseline(entries, share) {
-  const cut = Math.round(entries.length * share);
-  return { baseline: entries.slice(0, cut), inspected: entries.slice(cut) };
-}
-
-/**
- * The detector, from the baseline only: the model learns from its first part, the threshold is
- * set on its last part, so the threshold never sees the requests it trained on.
+ * The detector, from the baseline only. Its requests that match a signature are known attacks,
+ * not normal traffic: they are left out. Of the rest, the model learns from the first part and
+ * the threshold is set on the last part, so the threshold never sees the requests it trained on.
  * @param {import('./format.js').LogEntry[]} baseline
  * @param {DetectorSettings} settings
  * @throws {RangeError} when the statistics have too small a baseline to learn from
  */
 export function prepareDetector(baseline, settings) {
-  if (settings.mode !== 'rules' && baseline.length < MIN_BASELINE) {
+  const ruleEngine = new RuleEngine();
+  /** @type {import('./format.js').LogEntry[]} */
+  const known = [];
+  /** @type {ReturnType<typeof toRequest>[]} */
+  const requests = [];
+  for (const entry of baseline) {
+    const request = toRequest(entry);
+    if (ruleEngine.inspect(request).matched) known.push(entry);
+    else requests.push(request);
+  }
+  if (settings.mode !== 'rules' && requests.length < MIN_BASELINE) {
     throw new RangeError(
-      `The baseline has ${baseline.length} requests: the statistics need at least ${MIN_BASELINE}. ` +
-        'Use a longer log, a larger baseline share, or the rules alone.',
+      `The baseline has ${requests.length} requests` +
+        (known.length ? ` once the ${known.length} that match a signature are left out` : '') +
+        `: the statistics need at least ${MIN_BASELINE}. ` +
+        'Use a longer baseline log, or the rules alone, which need none.',
     );
   }
-  const requests = baseline.map(toRequest);
   const trainCount = Math.round(requests.length * (1 - CALIBRATION_SHARE));
   const calibration = requests.slice(trainCount).map((request) => ({ request }));
-  const ruleEngine = new RuleEngine();
   const model = trainStatModel(settings.mode === 'rules' ? [] : requests.slice(0, trainCount));
   let operating = operatingPoint(settings, calibration, { ruleEngine, model });
   /** @type {string[]} */
   const warnings = [];
+  if (known.length) {
+    const [first] = known;
+    warnings.push(
+      `${known.length} of the ${baseline.length} baseline requests match a signature, such as ` +
+        `line ${first.line}: ${first.method} ${first.target.slice(0, 120)}. As known attacks they ` +
+        'are left out of what counts as normal. If they are not attacks, a signature fires on ' +
+        "this site's normal traffic.",
+    );
+  }
   const calibrated = settings.mode !== 'rules' && operating.target !== null;
   // A request is never flagged while its own p-value is above the target (s < −log10 α). On a
   // baseline that repeats a few identical requests almost every score is about 0, and the
@@ -101,8 +107,9 @@ export function prepareDetector(baseline, settings) {
   }
   if (operating.attainable === false) {
     warnings.push(
-      'The rules alone flag more baseline requests than the false-positive target allows: either ' +
-        'the baseline holds attacks, or a signature matches this traffic.',
+      'No threshold keeps the alerts on the baseline within the false-positive target: ' +
+        `${(100 * operating.calibrationFpr).toFixed(1)}% of the requests that set it score so ` +
+        'high that any threshold flags them.',
     );
   }
   return {
@@ -111,6 +118,7 @@ export function prepareDetector(baseline, settings) {
     operating,
     train: trainCount,
     calibration: calibration.length,
+    known: known.length,
     warnings,
   };
 }
@@ -167,6 +175,7 @@ export async function analyseLog({ baseline, inspected, settings }, options = {}
     operating: detector.operating,
     train: detector.train,
     calibration: detector.calibration,
+    known: detector.known,
     warnings: detector.warnings,
     alerts: count((row) => row.alert),
     signatures: count((row) => row.alert && row.result.ruleMatched),

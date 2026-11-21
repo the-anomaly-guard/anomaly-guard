@@ -148,8 +148,8 @@
   color: var(--text);
 }
 
-.log-baseline select {
-  height: 26px;
+.log-baseline .log-hint {
+  margin: 0;
 }
 
 .log-explain {

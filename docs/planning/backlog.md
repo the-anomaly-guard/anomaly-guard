@@ -120,6 +120,7 @@
 | E-08 | Live replay (ADR-011): the pages open empty; "Start monitoring" shows the training, then the threshold on the calibration split, then the test requests arriving (pause, speed, skip); the position travels in the URL (`at`)             | shared     | E-07             | Done            |
 | E-09 | Team contribution pages: per-theme methods, completed tasks and experiment visualizations in the sidebar                                                                                                                                  | shared     | E-02, E-03       | Done            |
 | E-10 | Import logs (`logs.html`, ADR-016): Apache, Nginx, AWS and generic logs read in the browser, one plug-in file per format, analysed with a baseline taken as normal                                                                        | T3         | E-07, D-06       | Done            |
+| E-11 | Import logs baseline (ADR-017): a separate log of normal traffic, required by the statistics, with the known attacks left out; the page says why it needs no attacks                                                                      | T3         | E-10             | Done            |
 
 ## 8. Work split by statistical theme
 

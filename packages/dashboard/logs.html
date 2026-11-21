@@ -66,7 +66,7 @@
                   Paste the example
                 </button>
                 <button type="button" class="btn btn-small" id="log-sample">
-                  Generate a sample log
+                  Generate a sample
                 </button>
               </div>
             </div>
@@ -89,14 +89,7 @@
               <fieldset class="log-baseline">
                 <legend>What counts as normal</legend>
                 <label class="log-choice">
-                  <input type="radio" name="log-baseline" value="share" checked />
-                  The first
-                  <select id="log-share" aria-label="Share of the log taken as normal"></select>
-                  of this log
-                </label>
-                <label class="log-choice">
-                  <input type="radio" name="log-baseline" value="file" />
-                  A separate log:
+                  Baseline, a separate log:
                   <input
                     id="log-baseline-files"
                     type="file"
@@ -104,6 +97,10 @@
                     accept=".log,.txt,.gz,.json,.jsonl,text/plain,application/gzip"
                   />
                 </label>
+                <p class="log-hint">
+                  Normal traffic of the same site, from another period: it needs no attacks. The
+                  rules alone need no baseline.
+                </p>
               </fieldset>
               <label>
                 Detector
@@ -124,10 +121,18 @@
               <button type="button" class="btn btn-primary" id="log-analyse">Analyse</button>
             </div>
             <p class="log-explain">
-              The first 70% of the baseline trains the statistical model; the last 30% sets the
-              threshold, so that only the chosen share of it would raise an alert. Every other
-              request is then scored once. The rules learn nothing, so with the rules alone the
-              whole log is inspected. The path is inspected too, as the value
+              <strong>Why the baseline needs no attacks.</strong> The statistics learn from it how
+              each page and parameter of the site usually looks, and flag what departs from it: a
+              new attack stands out with no signature, because it is not like the baseline. So the
+              baseline must be normal traffic of the same site, as recent as possible. Its requests
+              that match a signature are known attacks and are left out; an attack that no signature
+              knows would be learned as normal, so pick a period you trust.
+            </p>
+            <p class="log-explain">
+              Of the baseline, the first 70% trains the statistical model and the last 30% sets the
+              threshold, so that only the chosen share of it would raise an alert. Then every
+              request of the log is scored once. The rules learn nothing, so with the rules alone no
+              baseline is needed. The path is inspected too, as the value
               <code>(path)</code>: access logs record no request body. So is a query without a name,
               such as <code>?cd+/tmp;wget+...</code>, as the value <code>(query)</code>.
             </p>

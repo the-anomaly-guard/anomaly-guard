@@ -2,10 +2,11 @@
 // delivers its logs. Read with the browser's own streams (DecompressionStream, TextDecoder): no
 // library, and nothing leaves the page. Works in Node too, for the tests.
 //
-// The text is read as a stream and only its start is kept. The page analyses the first
-// MAX_REQUESTS requests anyway (100,000 lines are some 10 to 60 MB), and a gzip file expands
-// about ten times: a real 20 MB .gz of 1.9 million lines held 205 MB of text, which took the
-// browser tab to 721 MB of memory. Reading all of a larger one would exhaust it.
+// The text is read as a stream and only its start is kept: the first MAX_TEXT_LINES lines, and
+// never more than MAX_TEXT_CHARS characters. The page analyses the first 100,000 requests of a
+// log anyway (MAX_REQUESTS, read.js), and a gzip file expands about ten times: a real 20 MB .gz
+// of 1.9 million lines held 205 MB of text, which took the browser tab to 721 MB of memory, and
+// the baseline is a second log (ADR-017). Reading all of a larger one would exhaust it.
 //
 // A gzip file may hold several compressed streams one after the other ("members"): Nginx writes
 // one per buffer with `access_log ... gzip`, and `cat a.gz b.gz` joins two. DecompressionStream
@@ -15,6 +16,9 @@
 
 /** Most text kept from one log (several files count together): 100 MB. */
 export const MAX_TEXT_CHARS = 100 * 1024 * 1024;
+
+/** Most lines kept from one log: twice the requests analysed, room for lines without one. */
+export const MAX_TEXT_LINES = 200_000;
 
 /** Bytes of compressed data searched at a time for the start of the next gzip member. */
 const SEARCH_WINDOW = 64 * 1024;
@@ -114,31 +118,57 @@ async function readGzip(blob, push) {
   return false;
 }
 
+/** @param {string} text */
+const countLines = (text) => {
+  let n = 0;
+  for (let i = text.indexOf('\n'); i !== -1; i = text.indexOf('\n', i + 1)) n++;
+  return n;
+};
+
 /**
- * The text of one file, decompressed when it is gzip: no more than `maxChars` characters, cut at
- * the end of a line.
+ * Where to cut a text so that it keeps whole lines only, at most `maxLines` of them and at most
+ * `maxChars` characters.
+ * @param {string} text
+ * @param {number} maxChars
+ * @param {number} maxLines
+ */
+function cutAt(text, maxChars, maxLines) {
+  const end = text.lastIndexOf('\n', maxChars - 1) + 1;
+  let n = 0;
+  for (let i = text.indexOf('\n'); i !== -1 && i < end; i = text.indexOf('\n', i + 1)) {
+    if (++n === maxLines) return i + 1;
+  }
+  return end;
+}
+
+/**
+ * The text of one file, decompressed when it is gzip: no more than `maxLines` lines and
+ * `maxChars` characters, cut at the end of a line.
  * @param {Blob} blob
- * @param {{ maxChars?: number }} [options]
+ * @param {{ maxChars?: number, maxLines?: number }} [options]
  * @returns {Promise<{ text: string, cut: boolean, damaged: boolean }>}  `cut`: the file holds more
  *   than was kept; `damaged`: it could be read only up to some point (it ends with a whole line)
  */
-export async function readText(blob, { maxChars = MAX_TEXT_CHARS } = {}) {
+export async function readText(
+  blob,
+  { maxChars = MAX_TEXT_CHARS, maxLines = MAX_TEXT_LINES } = {},
+) {
+  if (maxLines <= 0) return { text: '', cut: blob.size > 0, damaged: false };
   const gzip = await isGzip(blob);
   const decoder = new TextDecoder(gzip ? 'utf-8' : await encodingOf(blob));
   let text = '';
+  let lines = 0;
   const push = (/** @type {Uint8Array} */ bytes) => {
-    text += decoder.decode(bytes, { stream: true });
-    return text.length <= maxChars;
+    const chunk = decoder.decode(bytes, { stream: true });
+    text += chunk;
+    lines += countLines(chunk);
+    return text.length <= maxChars && lines <= maxLines;
   };
   const damaged = gzip
     ? await readGzip(blob, push)
     : (await drain(blob.stream(), push)).end === 'failed';
-  if (text.length > maxChars) {
-    return {
-      text: text.slice(0, text.lastIndexOf('\n', maxChars - 1) + 1),
-      cut: true,
-      damaged: false,
-    };
+  if (text.length > maxChars || lines > maxLines) {
+    return { text: text.slice(0, cutAt(text, maxChars, maxLines)), cut: true, damaged: false };
   }
   if (damaged)
     return { text: text.slice(0, text.lastIndexOf('\n') + 1), cut: false, damaged: true };
@@ -147,16 +177,20 @@ export async function readText(blob, { maxChars = MAX_TEXT_CHARS } = {}) {
 
 /**
  * Several files as one log, in name order (AWS writes one file every few minutes, named by time).
- * They share the MAX_TEXT_CHARS budget: once a file is cut, the later ones are left out.
+ * They share the budgets of lines and characters: once a file is cut, the later ones are left out.
  * @param {File[]} files
- * @param {{ maxChars?: number }} [options]
+ * @param {{ maxChars?: number, maxLines?: number }} [options]
  * @returns {Promise<{ text: string, cut: string[], damaged: string[] }>}  `cut`: the files read in
  *   part or not at all; `damaged`: those read only up to some damage
  * @throws {Error} when a file is damaged from its very start
  */
-export async function readFiles(files, { maxChars = MAX_TEXT_CHARS } = {}) {
+export async function readFiles(
+  files,
+  { maxChars = MAX_TEXT_CHARS, maxLines = MAX_TEXT_LINES } = {},
+) {
   const sorted = [...files].sort((a, b) => a.name.localeCompare(b.name));
   let text = '';
+  let lines = 0;
   /** @type {string[]} */
   const cut = [];
   /** @type {string[]} */
@@ -166,14 +200,19 @@ export async function readFiles(files, { maxChars = MAX_TEXT_CHARS } = {}) {
       cut.push(file.name);
       continue;
     }
-    const part = await readText(file, { maxChars: maxChars - text.length });
+    const part = await readText(file, {
+      maxChars: maxChars - text.length,
+      maxLines: maxLines - lines,
+    });
     if (part.damaged && !part.text) {
       throw new Error(
         `${file.name} could not be read: it is damaged or incomplete, or it changed after it was ` +
           'chosen (choose it again).',
       );
     }
-    text += part.text && !part.text.endsWith('\n') ? `${part.text}\n` : part.text;
+    const whole = part.text && !part.text.endsWith('\n') ? `${part.text}\n` : part.text;
+    text += whole;
+    lines += countLines(whole);
     if (part.cut) cut.push(file.name);
     if (part.damaged) damaged.push(file.name);
   }
